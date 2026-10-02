@@ -269,9 +269,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
 
     final groups = <AppNavigationGroup>[
       AppNavigationGroup(
-        label: 'MAIN',
-        icon: Icons.home_outlined,
-        collapsible: false,
+        label: '',
         items: [
           destination(
             label: 'Dashboard',
@@ -286,9 +284,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ],
       ),
       AppNavigationGroup(
-        label: 'SALES & FINANCE',
-        icon: Icons.point_of_sale_outlined,
-        initiallyExpanded: true,
+        label: 'Sales & Finance',
         items: [
           destination(
             label: 'Orders / POS',
@@ -323,8 +319,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
       ),
       if (can('menu.manage'))
         AppNavigationGroup(
-          label: 'MENU & PRODUCTS',
-          icon: Icons.restaurant_menu_outlined,
+          label: 'Menu & Products',
           items: [
             destination(
               label: 'Menu Management',
@@ -355,9 +350,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
           ],
         ),
       AppNavigationGroup(
-        label: 'INVENTORY',
-        icon: Icons.inventory_2_outlined,
-        initiallyExpanded: true,
+        label: 'Inventory',
         items: [
           destination(
             label: 'Stock Overview',
@@ -423,8 +416,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
       ),
       if (can('purchases.view'))
         AppNavigationGroup(
-          label: 'PURCHASING',
-          icon: Icons.shopping_cart_checkout_outlined,
+          label: 'Purchasing',
           items: [
             destination(
               label: 'Purchase Orders',
@@ -447,8 +439,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ),
       if (can('expenses.view'))
         AppNavigationGroup(
-          label: 'EXPENSES',
-          icon: Icons.payments_outlined,
+          label: 'Expenses',
           items: [
             destination(
               label: 'Expense Records',
@@ -463,8 +454,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ),
       if (can('reports.view'))
         AppNavigationGroup(
-          label: 'REPORTS',
-          icon: Icons.bar_chart_outlined,
+          label: 'Reports',
           items: [
             destination(
               label: 'Reports Overview',
@@ -486,8 +476,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ),
       if (can('users.view'))
         AppNavigationGroup(
-          label: 'ADMINISTRATION',
-          icon: Icons.admin_panel_settings_outlined,
+          label: 'Administration',
           items: [
             destination(
               label: 'User Management',

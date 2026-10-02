@@ -117,16 +117,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     horizontal: 28,
                     vertical: 20,
                   ),
+                  // A tonal card, as Material 3 marks the one figure that
+                  // matters most on a screen.
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: .12),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
@@ -135,10 +130,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "TODAY'S NET SALES",
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.white,
-                              fontWeight: FontWeight.w700,
+                            "Today's net sales",
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.onPrimarySoft,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -151,7 +145,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 _money(summary.netSales),
                                 maxLines: 1,
                                 style: AppTextStyles.display.copyWith(
-                                  color: AppColors.white,
+                                  fontSize: 40,
+                                  color: AppColors.onPrimarySoft,
                                 ),
                               ),
                             ),
@@ -161,8 +156,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       final contextLabel = Text(
                         '${summary.completedOrders} completed orders'
                         '  •  ${_money(summary.averageOrder)} average',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.white,
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.onPrimarySoft,
                         ),
                       );
 

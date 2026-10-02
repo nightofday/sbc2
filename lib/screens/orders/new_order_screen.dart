@@ -26,7 +26,6 @@ import '../../widgets/common/order_line.dart';
 import '../../widgets/common/shift_report_view.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/section_card.dart';
-import '../../widgets/layout/header_brand_motif.dart';
 
 class NewOrderScreen extends StatefulWidget {
   final OrderRepository orderRepository;
@@ -617,84 +616,62 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   }
 
   Widget _buildScreen(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    // The shift controls sit in the app bar where there is room for them,
+    // and in their own row under it on narrow screens.
+    final shiftInAppBar = width >= 760;
+
     return Scaffold(
-      backgroundColor: AppColors.gray100,
-      body: Stack(
-        children: [
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: HeaderBrandMotif(),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.all(
-                MediaQuery.sizeOf(context).width < 600 ? 16 : AppSpacing.page,
-              ),
-              child: FutureBuilder<List<PosMenuItem>>(
-                future: _menuFuture,
-                builder: (context, snapshot) {
-                  final menu = snapshot.data ?? const <PosMenuItem>[];
-
-                  return Column(
-                    children: [
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final title = Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                onPressed: () => Navigator.maybePop(context),
-                                icon: const Icon(Icons.arrow_back),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text('New Order', style: AppTextStyles.h1),
-                            ],
-                          );
-
-                          if (constraints.maxWidth < 760) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                title,
-                                const SizedBox(height: 10),
-                                _buildShiftStatus(),
-                              ],
-                            );
-                          }
-
-                          return Row(
-                            children: [
-                              title,
-                              const Spacer(),
-                              _buildShiftStatus(),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 18),
-                      if (snapshot.connectionState == ConnectionState.waiting)
-                        const Expanded(
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      else if (snapshot.hasError)
-                        Expanded(child: _buildLoadError(snapshot.error))
-                      else if (menu.isEmpty)
-                        Expanded(
-                          child: _buildLoadError(
-                            'No active menu items are available.',
-                          ),
-                        )
-                      else
-                        Expanded(child: _buildOrderWorkspace(menu)),
-                    ],
-                  );
-                },
-              ),
+      appBar: AppBar(
+        title: const Text('New Order'),
+        actions: [
+          if (shiftInAppBar)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: _buildShiftStatus(),
             ),
-          ),
         ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            width < 600 ? 16 : AppSpacing.page,
+            8,
+            width < 600 ? 16 : AppSpacing.page,
+            width < 600 ? 16 : AppSpacing.page,
+          ),
+          child: FutureBuilder<List<PosMenuItem>>(
+            future: _menuFuture,
+            builder: (context, snapshot) {
+              final menu = snapshot.data ?? const <PosMenuItem>[];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!shiftInAppBar) ...[
+                    _buildShiftStatus(),
+                    const SizedBox(height: 12),
+                  ],
+                  if (snapshot.connectionState == ConnectionState.waiting)
+                    const Expanded(
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (snapshot.hasError)
+                    Expanded(child: _buildLoadError(snapshot.error))
+                  else if (menu.isEmpty)
+                    Expanded(
+                      child: _buildLoadError(
+                        'No active menu items are available.',
+                      ),
+                    )
+                  else
+                    Expanded(child: _buildOrderWorkspace(menu)),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -714,18 +691,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAF7EE),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'Shift Active',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.success,
-              ),
-            ),
+          const Chip(
+            avatar: Icon(Icons.circle, size: 10, color: AppColors.success),
+            label: Text('Shift Active'),
           ),
           OutlinedButton.icon(
             onPressed: _showCashMovementDialog,

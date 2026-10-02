@@ -26,7 +26,7 @@ class DataTableCard extends StatelessWidget {
   static const double _minimumColumnWidth = 84;
 
   /// Width given to each unit of flex when columns have different weights.
-  static const double _minimumFlexUnitWidth = 52;
+  static const double _minimumFlexUnitWidth = 44;
 
   /// The least width at which every column is still readable side by side.
   double get _minimumTableWidth {
@@ -99,7 +99,7 @@ class DataTableCard extends StatelessWidget {
   }) {
     final labelText = Text(
       label,
-      style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+      style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w500),
     );
 
     // An action column has no heading; its button stands on its own.
@@ -138,8 +138,8 @@ class DataTableCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
+                  horizontal: 16,
+                  vertical: 12,
                 ),
                 child: Row(
                   children: [
@@ -151,7 +151,8 @@ class DataTableCard extends StatelessWidget {
                           child: Text(
                             headers[i],
                             style: AppTextStyles.caption.copyWith(
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.gray700,
                             ),
                           ),
                         ),
@@ -163,7 +164,7 @@ class DataTableCard extends StatelessWidget {
               for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
+                    horizontal: 16,
                     vertical: 14,
                   ),
                   child: Row(

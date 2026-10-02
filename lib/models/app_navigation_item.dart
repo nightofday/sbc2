@@ -12,20 +12,13 @@ class AppNavigationItem {
   });
 }
 
+/// A titled section of the navigation drawer.
 class AppNavigationGroup {
+  /// Shown above the section; empty for a section without a heading.
   final String label;
-  final IconData icon;
   final List<AppNavigationItem> items;
-  final bool collapsible;
-  final bool initiallyExpanded;
 
-  const AppNavigationGroup({
-    required this.label,
-    required this.icon,
-    required this.items,
-    this.collapsible = true,
-    this.initiallyExpanded = false,
-  });
+  const AppNavigationGroup({required this.label, required this.items});
 
   bool containsDestination(int destinationIndex) {
     return items.any((item) => item.destinationIndex == destinationIndex);

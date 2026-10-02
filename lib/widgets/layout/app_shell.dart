@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../common/business_profile_scope.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../models/app_navigation_item.dart';
 import '../../models/app_user_profile.dart';
-import 'app_sidebar.dart';
+import '../common/business_profile_scope.dart';
+import 'app_navigation_drawer.dart';
 
+/// The frame around every page: the navigation drawer, the app-wide banner
+/// and the selected page.
 class AppShell extends StatefulWidget {
   final AppUserProfile profile;
   final List<AppNavigationGroup> groups;
@@ -25,14 +27,16 @@ class AppShell extends StatefulWidget {
     this.banner,
   });
 
+  /// From this width the drawer stays open beside the page, as on a tablet
+  /// in landscape. Below it the drawer slides in from a menu button.
+  static const double permanentDrawerBreakpoint = 1000;
+
   @override
   State<AppShell> createState() => _AppShellState();
 }
 
 class _AppShellState extends State<AppShell> {
-  static const double _phoneBreakpoint = 700;
-  static const double _expandedSidebarBreakpoint = 1120;
-
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
 
   @override
@@ -44,83 +48,62 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
+  AppNavigationDrawer _drawer({required bool closeOnSelect}) {
+    return AppNavigationDrawer(
+      profile: widget.profile,
+      groups: widget.groups,
+      selectedDestination: _selectedIndex,
+      onDestinationSelected: (index) {
+        _selectDestination(index);
+        if (closeOnSelect) _scaffoldKey.currentState?.closeDrawer();
+      },
+      onSignOut: widget.onSignOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < _phoneBreakpoint) {
-          return _buildPhoneShell(constraints.maxWidth);
+        if (constraints.maxWidth >= AppShell.permanentDrawerBreakpoint) {
+          return Scaffold(
+            body: Row(
+              children: [
+                SizedBox(
+                  width: AppSpacing.sidebarWidth,
+                  child: Theme(
+                    // A permanent drawer sits flat beside the page.
+                    data: Theme.of(context).copyWith(
+                      drawerTheme: const DrawerThemeData(
+                        elevation: 0,
+                        width: AppSpacing.sidebarWidth,
+                        shape: RoundedRectangleBorder(),
+                      ),
+                    ),
+                    child: _drawer(closeOnSelect: false),
+                  ),
+                ),
+                const VerticalDivider(width: 1, color: AppColors.gray200),
+                Expanded(child: _buildPages()),
+              ],
+            ),
+          );
         }
 
-        final compactNavigation =
-            constraints.maxWidth < _expandedSidebarBreakpoint;
-
         return Scaffold(
-          backgroundColor: AppColors.gray100,
-          body: Row(
-            children: [
-              AppSidebar(
-                profile: widget.profile,
-                groups: widget.groups,
-                selectedIndex: _selectedIndex,
-                compact: compactNavigation,
-                onItemSelected: _selectDestination,
-                onSignOut: widget.onSignOut,
-              ),
-              Expanded(child: _buildPages()),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPhoneShell(double availableWidth) {
-    final drawerWidth = availableWidth < 360 ? availableWidth * .88 : 320.0;
-
-    return Scaffold(
-      backgroundColor: AppColors.gray100,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.black,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: false,
-        titleSpacing: 4,
-        // Each page shows its own title; the bar says whose system it is.
-        title: Text(
-          BusinessProfileScope.of(context).tradeName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.h3,
-        ),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1),
-        ),
-      ),
-      drawer: Drawer(
-        width: drawerWidth,
-        backgroundColor: AppColors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(),
-        child: SafeArea(
-          child: Builder(
-            builder: (drawerContext) => AppSidebar(
-              profile: widget.profile,
-              groups: widget.groups,
-              selectedIndex: _selectedIndex,
-              onItemSelected: (index) {
-                _selectDestination(index);
-                Navigator.of(drawerContext).pop();
-              },
-              onSignOut: widget.onSignOut,
-              onClose: () => Navigator.of(drawerContext).pop(),
+          key: _scaffoldKey,
+          appBar: AppBar(
+            // Each page shows its own title; the bar says whose system it is.
+            title: Text(
+              BusinessProfileScope.of(context).tradeName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        ),
-      ),
-      body: _buildPages(),
+          drawer: _drawer(closeOnSelect: true),
+          body: _buildPages(),
+        );
+      },
     );
   }
 
