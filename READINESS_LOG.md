@@ -161,8 +161,10 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-03 | Business Details screen under Administration; receipts, the sidebar and the offline cache use the saved name, address, phone and TIN (`ReceiptHeader`, `BusinessProfileScope`); starting a shift asks for the opening cash and enforces it when the rule is on | Same; and the till had no way to enter opening cash at all, so turning the rule on would have blocked every shift | `test/business_profile_test.dart` (5 tests, at 1300 px and 360 px) |
 | 2026-10-03 | `DataTableCard` never scrolls sideways: when the columns do not fit, each row becomes labelled values, one, two or three across depending on width. Status columns widened; status codes shown as words (`PARTIALLY_PAID` → "Partially Paid"); every dropdown fits its field | Seen live at 1024 px and 1280 px: tables hid their status and action columns behind a sideways scroll on tablets, the target device. F-13, F-16 | `test/responsive_widgets_test.dart` (tablet case added); live at 1024 px and 1280 px |
 | 2026-10-03 | One money format everywhere (`₱1,540.50`, `-₱200.00`); receipts carry date and time; order details and receipts show the refunded amount; an ordinary size ("Regular") is not printed after the product name; one-tap cash amounts at payment; products are compact rows on a phone and the phone tab shows the cart count and total; the phone app bar shows the business name | Design pass after the live check | `test/till_helpers_test.dart` (4 tests), `test/till_phone_layout_test.dart` |
+| 2026-10-03 | Hold and continue an order on the till (`HeldOrder`, `HeldOrdersStore`): a cart with its table or customer name is set aside on the device and picked up later at the current menu prices; a product removed from the menu meanwhile is left out and reported | Open tickets: a table that is still ordering had to be paid at once or lost | `test/held_orders_test.dart` (3 tests). Device-local by design: nothing is posted, no stock moves and no report shows it until it is paid, and another device cannot see it |
+| 2026-10-03 | Copy Receipt on both receipt dialogs (`receiptText`) | A receipt could not leave the screen; printing is undecided (`OPS-02`) | `test/till_helpers_test.dart` |
 
-The first three rows are Flutter-only changes; the rest add thirteen database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 91 passed. pgTAP: 22 files, 439 assertions, all passing in rolled-back trial runs against the hosted test project. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add thirteen database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 95 passed. pgTAP: 22 files, 439 assertions, all passing in rolled-back trial runs against the hosted test project. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### Live check on 3 October 2026
 
@@ -453,8 +455,8 @@ Left column: where the app stood on 2 October 2026 before this work. Right colum
 | Items, variants, modifiers | yes | yes, with limits | yes; shared modifier groups, reordering |
 | Category management | yes | read-only | yes |
 | Discounts managed by the owner | yes | three hard-coded types | yes, with fixed or adjustable values, limits and validity dates. Senior and PWD discounts stay off until the tax rules are confirmed |
-| Receipt showing discounts and modifiers | yes | no discount line, no options | yes, with business header, date and time. On screen only: no printing or email (`OPS-02`) |
-| Open tickets (save and pay later) | yes | no | no. The schema supports it; the till always pays immediately |
+| Receipt showing discounts and modifiers | yes | no discount line, no options | yes, with business header, date and time, and a copy-as-text button. No printing or email (`OPS-02`) |
+| Open tickets (save and pay later) | yes | no | partly: an order can be held on the device and continued; it is not shared between devices and not recorded until paid |
 | Split payments | yes | no | no. Switched off in settings |
 | Shift open and close with cash report | yes | no report, no opening cash | yes: opening cash, shift report, shift history |
 | Sales reports, any date range, export | yes | 7 or 30 days, top 10, no export | yes: by day, item, category, payment, discount, employee; copy to a spreadsheet. No file download |
@@ -481,7 +483,7 @@ Technical work not done:
 1. Deploy the `create-employee` Edge Function and test the Cashier and Manager roles end to end. Nothing in this log was verified as a non-administrator in the running app; the permission rules are covered by database tests only.
 2. Test on the Android tablet and in a release build, including a real loss of network.
 3. Run CI. The GitHub workflow has never run for this branch because local Docker is not installed; the same pgTAP files were run against the hosted project instead.
-4. Open tickets, split payments, PIN sign-in, receipt printing, file export of reports.
+4. Open tickets shared between devices (held orders are on one device only), split payments, PIN sign-in, receipt printing, file export of reports.
 5. A maintained stock balance (S-17), per-device invoice numbering (S-18), a scheduled run of `check_stock_consistency()`.
 6. Existing pgTAP files `02` and `03` still depend on an empty database (S-20).
 7. Split reference data from sample data in `seed.sql` before the café's real setup (`DOC-01`, S-12). The hosted test project contains test rows named `TEST …` from this work.

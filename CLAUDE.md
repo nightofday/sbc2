@@ -31,7 +31,7 @@ flutter run -d chrome \
   --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
 ```
 
-Both values are read with `String.fromEnvironment` in `lib/main.dart`, so they are compile-time: there is no `.env` file, and omitting either one boots a "Supabase configuration is missing" screen instead of the app. Only the project URL and publishable key ever go to Flutter. Login needs an existing Auth user with a `profiles` row; seed scripts do not create accounts.
+Both values are read with `String.fromEnvironment` in `lib/main.dart`, so they are compile-time: there is no `.env` file, and omitting either one boots a "Supabase configuration is missing" screen instead of the app. Only the project URL and publishable key ever go to Flutter. Login needs an existing Auth user with a `profiles` row; seed scripts do not create accounts. The first administrator is set up once in the SQL editor with `select public.bootstrap_first_admin('email');`.
 
 Database tests (pgTAP, need a Docker-compatible runtime):
 
@@ -52,7 +52,7 @@ One enforced data path:
 
 **Screen → `lib/domain/repositories/` interface → `lib/data/repositories/Supabase*` → Data API / RPC → PostgreSQL**
 
-- **`lib/app.dart` is the single composition root.** It constructs all ten `Supabase*Repository` instances and passes them to screens by constructor. There is no DI container, router package or state-management library; screens are `StatefulWidget` + `FutureBuilder`. A new module is wired here.
+- **`lib/app.dart` is the single composition root.** It constructs every `Supabase*Repository` and passes them to screens by constructor. The order repository is wrapped in `OfflineOrderRepository` (see below). There is no DI container, router package or state-management library; screens are `StatefulWidget` + `FutureBuilder`. A new module is wired here.
 - **Navigation indices are positional.** `_buildAuthenticatedApp` builds `pages` through a local `destination()` closure that assigns `destinationIndex = pages.length` at call time, inside role-conditional blocks. The same screen therefore has a different index for a cashier than for a manager. Never hardcode an index; add destinations through the closure.
 - **One screen class, several destinations.** `InventoryScreen` is mounted five times with different `InventoryView` values (overview, release, disposal, adjustment, history). A change to it affects all five sidebar entries.
 - **Business logic lives in Postgres, not Dart.** Multi-table writes (checkout, refunds, receiving, stock release, counts, payments) are transactional SQL functions called with `_client.rpc(...)`. Reads usually go through `v_*` views. Repositories map rows to models; they must not orchestrate several writes for one business transaction, and totals shown in the UI are previews of server-computed values.
@@ -60,7 +60,11 @@ One enforced data path:
 - **Authorization is in the database.** RLS plus explicit permission checks inside `SECURITY DEFINER` RPCs, with a default-deny Data API: a new table, view or function is unreachable from Flutter until a migration grants it. The UI gates each destination on a named permission through `profile.can('menu.manage')` in `lib/app.dart`; the permission codes come from `role_permissions` and are loaded with the profile in `AuthGate`. Hiding a button is not authorization, and new UI checks must name explicit roles rather than assume "not cashier means admin".
 - **Auth is the one sanctioned exception to the data path.** `lib/screens/auth/auth_gate.dart` and the login screen query Supabase Auth and `profiles`/`roles` directly. Do not use that as precedent for business queries in widgets.
 - **Refresh is in-process only.** `BusinessRefreshController` and `InventoryRefreshController` are `ChangeNotifier`s created in `lib/app.dart`; the inventory controller forwards to the business one. Screens take a `refreshListenable` to listen and an `onDataChanged` callback to emit. After adding a mutation, wire both sides. This is not multi-device sync.
-- **Mocks cover five of the ten modules** (expense, inventory, order, supplier, user) and exist for isolated tests. They are never a runtime fallback: a failed live call must surface as an error, not mock success.
+- **There are no mock repositories in `lib/`.** Test fakes live in `test/support/` (`FakeOrderRepository`); tests subclass it and override what they need. A failed live call must surface as an error, never as fake success.
+- **The till works offline; the back office does not.** `lib/data/offline/OfflineOrderRepository` decorates the server order repository. It caches the till's reference data and the open shift in `KeyValueStore` (`shared_preferences`), queues a sale that cannot reach the server under its request ID, and replays the queue oldest-first through the `sync_offline_order` RPC. It also holds parked orders (`HeldOrdersStore`). `isConnectionFailure()` decides what may be queued: only failures to reach the server, never a server refusal. `OfflineStatusBanner` in `AppShell` shows the state.
+- **Every posting RPC takes `p_client_request_id`.** A form creates one ID with `newRequestId()` and reuses it on retry, so a lost response cannot post twice. New posting functions and forms must do the same (`claim_client_request` / `record_client_request` in SQL).
+- **Tables never scroll sideways.** `DataTableCard` stacks rows as labelled values when its columns do not fit. Give the status and action columns a flex of at least 2, and a blank header for an action column.
+- **Shared formatting and messages:** money through `formatReportMoney`, user-facing errors through `errorText()` (`lib/core/error_text.dart`), business name and receipt header through `BusinessProfileScope`.
 - **`supabase/functions/create-employee/`** is a Deno Edge Function and the only place a privileged key is used, for administrator-only account creation.
 
 ## Domain rules that look like bugs but are deliberate
@@ -73,6 +77,7 @@ These are settled business decisions. Do not "fix" them.
 - **Package conversions are snapshotted.** Receiving two boxes of 50 adds 100 base pieces as one line. Never require a transaction per unit.
 - **History is never destroyed.** Archive master data and correct posted documents through void, reversal or adjustment flows that keep actor, timestamp and reason.
 - **Purchases, supplier payments, operating expenses, stock consumption and losses are distinct events.** Do not sum them together or label "net after expenses" as profit.
+- **Corrections are linked entries, not edits.** A supplier payment is undone by a negative payment (`reverses_payment_id`), a write-off by a `REVERSAL` movement with reference type `LOT_DISPOSAL_VOID`, documents by `void_*` functions. Sums over these tables stay correct without filtering, so do not add "exclude voided" conditions to them.
 - **Report dates use Asia/Manila**, whatever the client timezone, and totals must cover the whole filtered result rather than a `.limit(...)` page.
 - **Types:** money is `numeric(14,2)`, quantities and conversion factors are `numeric(14,4)`. No floating point for currency.
 

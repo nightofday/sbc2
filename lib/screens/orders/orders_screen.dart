@@ -9,6 +9,7 @@ import '../../domain/repositories/order_repository.dart';
 import '../../models/order_record.dart';
 import '../../models/refund_preview.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/copy_receipt_button.dart';
 import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/order_line.dart';
 import '../../widgets/common/app_dialog.dart';
@@ -1153,6 +1154,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
               _detailRow('Refunded', _moneyDouble(-order.refundedAmount)),
             const SizedBox(height: 12),
             Center(child: StatusBadge(order.status)),
+            const SizedBox(height: 8),
+            Center(child: CopyReceiptButton(order: order)),
           ],
         ),
       ),

@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sbc_management_system/models/order_item.dart';
 import 'package:sbc_management_system/models/order_record.dart';
+import 'package:sbc_management_system/models/business_profile.dart';
 import 'package:sbc_management_system/models/pos_checkout.dart';
+import 'package:sbc_management_system/models/receipt_text.dart';
 import 'package:sbc_management_system/models/reporting.dart';
 
 void main() {
@@ -50,5 +52,55 @@ void main() {
     expect(order.dateTimeLabel, 'Oct 2, 2026 9:09 PM');
     // Changing the status keeps what was refunded.
     expect(order.copyWith(status: 'Refunded').refundedAmount, 162);
+  });
+
+  test('the copied receipt carries the header, lines, discount and refund', () {
+    final text = receiptText(
+      OrderRecord(
+        id: '#12',
+        createdAt: DateTime(2026, 10, 3, 9, 5),
+        employee: 'Ana',
+        type: 'Dine In',
+        tableNumber: 'T4',
+        amount: 369,
+        status: 'Partially Refunded',
+        invoiceNumber: 'SI-00000012',
+        paymentMethod: 'Cash',
+        amountReceived: 400,
+        changeAmount: 31,
+        subtotal: 410,
+        discountAmount: 41,
+        discountName: 'Promo 10%',
+        refundedAmount: 162,
+        items: const [
+          OrderItem(
+            productId: '1',
+            productName: 'Latte (Large)',
+            unitPrice: 180,
+            quantity: 2,
+            options: ['Extra Shot'],
+            note: 'Less ice',
+          ),
+          OrderItem(
+            productId: '2',
+            productName: 'Cookie',
+            unitPrice: 50,
+            quantity: 1,
+          ),
+        ],
+      ),
+      const BusinessProfile(tradeName: 'Street Bowl Café', tin: '123'),
+    );
+
+    expect(text, startsWith('Street Bowl Café\nTIN 123\n'));
+    expect(text, contains('#12 · Oct 3, 2026 9:05 AM'));
+    expect(text, contains('Dine In · Table T4'));
+    expect(text, contains('2 × Latte (Large)   ₱360.00'));
+    expect(text, contains('   Extra Shot'));
+    expect(text, contains('   Note: Less ice'));
+    expect(text, contains('Discount (Promo 10%): -₱41.00'));
+    expect(text, contains('Total: ₱369.00'));
+    expect(text, contains('Change: ₱31.00'));
+    expect(text, contains('Refunded: -₱162.00'));
   });
 }

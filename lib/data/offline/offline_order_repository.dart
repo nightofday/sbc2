@@ -4,8 +4,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
+import '../../domain/repositories/held_orders_store.dart';
 import '../../domain/repositories/offline_sales_queue.dart';
 import '../../domain/repositories/order_repository.dart';
+import '../../models/held_order.dart';
 import '../../models/offline_sale.dart';
 import '../../models/order_item.dart';
 import '../../models/order_record.dart';
@@ -63,12 +65,13 @@ bool isConnectionFailure(Object error) {
 /// Only taking a sale works offline. Voids, refunds, cash movements and
 /// closing a shift need the server.
 class OfflineOrderRepository extends ChangeNotifier
-    implements OrderRepository, OfflineSalesQueue {
+    implements OrderRepository, OfflineSalesQueue, HeldOrdersStore {
   static const _salesKey = 'offline.sales.v1';
   static const _menuKey = 'offline.cache.menu.v1';
   static const _paymentMethodsKey = 'offline.cache.payment_methods.v1';
   static const _discountsKey = 'offline.cache.discounts.v1';
   static const _modifiersKey = 'offline.cache.modifiers.v1';
+  static const _heldOrdersKey = 'offline.held_orders.v1';
   static const _shiftPrefix = 'offline.shift.v1.';
   static const _shiftStartPrefix = 'offline.shift_start.v1.';
   static const _localShiftPrefix = 'offline-shift-';
@@ -255,6 +258,46 @@ class OfflineOrderRepository extends ChangeNotifier
       if (kept == null) rethrow;
       return kept;
     }
+  }
+
+  // --------------------------------------------------------- held orders
+
+  @override
+  String get heldOrdersOwnerId => _identity()?.userId ?? '';
+
+  @override
+  List<HeldOrder> get heldOrders {
+    final userId = _identity()?.userId;
+    if (userId == null) return const [];
+
+    return _readHeldOrders().where((order) => order.userId == userId).toList()
+      ..sort((a, b) => a.heldAt.compareTo(b.heldAt));
+  }
+
+  @override
+  Future<void> holdOrder(HeldOrder order) async {
+    final orders = _readHeldOrders()
+      ..removeWhere((existing) => existing.id == order.id)
+      ..add(order);
+    await _writeHeldOrders(orders);
+    notifyListeners();
+  }
+
+  @override
+  Future<void> removeHeldOrder(String id) async {
+    final orders = _readHeldOrders()..removeWhere((order) => order.id == id);
+    await _writeHeldOrders(orders);
+    notifyListeners();
+  }
+
+  List<HeldOrder> _readHeldOrders() =>
+      _readList(_heldOrdersKey, HeldOrder.fromMap) ?? [];
+
+  Future<void> _writeHeldOrders(List<HeldOrder> orders) {
+    return _store.write(
+      _heldOrdersKey,
+      jsonEncode(orders.map((order) => order.toMap()).toList()),
+    );
   }
 
   // ---------------------------------------------------------- till reads

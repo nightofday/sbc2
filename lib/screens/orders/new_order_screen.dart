@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/held_order.dart';
+import '../../models/shift_report.dart';
 import '../../models/order_item.dart';
 import '../../models/reporting.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../domain/repositories/held_orders_store.dart';
 import '../../domain/repositories/offline_sales_queue.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../models/offline_sale.dart';
@@ -17,6 +20,7 @@ import '../../models/pos_menu_item.dart';
 import '../../models/pos_modifier.dart';
 import '../../models/pos_payment_method.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/copy_receipt_button.dart';
 import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/order_line.dart';
 import '../../widgets/common/shift_report_view.dart';
@@ -1118,9 +1122,251 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               ),
             ),
           ),
+          if (_heldStore != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _cart.isEmpty ? null : _holdOrder,
+                    icon: const Icon(Icons.pause_circle_outline, size: 18),
+                    label: const Text('Hold'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _heldStore!.heldOrders.isEmpty
+                        ? null
+                        : _showHeldOrders,
+                    icon: const Icon(Icons.playlist_play, size: 18),
+                    label: Text('Held (${_heldStore!.heldOrders.length})'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  /// Present when the till can set orders aside on this device.
+  HeldOrdersStore? get _heldStore {
+    final repository = widget.orderRepository;
+    return repository is HeldOrdersStore ? repository as HeldOrdersStore : null;
+  }
+
+  Future<void> _holdOrder() async {
+    final store = _heldStore;
+    if (store == null || _cart.isEmpty) return;
+
+    if (_tableNumberController.text.trim().isEmpty &&
+        _customerNameController.text.trim().isEmpty) {
+      _showError(
+        'Enter a table number or customer name so the order can be found '
+        'again.',
+      );
+      return;
+    }
+
+    await store.holdOrder(
+      HeldOrder(
+        id: newRequestId(),
+        userId: store.heldOrdersOwnerId,
+        heldAt: DateTime.now(),
+        orderType: _orderType,
+        tableNumber: _tableNumberController.text.trim(),
+        customerName: _customerNameController.text.trim(),
+        deliveryReference: _deliveryReferenceController.text.trim(),
+        lines: [
+          for (final line in _cart)
+            HeldOrderLine(
+              product: line.product,
+              quantity: line.quantity,
+              modifiers: line.modifiers,
+              note: line.specialInstructions,
+            ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _cart.clear();
+      _tableNumberController.clear();
+      _customerNameController.clear();
+      _deliveryReferenceController.clear();
+    });
+    _checkoutAttempt.resolve();
+    _showMessage('Order held. Find it under Held to continue.');
+  }
+
+  Future<void> _showHeldOrders() async {
+    final store = _heldStore;
+    if (store == null) return;
+
+    final chosen = await showPrototypeDialog<HeldOrder>(
+      context: context,
+      title: 'Held Orders',
+      width: 480,
+      content: StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          final orders = store.heldOrders;
+
+          if (orders.isEmpty) {
+            return const Text(
+              'No orders are being held.',
+              style: AppTextStyles.body,
+            );
+          }
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Kept on this device only. Nothing is recorded until the '
+                'order is paid.',
+                style: AppTextStyles.caption,
+              ),
+              const SizedBox(height: 12),
+              for (final order in orders)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.gray200),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(order.label, style: AppTextStyles.bodyMedium),
+                            Text(
+                              '${order.orderType} · ${order.itemCount} '
+                              '${order.itemCount == 1 ? 'item' : 'items'} · '
+                              '${_money(order.total)} · held '
+                              '${formatShiftTime(order.heldAt)}',
+                              style: AppTextStyles.caption,
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Discard this held order',
+                        onPressed: () async {
+                          final discard = await showSettledDialog<bool>(
+                            context: dialogContext,
+                            builder: (confirmContext) => AlertDialog(
+                              title: const Text('Discard held order?'),
+                              content: Text(
+                                '${order.label} with ${order.itemCount} '
+                                '${order.itemCount == 1 ? 'item' : 'items'} '
+                                'will be removed. It was never charged.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(confirmContext, false),
+                                  child: const Text('Keep'),
+                                ),
+                                FilledButton(
+                                  onPressed: () =>
+                                      Navigator.pop(confirmContext, true),
+                                  child: const Text('Discard'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (discard != true) return;
+                          await store.removeHeldOrder(order.id);
+                          setDialogState(() {});
+                          if (mounted) setState(() {});
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                      ),
+                      const SizedBox(width: 4),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(dialogContext, order),
+                        child: const Text('Continue'),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (chosen == null || !mounted) return;
+    await _resumeHeldOrder(chosen);
+  }
+
+  Future<void> _resumeHeldOrder(HeldOrder order) async {
+    final store = _heldStore;
+    if (store == null) return;
+
+    if (_cart.isNotEmpty) {
+      _showError('Hold or finish the current order before continuing another.');
+      return;
+    }
+
+    // Lines are matched to the menu as it is now, so a price changed since
+    // the order was held is the price charged, and a product taken off the
+    // menu is left out and reported.
+    List<PosMenuItem> menu;
+    try {
+      menu = await _menuFuture;
+    } catch (_) {
+      menu = const [];
+    }
+    if (!mounted) return;
+
+    final lines = <_PosCartLine>[];
+    var dropped = 0;
+
+    for (final line in order.lines) {
+      final current = menu
+          .where((item) => item.variantId == line.product.variantId)
+          .firstOrNull;
+      if (menu.isNotEmpty && current == null) {
+        dropped++;
+        continue;
+      }
+      lines.add(
+        _PosCartLine(
+          product: current ?? line.product,
+          quantity: line.quantity,
+          modifiers: line.modifiers,
+          specialInstructions: line.note,
+        ),
+      );
+    }
+
+    await store.removeHeldOrder(order.id);
+    if (!mounted) return;
+
+    setState(() {
+      _orderType = order.orderType;
+      _tableNumberController.text = order.tableNumber;
+      _customerNameController.text = order.customerName;
+      _deliveryReferenceController.text = order.deliveryReference;
+      _cart
+        ..clear()
+        ..addAll(lines);
+    });
+
+    if (dropped > 0) {
+      _showMessage(
+        '$dropped ${dropped == 1 ? 'item is' : 'items are'} no longer on the '
+        'menu and ${dropped == 1 ? 'was' : 'were'} left out.',
+      );
+    }
   }
 
   Widget _buildOrderIdentityFields() {
@@ -2092,6 +2338,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         ),
       ),
       actions: [
+        CopyReceiptButton(order: order),
         ElevatedButton(
           onPressed: () {
             Navigator.pop(context);
