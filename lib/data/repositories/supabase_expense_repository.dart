@@ -59,8 +59,8 @@ class SupabaseExpenseRepository implements ExpenseRepository {
         .from('expense_categories')
         .select('id, name')
         .eq('is_active', true)
-        .order('sort_order')
-        .order('name');
+        .order('sort_order', ascending: true)
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(
@@ -77,7 +77,7 @@ class SupabaseExpenseRepository implements ExpenseRepository {
         .from('suppliers')
         .select('id, name')
         .eq('is_active', true)
-        .order('name');
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(

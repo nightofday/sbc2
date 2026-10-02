@@ -42,7 +42,10 @@ class SupabaseSupplierRepository implements SupplierRepository {
 
   @override
   Future<List<SupplierRecord>> getSuppliers() async {
-    final rows = await _client.from('suppliers').select(_columns).order('name');
+    final rows = await _client
+        .from('suppliers')
+        .select(_columns)
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(

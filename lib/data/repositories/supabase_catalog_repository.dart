@@ -80,7 +80,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
           'max_value, valid_from, valid_until, is_active, is_pos_enabled, '
           'requires_id, is_tax_exempt_related, notes',
         )
-        .order('name');
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(

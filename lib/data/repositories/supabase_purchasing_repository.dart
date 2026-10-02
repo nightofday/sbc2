@@ -15,7 +15,7 @@ class SupabasePurchasingRepository implements PurchasingRepository {
         .from('suppliers')
         .select('id, name')
         .eq('is_active', true)
-        .order('name');
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(
@@ -33,7 +33,7 @@ class SupabasePurchasingRepository implements PurchasingRepository {
         .select(
           'inventory_item_id, name, base_uom_id, base_uom_code, track_expiry',
         )
-        .order('name');
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(
@@ -50,8 +50,8 @@ class SupabasePurchasingRepository implements PurchasingRepository {
         .from('units_of_measure')
         .select('id, code, name, dimension, factor_to_dimension_base')
         .eq('is_active', true)
-        .order('dimension')
-        .order('factor_to_dimension_base');
+        .order('dimension', ascending: true)
+        .order('factor_to_dimension_base', ascending: true);
 
     return (rows as List)
         .map(
@@ -85,7 +85,7 @@ class SupabasePurchasingRepository implements PurchasingRepository {
         .from('v_purchase_order_lines_remaining')
         .select()
         .eq('purchase_order_id', purchaseOrderId)
-        .order('id');
+        .order('id', ascending: true);
 
     return (rows as List).map((raw) {
       final row = Map<String, dynamic>.from(raw as Map);
@@ -132,7 +132,7 @@ class SupabasePurchasingRepository implements PurchasingRepository {
         .from('v_goods_receipt_line_details')
         .select()
         .eq('goods_receipt_id', goodsReceiptId)
-        .order('inventory_item_name');
+        .order('inventory_item_name', ascending: true);
 
     return (rows as List)
         .map(

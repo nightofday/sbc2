@@ -15,7 +15,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
     final rows = await _client
         .from('v_inventory_catalog')
         .select()
-        .order('name');
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(
@@ -43,8 +43,8 @@ class SupabaseInventoryRepository implements InventoryRepository {
         .from('inventory_categories')
         .select('id, name')
         .eq('is_active', true)
-        .order('sort_order')
-        .order('name');
+        .order('sort_order', ascending: true)
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(
@@ -61,8 +61,8 @@ class SupabaseInventoryRepository implements InventoryRepository {
         .from('units_of_measure')
         .select('id, code, name, dimension, factor_to_dimension_base')
         .eq('is_active', true)
-        .order('dimension')
-        .order('factor_to_dimension_base');
+        .order('dimension', ascending: true)
+        .order('factor_to_dimension_base', ascending: true);
 
     return (rows as List)
         .map(
@@ -119,8 +119,8 @@ class SupabaseInventoryRepository implements InventoryRepository {
         .from('v_inventory_lots')
         .select()
         .eq('inventory_item_id', inventoryItemId)
-        .order('expiration_date')
-        .order('received_at');
+        .order('expiration_date', ascending: true)
+        .order('received_at', ascending: true);
 
     return (rows as List)
         .map(

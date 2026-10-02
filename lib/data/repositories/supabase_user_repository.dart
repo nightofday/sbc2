@@ -14,7 +14,7 @@ class SupabaseUserRepository implements UserRepository {
     final rows = await _client
         .from('v_user_management')
         .select()
-        .order('display_name');
+        .order('display_name', ascending: true);
 
     return (rows as List)
         .map((raw) => UserRecord.fromMap(Map<String, dynamic>.from(raw as Map)))
@@ -39,7 +39,7 @@ class SupabaseUserRepository implements UserRepository {
     final rows = await _client
         .from('roles')
         .select('id, code, name')
-        .order('name');
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(

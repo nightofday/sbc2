@@ -15,8 +15,8 @@ class SupabaseFinanceRepository implements FinanceRepository {
         .from('v_supplier_balances')
         .select()
         .gt('balance', 0)
-        .order('due_date')
-        .order('invoice_date');
+        .order('due_date', ascending: true)
+        .order('invoice_date', ascending: true);
 
     return (rows as List)
         .map(
@@ -33,7 +33,7 @@ class SupabaseFinanceRepository implements FinanceRepository {
         .from('payment_methods')
         .select('id, code, name, requires_reference')
         .eq('is_active', true)
-        .order('sort_order');
+        .order('sort_order', ascending: true);
 
     return (rows as List)
         .map(

@@ -102,9 +102,9 @@ class SupabaseOrderRepository implements OrderRepository {
     final rows = await _client
         .from('v_pos_menu')
         .select()
-        .order('category_sort_order')
-        .order('variant_sort_order')
-        .order('item_name');
+        .order('category_sort_order', ascending: true)
+        .order('variant_sort_order', ascending: true)
+        .order('item_name', ascending: true);
 
     return (rows as List)
         .map(
@@ -131,7 +131,7 @@ class SupabaseOrderRepository implements OrderRepository {
         .from('payment_methods')
         .select('id, code, name, is_cash, requires_reference')
         .eq('is_active', true)
-        .order('sort_order');
+        .order('sort_order', ascending: true);
 
     return (rows as List)
         .map(
@@ -147,9 +147,9 @@ class SupabaseOrderRepository implements OrderRepository {
         .from('v_pos_modifiers')
         .select()
         .eq('menu_item_id', menuItemId)
-        .order('group_sort_order')
-        .order('modifier_sort_order')
-        .order('modifier_name');
+        .order('group_sort_order', ascending: true)
+        .order('modifier_sort_order', ascending: true)
+        .order('modifier_name', ascending: true);
 
     final groups = <String, _MutableModifierGroup>{};
 
@@ -442,8 +442,8 @@ class SupabaseOrderRepository implements OrderRepository {
         .from('v_refund_restock_candidates')
         .select()
         .eq('order_id', orderUuid)
-        .order('refund_number')
-        .order('item_name_snapshot');
+        .order('refund_number', ascending: true)
+        .order('item_name_snapshot', ascending: true);
 
     return (rows as List)
         .map(

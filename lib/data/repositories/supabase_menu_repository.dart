@@ -14,8 +14,8 @@ class SupabaseMenuRepository implements MenuRepository {
     final rows = await _client
         .from('v_menu_management')
         .select()
-        .order('item_name')
-        .order('variant_name');
+        .order('item_name', ascending: true)
+        .order('variant_name', ascending: true);
 
     return (rows as List)
         .map(
@@ -31,8 +31,8 @@ class SupabaseMenuRepository implements MenuRepository {
         .from('menu_categories')
         .select('id, name')
         .eq('is_active', true)
-        .order('sort_order')
-        .order('name');
+        .order('sort_order', ascending: true)
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(
@@ -47,7 +47,7 @@ class SupabaseMenuRepository implements MenuRepository {
     final rows = await _client
         .from('v_inventory_catalog')
         .select('inventory_item_id, name, base_uom_code, usable_quantity')
-        .order('name');
+        .order('name', ascending: true);
 
     return (rows as List)
         .map(
@@ -143,8 +143,8 @@ class SupabaseMenuRepository implements MenuRepository {
         .from('v_menu_modifier_management')
         .select()
         .eq('menu_item_id', menuItemId)
-        .order('group_sort_order')
-        .order('modifier_sort_order');
+        .order('group_sort_order', ascending: true)
+        .order('modifier_sort_order', ascending: true);
 
     final groups = <String, _MutableMenuModifierGroup>{};
 
