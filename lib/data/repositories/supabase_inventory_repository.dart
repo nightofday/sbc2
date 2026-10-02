@@ -1,6 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/repositories/inventory_repository.dart';
+import 'package_memory_query.dart';
+import '../../models/package_memory.dart';
 import '../../models/inventory_item.dart';
 import '../../models/inventory_reference.dart';
 
@@ -9,6 +11,9 @@ class SupabaseInventoryRepository implements InventoryRepository {
 
   SupabaseInventoryRepository({SupabaseClient? client})
     : _client = client ?? Supabase.instance.client;
+
+  @override
+  Future<PackageMemory> getPackageMemory() => loadPackageMemory(_client);
 
   @override
   Future<List<InventoryItem>> getInventoryItems() async {
@@ -231,6 +236,22 @@ class SupabaseInventoryRepository implements InventoryRepository {
         'p_items': items.map((item) => item.toJson()).toList(),
         'p_notes': _nullableText(notes),
         'p_counted_at': (countedAt ?? DateTime.now()).toUtc().toIso8601String(),
+        'p_client_request_id': clientRequestId,
+      },
+    );
+  }
+
+  @override
+  Future<void> voidLotDisposal({
+    required String stockMovementId,
+    required String reason,
+    String? clientRequestId,
+  }) async {
+    await _client.rpc(
+      'void_lot_disposal',
+      params: {
+        'p_stock_movement_id': stockMovementId,
+        'p_reason': reason.trim(),
         'p_client_request_id': clientRequestId,
       },
     );

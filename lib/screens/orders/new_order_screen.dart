@@ -15,6 +15,7 @@ import '../../models/pos_menu_item.dart';
 import '../../models/pos_modifier.dart';
 import '../../models/pos_payment_method.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/order_line.dart';
 import '../../widgets/common/shift_report_view.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/section_card.dart';
@@ -737,7 +738,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   Widget _buildProductsPanel(List<PosMenuItem> menu) {
     final categories = <String>[
       'All',
-      ...(menu.map((item) => item.category).toSet().toList()..sort()),
+      // The menu arrives in the order management set for its categories.
+      ...{for (final item in menu) item.category},
     ];
 
     if (!categories.contains(_selectedCategory)) {
@@ -1372,6 +1374,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     String? errorMessage;
     StateSetter? dialogSetState;
 
+    var amountEdited = false;
+
     double discountValue() {
       return double.tryParse(discountValueController.text.trim()) ?? 0;
     }
@@ -1450,6 +1454,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                               );
 
                         amountController.text = finalTotal().toStringAsFixed(2);
+                        amountEdited = false;
                         errorMessage = null;
                       });
                     },
@@ -1482,6 +1487,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       onChanged: (_) {
                         setDialogState(() {
                           errorMessage = null;
+                          // Keeps the amount in step with the total until
+                          // the cashier types what the customer handed over.
+                          if (!amountEdited) {
+                            amountController.text = finalTotal()
+                                .toStringAsFixed(2);
+                          }
                         });
                       },
                     ),
@@ -1536,6 +1547,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   ),
                   onChanged: (_) {
                     dialogSetState?.call(() {
+                      amountEdited = true;
                       errorMessage = null;
                     });
                   },
@@ -1866,25 +1878,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             _paymentInfoRow('Order Type', order.type),
             _paymentInfoRow('Handled by', order.employee),
             const Divider(height: 28),
-            ...order.items.map(
-              (item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${item.quantity} × ${item.productName}',
-                        style: AppTextStyles.body,
-                      ),
-                    ),
-                    Text(
-                      _money(item.lineTotal),
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            for (final item in order.items)
+              OrderLine(item: item, total: _money(item.lineTotal)),
             const Divider(height: 28),
             if (order.discountAmount > 0) ...[
               _paymentInfoRow('Subtotal', _money(order.subtotal)),

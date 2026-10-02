@@ -1,7 +1,11 @@
+import '../../models/package_memory.dart';
 import '../../models/inventory_item.dart';
 import '../../models/inventory_reference.dart';
 
 abstract class InventoryRepository {
+  /// Package sizes and costs remembered from earlier receipts.
+  Future<PackageMemory> getPackageMemory();
+
   Future<List<InventoryItem>> getInventoryItems();
 
   Future<InventoryItem?> getInventoryItemById(String id);
@@ -50,6 +54,14 @@ abstract class InventoryRepository {
     required List<StockCountLineInput> items,
     String notes = '',
     DateTime? countedAt,
+    String? clientRequestId,
+  });
+
+  /// Returns a written-off quantity to its lot. The write-off and the
+  /// reversal both stay in the history.
+  Future<void> voidLotDisposal({
+    required String stockMovementId,
+    required String reason,
     String? clientRequestId,
   });
 

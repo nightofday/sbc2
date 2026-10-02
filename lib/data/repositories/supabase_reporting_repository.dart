@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/repositories/reporting_repository.dart';
+import '../../models/audit_entry.dart';
 import '../../models/reporting.dart';
 
 class SupabaseReportingRepository implements ReportingRepository {
@@ -71,6 +72,26 @@ class SupabaseReportingRepository implements ReportingRepository {
             Map<String, dynamic>.from(raw as Map),
           ),
         )
+        .toList();
+  }
+
+  @override
+  Future<List<AuditEntry>> getAuditLog({
+    required DateTime from,
+    required DateTime to,
+    String search = '',
+  }) async {
+    final result = await _client.rpc(
+      'get_audit_log',
+      params: {
+        'p_from': _dateOnly(from),
+        'p_to': _dateOnly(to),
+        'p_search': search.trim().isEmpty ? null : search.trim(),
+      },
+    );
+
+    return ((result as List?) ?? const [])
+        .map((row) => AuditEntry.fromMap(Map<String, dynamic>.from(row as Map)))
         .toList();
   }
 

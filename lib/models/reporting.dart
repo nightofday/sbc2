@@ -465,6 +465,10 @@ class TransactionTraceRecord {
   final double? amount;
   final String actorName;
   final String status;
+  final String voidReason;
+
+  /// Voided and reversed documents stay listed but are not live.
+  bool get isVoided => status == 'VOIDED' || status == 'REVERSED';
 
   const TransactionTraceRecord({
     required this.eventKey,
@@ -477,6 +481,7 @@ class TransactionTraceRecord {
     required this.amount,
     required this.actorName,
     required this.status,
+    this.voidReason = '',
   });
 
   factory TransactionTraceRecord.fromMap(Map<String, dynamic> map) {
@@ -491,6 +496,7 @@ class TransactionTraceRecord {
       amount: (map['amount'] as num?)?.toDouble(),
       actorName: map['actor_name']?.toString() ?? 'Unknown Employee',
       status: map['status']?.toString() ?? '',
+      voidReason: map['void_reason']?.toString() ?? '',
     );
   }
 }

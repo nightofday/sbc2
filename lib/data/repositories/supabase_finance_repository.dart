@@ -67,4 +67,39 @@ class SupabaseFinanceRepository implements FinanceRepository {
       },
     );
   }
+
+  @override
+  Future<List<SupplierPaymentRecord>> getSupplierPayments({
+    int limit = 50,
+  }) async {
+    final rows = await _client
+        .from('v_supplier_bill_payments')
+        .select()
+        .order('paid_at', ascending: false)
+        .limit(limit);
+
+    return (rows as List)
+        .map(
+          (raw) => SupplierPaymentRecord.fromMap(
+            Map<String, dynamic>.from(raw as Map),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> voidSupplierPayment({
+    required String paymentId,
+    required String reason,
+    String? clientRequestId,
+  }) async {
+    await _client.rpc(
+      'void_supplier_bill_payment',
+      params: {
+        'p_payment_id': paymentId,
+        'p_reason': reason.trim(),
+        'p_client_request_id': clientRequestId,
+      },
+    );
+  }
 }

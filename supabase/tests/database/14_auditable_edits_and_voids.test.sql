@@ -497,7 +497,7 @@ select throws_ok(
     )
   $test$,
   'P0001',
-  'The supplier bill for this receipt has payments recorded, so the receipt cannot be voided.',
+  'The supplier bill for this receipt has payments recorded, so the receipt cannot be voided. Reverse the payments first.',
   'a receipt with a paid bill cannot be voided'
 );
 

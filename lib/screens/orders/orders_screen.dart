@@ -8,6 +8,7 @@ import '../../domain/repositories/order_repository.dart';
 import '../../models/order_record.dart';
 import '../../models/refund_preview.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/order_line.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
@@ -338,25 +339,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 style: AppTextStyles.body.copyWith(color: AppColors.gray500),
               )
             else
-              ...order.items.map(
-                (item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${item.quantity} × ${item.productName}',
-                          style: AppTextStyles.body,
-                        ),
-                      ),
-                      Text(
-                        _moneyDouble(item.lineTotal),
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              for (final item in order.items)
+                OrderLine(item: item, total: _moneyDouble(item.lineTotal)),
             const Divider(height: 28),
             if (order.discountAmount > 0) ...[
               _detailRow('Subtotal', _moneyDouble(order.subtotal)),
@@ -1129,25 +1113,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 style: AppTextStyles.body.copyWith(color: AppColors.gray500),
               )
             else
-              ...order.items.map(
-                (item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${item.quantity} × ${item.productName}',
-                          style: AppTextStyles.body,
-                        ),
-                      ),
-                      Text(
-                        _moneyDouble(item.lineTotal),
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              for (final item in order.items)
+                OrderLine(item: item, total: _moneyDouble(item.lineTotal)),
             const Divider(height: 28),
             if (order.discountAmount > 0) ...[
               _detailRow('Subtotal', _moneyDouble(order.subtotal)),

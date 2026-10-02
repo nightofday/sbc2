@@ -8,7 +8,7 @@ Do not connect every screen directly to Supabase.
 2. Run migrations.
 3. Run seed.
 4. Create one test Auth user manually.
-5. Assign that user the ADMIN role and ACTIVE status through SQL for initial bootstrap.
+5. Make that user the first administrator by running `select public.bootstrap_first_admin('their-email@example.com');` in the Supabase SQL editor. It works only while no active administrator exists and cannot be called from the app. Later administrators are assigned in User Management.
 6. Test schema and RLS before changing Flutter.
 
 ## Phase 2 — Infrastructure

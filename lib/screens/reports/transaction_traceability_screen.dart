@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/reporting_repository.dart';
 import '../../models/reporting.dart';
+import '../../widgets/common/status_badge.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/section_card.dart';
@@ -150,11 +151,39 @@ class _TransactionTraceabilityScreenState
                                       ),
                                     ],
                                   ),
-                                  Text(
-                                    record.description,
-                                    style: AppTextStyles.body,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        record.description,
+                                        style: AppTextStyles.body,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (record.isVoided ||
+                                          record.status == 'REVERSAL')
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
+                                          child: StatusBadge(
+                                            record.status == 'REVERSAL'
+                                                ? 'Reversal'
+                                                : record.status == 'REVERSED'
+                                                ? 'Reversed'
+                                                : 'Voided',
+                                          ),
+                                        ),
+                                      if (record.voidReason.isNotEmpty)
+                                        Text(
+                                          'Reason: ${record.voidReason}',
+                                          style: AppTextStyles.caption
+                                              .copyWith(
+                                                color: AppColors.gray700,
+                                              ),
+                                        ),
+                                    ],
                                   ),
                                   Text(
                                     record.partyName.isEmpty
@@ -167,9 +196,14 @@ class _TransactionTraceabilityScreenState
                                         ? '—'
                                         : _money(record.amount!),
                                     style: AppTextStyles.bodyMedium.copyWith(
-                                      color: (record.amount ?? 0) < 0
+                                      color: record.isVoided
+                                          ? AppColors.gray500
+                                          : (record.amount ?? 0) < 0
                                           ? AppColors.error
                                           : AppColors.black,
+                                      decoration: record.isVoided
+                                          ? TextDecoration.lineThrough
+                                          : null,
                                     ),
                                   ),
                                   Text(

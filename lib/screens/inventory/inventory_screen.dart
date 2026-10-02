@@ -6,6 +6,7 @@ import '../../core/state/inventory_refresh_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/inventory_repository.dart';
+import '../../models/package_memory.dart';
 import '../../models/inventory_item.dart';
 import '../../models/inventory_reference.dart';
 import '../../models/request_id.dart';
@@ -39,6 +40,7 @@ class InventoryScreen extends StatefulWidget {
 class _InventoryScreenState extends State<InventoryScreen> {
   late Future<List<InventoryItem>> _itemsFuture;
   late Future<List<InventoryMovementRecord>> _movementsFuture;
+  PackageMemory _packageMemory = PackageMemory.empty;
   late Future<List<InventoryMovementRecord>> _recentMovementsFuture;
   late Future<List<StockOutSummary>> _stockOutsFuture;
 
@@ -73,6 +75,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   void _reload() {
     _itemsFuture = widget.inventoryRepository.getInventoryItems();
+    if (widget.view == InventoryView.release) _loadPackageMemory();
     _recentMovementsFuture = widget.view == InventoryView.overview
         ? widget.inventoryRepository.getAllRecentMovements()
         : Future.value(const <InventoryMovementRecord>[]);
@@ -82,6 +85,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
     _stockOutsFuture = widget.view == InventoryView.release
         ? widget.inventoryRepository.getStockOuts(limit: 100)
         : Future.value(const <StockOutSummary>[]);
+  }
+
+  /// Package sizes are a convenience for the release form, so a failure to
+  /// load them is not shown: the size is typed in as before.
+  Future<void> _loadPackageMemory() async {
+    try {
+      final memory = await widget.inventoryRepository.getPackageMemory();
+      if (mounted) setState(() => _packageMemory = memory);
+    } catch (_) {}
   }
 
   void _refresh() {
@@ -458,8 +470,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 'Quantity',
                                 'Source / Reference',
                                 'Reason',
+                                '',
                               ],
-                              flexes: const [2, 3, 2, 2, 3, 3],
+                              flexes: const [2, 3, 2, 2, 3, 3, 2],
                               rows: filtered
                                   .map(
                                     (movement) => [
@@ -502,6 +515,25 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                             ? '—'
                                             : movement.reason,
                                         style: AppTextStyles.body,
+                                      ),
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: movement.isReversed
+                                            ? const StatusBadge('Reversed')
+                                            : movement.canBeReversed &&
+                                                  widget.canManageInventory
+                                            ? OutlinedButton(
+                                                onPressed: () =>
+                                                    _voidLotDisposal(
+                                                      movement,
+                                                      itemById[movement
+                                                                  .inventoryItemId]
+                                                              ?.name ??
+                                                          'this item',
+                                                    ),
+                                                child: const Text('Reverse'),
+                                              )
+                                            : const SizedBox.shrink(),
                                       ),
                                     ],
                                   )
@@ -972,6 +1004,41 @@ class _InventoryScreenState extends State<InventoryScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _voidLotDisposal(
+    InventoryMovementRecord movement,
+    String itemName,
+  ) async {
+    final requestId = newRequestId();
+
+    final reversed = await showReasonDialog(
+      context: context,
+      title: 'Reverse Write-off',
+      message:
+          'This returns the written-off quantity of $itemName to the stock '
+          'it came from. The write-off stays in the history, marked as '
+          'reversed.',
+      confirmLabel: 'Reverse Write-off',
+      onConfirm: (reason) async {
+        try {
+          await widget.inventoryRepository.voidLotDisposal(
+            stockMovementId: movement.id,
+            reason: reason,
+            clientRequestId: requestId,
+          );
+          return null;
+        } on PostgrestException catch (error) {
+          return error.message;
+        } catch (error) {
+          return errorText(error);
+        }
+      },
+    );
+
+    if (!reversed || !mounted) return;
+    _refresh();
+    _showMessage('Write-off reversed. The stock is back on hand.');
   }
 
   Future<void> _voidStockOut(StockOutSummary release) async {
@@ -2019,7 +2086,18 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   if (value == baseUnit.id) {
                     line.conversionController.text = '1';
                   } else if (_isVariablePackageUnit(issueUnit)) {
-                    line.conversionController.clear();
+                    // A pack size learned at receiving is offered first.
+                    final remembered = _packageMemory.find(
+                      itemId: line.itemId,
+                      unitId: value,
+                    );
+                    if (remembered == null) {
+                      line.conversionController.clear();
+                    } else {
+                      line.conversionController.text = _plainNumber(
+                        remembered.baseQuantity,
+                      );
+                    }
                   } else {
                     line.conversionController.text = _plainNumber(
                       issueUnit.factorToDimensionBase /

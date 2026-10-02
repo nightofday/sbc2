@@ -1,6 +1,10 @@
+import '../../models/package_memory.dart';
 import '../../models/purchasing.dart';
 
 abstract class PurchasingRepository {
+  /// Package sizes and costs remembered from earlier receipts.
+  Future<PackageMemory> getPackageMemory();
+
   Future<List<PurchasingSupplierOption>> getSuppliers();
 
   Future<List<PurchaseInventoryOption>> getInventoryItems();

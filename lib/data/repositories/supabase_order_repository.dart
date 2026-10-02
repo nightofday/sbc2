@@ -30,7 +30,9 @@ class SupabaseOrderRepository
           'total_amount, subtotal, discount_amount, status, customer_name, '
           'table_number, delivery_reference, '
           'order_discounts(discount_name_snapshot), '
-          'order_items(id, item_name_snapshot, quantity, unit_price), '
+          'order_items(id, item_name_snapshot, variant_name_snapshot, quantity, '
+          'unit_price, modifier_total_per_unit, special_instructions, '
+          'order_item_modifiers(modifier_name_snapshot, quantity)), '
           'payments(amount, amount_tendered, change_amount, transaction_type, status, '
           'payment_methods(name, code)), sales_invoices(invoice_number)',
         )
@@ -518,7 +520,9 @@ class SupabaseOrderRepository
           'total_amount, subtotal, discount_amount, status, customer_name, '
           'table_number, delivery_reference, '
           'order_discounts(discount_name_snapshot), '
-          'order_items(id, item_name_snapshot, quantity, unit_price), '
+          'order_items(id, item_name_snapshot, variant_name_snapshot, quantity, '
+          'unit_price, modifier_total_per_unit, special_instructions, '
+          'order_item_modifiers(modifier_name_snapshot, quantity)), '
           'payments(amount, amount_tendered, change_amount, transaction_type, status, '
           'payment_methods(name, code)), sales_invoices(invoice_number)',
         );
@@ -566,11 +570,29 @@ class SupabaseOrderRepository
 
     final items = itemRows.map((raw) {
       final item = Map<String, dynamic>.from(raw as Map);
+      final itemName = item['item_name_snapshot']?.toString() ?? '';
+      final variantName = item['variant_name_snapshot']?.toString() ?? '';
+      final options = ((item['order_item_modifiers'] as List?) ?? const [])
+          .map((raw) {
+            final option = Map<String, dynamic>.from(raw as Map);
+            final name = option['modifier_name_snapshot']?.toString() ?? '';
+            final count = ((option['quantity'] as num?) ?? 1).round();
+            return count > 1 ? '$name × $count' : name;
+          })
+          .where((name) => name.isNotEmpty)
+          .toList();
+
       return OrderItem(
         productId: item['id']?.toString() ?? '',
-        productName: item['item_name_snapshot']?.toString() ?? '',
-        unitPrice: ((item['unit_price'] as num?) ?? 0).toDouble(),
+        productName: variantName.isEmpty || variantName == itemName
+            ? itemName
+            : '$itemName ($variantName)',
+        unitPrice:
+            ((item['unit_price'] as num?) ?? 0).toDouble() +
+            ((item['modifier_total_per_unit'] as num?) ?? 0).toDouble(),
         quantity: ((item['quantity'] as num?) ?? 0).round(),
+        options: options,
+        note: item['special_instructions']?.toString() ?? '',
       );
     }).toList();
 

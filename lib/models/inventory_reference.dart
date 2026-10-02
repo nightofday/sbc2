@@ -40,6 +40,7 @@ class InventoryUnitOption {
 }
 
 class InventoryMovementRecord {
+  final String id;
   final String inventoryItemId;
   final String movementType;
   final double quantityDelta;
@@ -47,8 +48,22 @@ class InventoryMovementRecord {
   final String sourceDocumentNumber;
   final String externalReferenceNumber;
   final DateTime createdAt;
+  final String referenceType;
+
+  /// True for a write-off that has since been reversed.
+  final bool isReversed;
+
+  /// A waste, damaged or expired write-off that has not been undone.
+  bool get canBeReversed =>
+      id.isNotEmpty &&
+      !isReversed &&
+      referenceType == 'LOT_DISPOSAL' &&
+      const {'WASTE', 'DAMAGED', 'EXPIRED'}.contains(movementType);
 
   const InventoryMovementRecord({
+    this.id = '',
+    this.referenceType = '',
+    this.isReversed = false,
     this.inventoryItemId = '',
     required this.movementType,
     required this.quantityDelta,
@@ -60,6 +75,9 @@ class InventoryMovementRecord {
 
   factory InventoryMovementRecord.fromMap(Map<String, dynamic> map) {
     return InventoryMovementRecord(
+      id: map['id']?.toString() ?? '',
+      referenceType: map['reference_type']?.toString() ?? '',
+      isReversed: map['is_reversed'] == true,
       inventoryItemId: map['inventory_item_id']?.toString() ?? '',
       movementType: map['movement_type']?.toString() ?? '',
       quantityDelta: (map['quantity_delta'] as num?)?.toDouble() ?? 0,

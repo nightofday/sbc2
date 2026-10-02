@@ -5,6 +5,7 @@ import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/purchasing_repository.dart';
+import '../../models/package_memory.dart';
 import '../../models/purchasing.dart';
 import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
@@ -523,6 +524,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           inventory,
                           units,
                           receiptMode: false,
+                        supplierId: supplierId,
                         );
 
                         if (line == null) return;
@@ -802,6 +804,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                             inventory,
                             units,
                             receiptMode: true,
+                          supplierId: supplierId,
                           );
                           if (line == null) return;
                           setDialogState(() => lines.add(line));
@@ -826,6 +829,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           inventory,
                           units,
                           receiptMode: true,
+                          supplierId: supplierId,
                           initial: lines[index],
                         );
                         if (edited == null) return;
@@ -969,8 +973,17 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
     List<PurchaseUnitOption> units, {
     required bool receiptMode,
     PurchaseLineInput? initial,
+    String supplierId = '',
   }) async {
     if (inventory.isEmpty || units.isEmpty) return null;
+
+    // What earlier receipts taught about package sizes. Without it the form
+    // still works; the size is simply typed in.
+    var memory = PackageMemory.empty;
+    try {
+      memory = await widget.purchasingRepository.getPackageMemory();
+    } catch (_) {}
+    if (!context.mounted) return null;
 
     String inventoryId = initial?.inventoryItemId ?? inventory.first.id;
     String purchaseUomId = initial?.purchaseUomId ?? inventory.first.baseUomId;
@@ -1093,12 +1106,26 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                                 final requiresManual =
                                     nextUnit.dimension == 'COUNT' &&
                                     nextUnit.id != item.baseUomId;
+                                final remembered = memory.find(
+                                  itemId: item.id,
+                                  unitId: nextUnit.id,
+                                  supplierId: supplierId,
+                                );
                                 conversionController.text = requiresManual
-                                    ? ''
+                                    ? remembered == null
+                                          ? ''
+                                          : _qty(remembered.baseQuantity)
                                     : _qty(
                                         nextUnit.factorToBase /
                                             baseUnit.factorToBase,
                                       );
+                                final lastCost = remembered?.lastUnitCost;
+                                if (costController.text.trim().isEmpty &&
+                                    lastCost != null &&
+                                    lastCost > 0) {
+                                  costController.text = lastCost
+                                      .toStringAsFixed(2);
+                                }
                               });
                             },
                     ),
@@ -1113,7 +1140,14 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           labelText:
                               '${item.baseUomCode} per ${purchaseUnit.code} *',
                           helperText:
-                              'Example: enter 50 when one box contains 50 ${item.baseUomCode}.',
+                              memory.find(
+                                    itemId: item.id,
+                                    unitId: purchaseUnit.id,
+                                    supplierId: supplierId,
+                                  ) !=
+                                  null
+                              ? 'Filled in from the last delivery. Change it if this pack is different.'
+                              : 'Example: enter 50 when one box contains 50 ${item.baseUomCode}.',
                         ),
                       )
                     else

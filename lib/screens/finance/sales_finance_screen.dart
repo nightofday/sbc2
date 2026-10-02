@@ -9,6 +9,7 @@ import '../../domain/repositories/reporting_repository.dart';
 import '../../models/finance_management.dart';
 import '../../models/reporting.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/status_badge.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/section_card.dart';
@@ -37,6 +38,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
   int _days = 7;
   late Future<BusinessReport> _reportFuture;
   late Future<List<SupplierBalanceRecord>> _balancesFuture;
+  late Future<List<SupplierPaymentRecord>> _paymentsFuture;
 
   @override
   void initState() {
@@ -68,6 +70,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
       to: today,
     );
     _balancesFuture = widget.financeRepository.getSupplierBalances();
+    _paymentsFuture = widget.financeRepository.getSupplierPayments();
   }
 
   void _changeDays(int days) {
@@ -267,7 +270,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                       return SectionCard(
                         child: Text(
                           'Unable to load supplier payables. '
-                          '${balancesSnapshot.error}',
+                          '${errorText(balancesSnapshot.error)}',
                         ),
                       );
                     }
@@ -339,12 +342,155 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                     );
                   },
                 ),
+                const SizedBox(height: 26),
+                const Text('Recent Supplier Payments', style: AppTextStyles.h3),
+                const SizedBox(height: 4),
+                Text(
+                  'A payment entered by mistake can be reversed. Both entries '
+                  'stay on record and the bill goes back to what was owed.',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: 12),
+                FutureBuilder<List<SupplierPaymentRecord>>(
+                  future: _paymentsFuture,
+                  builder: (context, paymentsSnapshot) {
+                    if (paymentsSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    if (paymentsSnapshot.hasError) {
+                      return SectionCard(
+                        child: Text(
+                          'Unable to load supplier payments. '
+                          '${errorText(paymentsSnapshot.error)}',
+                        ),
+                      );
+                    }
+
+                    final payments =
+                        paymentsSnapshot.data ??
+                        const <SupplierPaymentRecord>[];
+
+                    if (payments.isEmpty) {
+                      return const SectionCard(
+                        child: Text('No supplier payments recorded yet.'),
+                      );
+                    }
+
+                    return DataTableCard(
+                      headers: const [
+                        'Supplier',
+                        'Invoice',
+                        'Paid On',
+                        'Method',
+                        'Amount',
+                        'Recorded By',
+                        'Status',
+                        'Action',
+                      ],
+                      flexes: const [3, 2, 2, 2, 2, 2, 2, 2],
+                      rows: payments
+                          .map(
+                            (payment) => [
+                              Text(
+                                payment.supplierName,
+                                style: AppTextStyles.bodyMedium,
+                              ),
+                              Text(
+                                payment.invoiceNumber.isEmpty
+                                    ? '—'
+                                    : payment.invoiceNumber,
+                                style: AppTextStyles.body,
+                              ),
+                              Text(
+                                _date(payment.paidAt),
+                                style: AppTextStyles.body,
+                              ),
+                              Text(
+                                payment.referenceNumber.isEmpty
+                                    ? payment.paymentMethod
+                                    : '${payment.paymentMethod} · '
+                                          '${payment.referenceNumber}',
+                                style: AppTextStyles.body,
+                              ),
+                              Text(
+                                _money(payment.amount),
+                                style: AppTextStyles.bodyMedium,
+                              ),
+                              Text(
+                                payment.recordedByName,
+                                style: AppTextStyles.body,
+                              ),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: StatusBadge(payment.statusLabel),
+                              ),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: payment.canBeReversed
+                                    ? TextButton(
+                                        onPressed: () =>
+                                            _reverseSupplierPayment(payment),
+                                        child: const Text('Reverse'),
+                                      )
+                                    : Text(
+                                        payment.isReversal &&
+                                                payment.notes.isNotEmpty
+                                            ? payment.notes
+                                            : '—',
+                                        style: AppTextStyles.caption,
+                                      ),
+                              ),
+                            ],
+                          )
+                          .toList(),
+                    );
+                  },
+                ),
               ],
             ),
           );
         },
       ),
     );
+  }
+
+  Future<void> _reverseSupplierPayment(SupplierPaymentRecord payment) async {
+    final requestId = newRequestId();
+
+    final reversed = await showReasonDialog(
+      context: context,
+      title: 'Reverse Supplier Payment',
+      message:
+          'This undoes the ${_money(payment.amount)} payment to '
+          '${payment.supplierName}. The bill will show that amount as owed '
+          'again. Both the payment and its reversal stay on record.',
+      confirmLabel: 'Reverse Payment',
+      onConfirm: (reason) async {
+        try {
+          await widget.financeRepository.voidSupplierPayment(
+            paymentId: payment.id,
+            reason: reason,
+            clientRequestId: requestId,
+          );
+          return null;
+        } on PostgrestException catch (error) {
+          return error.message;
+        } catch (error) {
+          return errorText(error);
+        }
+      },
+    );
+
+    if (!reversed || !mounted) return;
+    _notifyDataChanged();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Supplier payment reversed.')));
   }
 
   Future<void> _showSupplierPayment(SupplierBalanceRecord bill) async {

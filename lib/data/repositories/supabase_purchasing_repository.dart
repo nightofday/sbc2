@@ -1,6 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/repositories/purchasing_repository.dart';
+import 'package_memory_query.dart';
+import '../../models/package_memory.dart';
 import '../../models/purchasing.dart';
 
 class SupabasePurchasingRepository implements PurchasingRepository {
@@ -8,6 +10,9 @@ class SupabasePurchasingRepository implements PurchasingRepository {
 
   SupabasePurchasingRepository({SupabaseClient? client})
     : _client = client ?? Supabase.instance.client;
+
+  @override
+  Future<PackageMemory> getPackageMemory() => loadPackageMemory(_client);
 
   @override
   Future<List<PurchasingSupplierOption>> getSuppliers() async {

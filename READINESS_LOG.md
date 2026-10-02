@@ -151,8 +151,13 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | Migration `20261002220000_shift_report_and_unused_objects.sql`: `get_shift_report(shift)` and `list_shifts(from, to)`; six unused views and three unused functions dropped | Shift (Z) report, which every commercial POS has and this app lacked; dead-code removal | pgTAP `19_shift_report.test.sql`, 20 of 20; all 19 files pass with it; applied to the hosted test project |
 | 2026-10-02 | Shifts screen under Sales & Finance for every role (cashiers see their own shifts); the shift report opens from the list and automatically after a shift is closed, with a copy button | Same | `test/shift_report_test.dart` (5 tests, at 1300 px and 360 px) |
 | 2026-10-02 | Dead Dart code removed: five mock repositories and `mock_data.dart` (805 lines), ten repository methods no screen calls, four unused `copyWith` methods and `dialogField` | Requested clean-up; the mocks shipped sample data inside the app | `flutter analyze` clean; 66 tests pass |
+| 2026-10-02 | Till details: categories keep the order management set; "Amount Received" follows the total until the cashier types in it; receipts and order details show the size, the chosen options and the note of each line (`OrderLine` widget) | F-11 (rest), `POS-02` (options part), category order after F-18 | analyzer and existing till tests; not separately tested |
+| 2026-10-02 | Migration `20261002230000_accounts_and_audit_log.sql`: `bootstrap_first_admin(email)` and a role guard that lets the database owner through; a trigger that keeps at least one active administrator; `profiles.email` follows the sign-in email (existing rows corrected); audit triggers on 11 master-data tables recording only the fields that changed; `get_audit_log(from, to, search)` | `AUTH-01`, S-10, S-11, F-04, S-15, `TRACE-01` | pgTAP `20_accounts_and_audit_log.test.sql`, 19 of 19; applied to the hosted test project; afterwards no profile email differs from its sign-in email |
+| 2026-10-02 | Audit Log screen under Administration with date range and search; entries read as plain sentences ("Product size changed: Large · Price: 100.00 → 120.00") | `TRACE-01` | `test/audit_log_test.dart` (4 tests, at 1300 px and 360 px) |
+| 2026-10-02 | Migration `20261002240000_reversals_trace_and_supplier_items.sql`: `void_supplier_bill_payment` (a linked negative payment), `void_lot_disposal` (a linked `REVERSAL` movement), the business report takes reversed write-offs off the losses, the transaction trace keeps voided documents with their reason, a trigger records each supplier's package size and latest cost in `supplier_items` (existing receipts backfilled), `check_stock_consistency()` | S-05 (rest), `TRACE-01`, `INV-01`, F-14, S-09 | pgTAP `21_reversals_trace_and_supplier_items.test.sql`, 27 of 27; all 21 files pass; applied to the hosted test project, where the consistency check returns no rows |
+| 2026-10-02 | App: Reverse action on write-offs in Stock History; Recent Supplier Payments table with Reverse in Finance Overview; voided and reversed rows marked in Transaction Traceability; receiving and release forms fill in the remembered package size and last cost | Same | `test/reversals_and_package_memory_test.dart` (6 tests). The forms themselves were not exercised by a widget test |
 
-The first three rows are Flutter-only changes; the rest add ten database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 66 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add twelve database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 76 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### Offline till status
 
@@ -186,6 +191,25 @@ Not done:
 - Offline was verified with a fake server in tests. It was not tested by cutting the network on a real tablet.
 - Sales wait on the device of the user who made them. A different user signing in on that device does not see or send them.
 - A cash sale re-priced higher than the cash tendered is refused at sync and lands in Needs Attention.
+
+### Accounts, audit and reversals status
+
+Decisions taken, to be confirmed:
+
+| Question | Chosen | Why |
+| --- | --- | --- |
+| How is a supplier payment undone? | A second, negative payment linked to the first | Every existing total (bill balance, bill status, reports, trace) stays correct with no other change, and nothing is deleted |
+| How is a stock write-off undone? | A `REVERSAL` movement linked to the write-off; the report subtracts it on the day of the reversal | Same principle as refunds: history is added to, never edited |
+| Can a manual stock adjustment be voided? | No. A wrong adjustment is corrected by another adjustment | An adjustment is already a correction with a reason and an author; a void of a correction adds nothing |
+| Who may run the first-admin bootstrap? | Only someone with the database password, in the SQL editor, and only while no active administrator exists | The app must never be able to grant itself administration |
+| What is audited? | Sales, refunds, shifts, cash, stock documents (as before) plus every change to products, sizes, options, discounts, payment methods, suppliers, stock items, staff accounts and settings | S-15: price and role changes left no trace |
+
+Not done:
+
+- The audit log has no export and loads at most 1,000 entries per search.
+- `business_profile` and `system_settings` are audited but still have no screen to edit them (see the settings item).
+- "Manager authorization" on refunds and discounts is still the signed-in user approving their own action (S-08). It is safe only while cashiers do not hold those permissions, which is the case today.
+- Stock availability is still summed from the whole ledger at each sale (S-17). The indexes it needs already exist; a maintained balance is a later change if sales volume makes it slow.
 
 ### Dead code removed
 

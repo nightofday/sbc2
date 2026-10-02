@@ -41,6 +41,7 @@ import 'screens/menu/menu_management_screen.dart';
 import 'screens/orders/orders_screen.dart';
 import 'screens/orders/shifts_screen.dart';
 import 'screens/purchasing/purchasing_screen.dart';
+import 'screens/reports/audit_log_screen.dart';
 import 'screens/reports/reports_screen.dart';
 import 'screens/reports/transaction_traceability_screen.dart';
 import 'screens/suppliers/suppliers_screen.dart';
@@ -428,6 +429,14 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               page: UsersScreen(
                 userRepository: _userRepository,
                 canManageRoles: profile.roleCode.toUpperCase() == 'ADMIN',
+              ),
+            ),
+            destination(
+              label: 'Audit Log',
+              icon: Icons.fact_check_outlined,
+              page: AuditLogScreen(
+                reportingRepository: _reportingRepository,
+                refreshListenable: _businessRefreshController,
               ),
             ),
           ],

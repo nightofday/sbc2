@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sbc_management_system/domain/repositories/reporting_repository.dart';
+import 'package:sbc_management_system/models/audit_entry.dart';
 import 'package:sbc_management_system/models/reporting.dart';
 import 'package:sbc_management_system/screens/reports/reports_screen.dart';
 
 class _FakeReportingRepository implements ReportingRepository {
   final List<String> requests = [];
+
+  @override
+  Future<List<AuditEntry>> getAuditLog({
+    required DateTime from,
+    required DateTime to,
+    String search = '',
+  }) async => const [];
 
   @override
   Future<BusinessReport> getBusinessReport({
