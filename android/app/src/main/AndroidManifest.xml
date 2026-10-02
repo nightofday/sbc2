@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The app talks to Supabase. Without this a release build has no
+         network access; only the debug and profile manifests had it. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="sbc_management_system"
+        android:label="Street Bowl Café"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
