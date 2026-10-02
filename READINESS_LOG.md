@@ -134,8 +134,9 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | App sends a request ID with every checkout and recovers after a lost response (`a955e52`): `CheckoutAttempt`, `newRequestId`, `CheckoutSavedException` in `lib/models/pos_checkout.dart`; `findOrderByRequestId` on `OrderRepository`; POS screen logic | POS-01, app side: the app sent null, so a sale that committed just before the connection dropped could be charged twice | `test/checkout_request_id_test.dart` (4 tests, including a simulated lost response on the POS screen: two submissions, one request ID, one order); live sale stored a request ID (order `#8`) |
 | 2026-10-02 | Migration `20261002150000_request_ids_for_posting_functions.sql`: `client_requests` table, two internal helpers, and an optional `p_client_request_id` on shift start and end, cash movements, refunds (`process_refund`, `process_refund_items`), stock release, adjustment, disposal, count, goods receipt, supplier payment and expense creation (`62b9d20`) | S-06: a retry after a lost response posted these twice | pgTAP `12_posting_request_ids.test.sql`, 33 of 33 passing; existing files `01`–`11` unchanged in result; applied to the hosted test project; no old overloads remain (12 functions, one signature each) |
 | 2026-10-02 | Every posting form sends a request ID (`5d8b726`): one ID per form instance, passed through the repository interfaces to the functions above | S-06, app side | `flutter analyze` clean, 28 Flutter tests pass; one live cash movement (`PAY_IN` ₱20) stored a `client_requests` row linked to it |
+| 2026-10-02 | Migration `20261002160000_close_direct_write_paths.sql`: all client write policies and write grants removed from 30 transactional tables; delete policies and delete grants removed from 20 master-data tables; `set_updated_at()` revoked from clients | S-14, S-16, S-19: posted records could be inserted, edited or deleted through the Data API, bypassing every function | pgTAP `13_direct_write_paths.test.sql`: 10 of 13 fail before the migration, 13 of 13 pass after; files `01`–`12` unchanged; `08_api_security_hardening` now 18 of 18 on the hosted project; write policies on the test project went from 98 to 48, none on transactional tables; app loads and reads with no permission errors |
 
-The first three rows are Flutter-only changes; the rest add three database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 28 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add four database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 28 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### How the database changes were tested without Docker
 
@@ -155,8 +156,16 @@ Side effect: identity sequences do not roll back, so these trial runs consumed o
 
 | ID | Finding | Status |
 | --- | --- | --- |
-| S-19 | On the hosted project, `authenticated` can execute `set_updated_at()`. The repository's own test 10 in `08_api_security_hardening` therefore fails there. Low risk: it is a trigger function and cannot be called through the API, but the hosted project's default privileges differ from the local CI database, so "passes in CI" does not prove the hosted grants. | found |
+| S-19 | *(Fixed 2 October 2026 in `20261002160000`.)* On the hosted project, `authenticated` could execute `set_updated_at()`. The repository's own test 10 in `08_api_security_hardening` therefore fails there. Low risk: it is a trigger function and cannot be called through the API, but the hosted project's default privileges differ from the local CI database, so "passes in CI" does not prove the hosted grants. | found |
 | S-20 | pgTAP files `02` and `03` pick rows with `order by id desc limit 1` on random UUIDs. They are only reliable on an empty database. | found |
+
+### What S-14 did not change
+
+- **Master data can still be created and edited directly** by an account with the matching permission (menu, suppliers, inventory items, categories, settings, roles). Only deleting it is closed. The app itself uses one such path: archiving an inventory item.
+- **`profiles` keeps its direct update policy** for accounts with `users.manage`. Role changes are still guarded by a trigger, but the self-deactivation check in `update_employee_profile` can be bypassed this way.
+- **Functions can still edit posted rows.** `update_expense` changing a posted amount without history (S-04) is a function, not a direct write, and is unchanged.
+- **No trigger makes posted rows immutable.** The protection is the absence of client privileges, which is enough for the API but not against a future function that edits history.
+- **`invoice_print_events` keeps its client insert policy**, by design, for print auditing.
 
 ### S-06 status
 
@@ -197,9 +206,9 @@ The schema is stronger than the app built on it: UUID keys, name and price snaps
 
 | ID | Finding | Recommendation |
 | --- | --- | --- |
-| S-14 | **Financial history can be hard-deleted through the API.** The original `FOR ALL` management policies were split into insert/update/delete policies, so an account with the matching permission can `DELETE` or directly `UPDATE` rows in `expenses`, `purchase_orders`, `supplier_bills`, `stock_counts`, `shifts`, `invoice_sequences`, `system_settings` and the menu tables without going through any function. The app does not do this, but the database allows it. | Remove update/delete policies from transactional tables; keep writes behind functions; add triggers that reject changes to posted rows. |
+| S-14 | *(Addressed 2 October 2026, see section 5.)* **Financial history could be hard-deleted through the API.** The original `FOR ALL` management policies were split into insert/update/delete policies, so an account with the matching permission can `DELETE` or directly `UPDATE` rows in `expenses`, `purchase_orders`, `supplier_bills`, `stock_counts`, `shifts`, `invoice_sequences`, `system_settings` and the menu tables without going through any function. The app does not do this, but the database allows it. | Remove update/delete policies from transactional tables; keep writes behind functions; add triggers that reject changes to posted rows. |
 | S-15 | **The audit trail is thin and unreadable.** `audit_logs` records about a dozen events (shift, checkout, refund, receipt, stock-out, count, restock). It records nothing for price or menu changes, user role or status changes, expense edits, supplier edits or settings, and no screen reads it. | Audit triggers on master data and posted records; a management audit view (`TRACE-01`). |
-| S-16 | `authenticated` still holds table-level `select, insert, update, delete` on every table that existed at migration `0007`; only RLS stands between a signed-in user and each table. The final default-deny migration tightened `anon` and future objects, not these. | Revoke write grants on tables that are function-only. |
+| S-16 | *(Addressed for transactional tables 2 October 2026.)* `authenticated` still held table-level `select, insert, update, delete` on every table that existed at migration `0007`; only RLS stands between a signed-in user and each table. The final default-deny migration tightened `anon` and future objects, not these. | Revoke write grants on tables that are function-only. |
 
 ### 6.3 Performance
 
