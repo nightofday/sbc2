@@ -155,7 +155,13 @@ class MockOrderRepository implements OrderRepository {
     String discountTypeId = '',
     double? discountValue,
     String discountNotes = '',
+    required String clientRequestId,
   }) {
     throw UnimplementedError('Mock POS placement is not used by the live app.');
+  }
+
+  @override
+  Future<OrderRecord?> findOrderByRequestId(String clientRequestId) async {
+    return null;
   }
 }

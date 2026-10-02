@@ -44,6 +44,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   bool _startingShift = false;
   bool _endingShift = false;
   bool _submittingOrder = false;
+  final CheckoutAttempt _checkoutAttempt = CheckoutAttempt();
 
   @override
   void initState() {
@@ -497,6 +498,21 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_checkoutAttempt.hasUnresolved,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _showError(
+            'The last payment is not confirmed yet. Open payment and tap '
+            'Complete Payment again before leaving this screen.',
+          );
+        }
+      },
+      child: _buildScreen(context),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.gray100,
       body: Stack(
@@ -525,7 +541,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () => Navigator.maybePop(context),
                                 icon: const Icon(Icons.arrow_back),
                               ),
                               const SizedBox(width: 8),
@@ -1590,10 +1606,52 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     return;
                   }
 
+                  final fingerprint = _checkoutFingerprint(
+                    paymentMethodId: selectedMethod.id,
+                    discountTypeId: discount?.id ?? '',
+                    discountValue: discount == null ? 0 : enteredDiscountValue,
+                  );
+
+                  if (_checkoutAttempt.conflictsWith(fingerprint)) {
+                    // A different sale is being paid while an earlier
+                    // payment is unconfirmed. Settle that one first.
+                    setState(() => _submittingOrder = true);
+                    try {
+                      final earlier = await widget.orderRepository
+                          .findOrderByRequestId(
+                            _checkoutAttempt.unresolvedRequestId!,
+                          );
+                      _checkoutAttempt.resolve();
+                      if (earlier != null) {
+                        dialogSetState?.call(() {
+                          errorMessage =
+                              'The earlier payment was saved as order '
+                              '${earlier.id}. Check it in Orders before '
+                              'charging again.';
+                        });
+                        return;
+                      }
+                    } catch (_) {
+                      dialogSetState?.call(() {
+                        errorMessage =
+                            'The earlier payment could not be confirmed yet. '
+                            'Check the connection and try again.';
+                      });
+                      return;
+                    } finally {
+                      if (mounted) {
+                        setState(() => _submittingOrder = false);
+                      }
+                    }
+                  }
+
+                  final requestId = _checkoutAttempt.requestIdFor(fingerprint);
+
                   setState(() => _submittingOrder = true);
 
                   try {
                     final order = await widget.orderRepository.placeOrder(
+                      clientRequestId: requestId,
                       orderType: _orderType,
                       items: _cart
                           .map(
@@ -1633,16 +1691,30 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       discountNotes: discountNotesController.text.trim(),
                     );
 
+                    _checkoutAttempt.resolve();
                     if (!mounted) return;
                     Navigator.pop(context);
                     await _showReceiptDialog(order);
+                  } on CheckoutSavedException catch (error) {
+                    _checkoutAttempt.resolve();
+                    if (!mounted) return;
+                    Navigator.pop(context);
+                    await _showSavedWithoutReceipt(error.orderNumber);
                   } on PostgrestException catch (error) {
+                    if (isServerRejectionCode(error.code)) {
+                      // The server answered and rolled back: nothing saved.
+                      _checkoutAttempt.resolve();
+                      dialogSetState?.call(() {
+                        errorMessage = error.message;
+                      });
+                    } else {
+                      dialogSetState?.call(() {
+                        errorMessage = _unknownOutcomeMessage;
+                      });
+                    }
+                  } catch (_) {
                     dialogSetState?.call(() {
-                      errorMessage = error.message;
-                    });
-                  } catch (error) {
-                    dialogSetState?.call(() {
-                      errorMessage = error.toString();
+                      errorMessage = _unknownOutcomeMessage;
                     });
                   } finally {
                     if (mounted) {
@@ -1665,6 +1737,57 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     referenceController.dispose();
     discountValueController.dispose();
     discountNotesController.dispose();
+  }
+
+  static const _unknownOutcomeMessage =
+      'The connection dropped before this sale was confirmed, so it may '
+      'already be saved. Tap Complete Payment again to check. The customer '
+      'will not be charged twice.';
+
+  /// Identifies the sale being paid, so a retry can be told apart from a
+  /// different sale. The amount tendered and reference are left out: changing
+  /// them does not make it a different sale.
+  String _checkoutFingerprint({
+    required String paymentMethodId,
+    required String discountTypeId,
+    required double discountValue,
+  }) {
+    final lines = _cart
+        .map(
+          (line) => [
+            line.product.variantId,
+            line.quantity,
+            line.modifiers.map((modifier) => modifier.id).join(','),
+            line.specialInstructions.trim(),
+          ].join(':'),
+        )
+        .join('|');
+
+    return [
+      _orderType,
+      _tableNumberController.text.trim(),
+      _customerNameController.text.trim(),
+      _deliveryReferenceController.text.trim(),
+      lines,
+      discountTypeId,
+      discountValue,
+      paymentMethodId,
+    ].join('\n');
+  }
+
+  Future<void> _showSavedWithoutReceipt(String orderNumber) async {
+    await showPrototypeDialog(
+      context: context,
+      title: 'Payment saved',
+      content: Text(
+        'Order #$orderNumber was saved, but its receipt could not be loaded. '
+        'Do not charge the customer again. Open the order from Orders to '
+        'view the receipt.',
+        style: AppTextStyles.body,
+      ),
+    );
+
+    if (mounted) Navigator.pop(context, true);
   }
 
   Future<void> _showReceiptDialog(OrderRecord order) async {

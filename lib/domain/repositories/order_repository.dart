@@ -82,5 +82,9 @@ abstract class OrderRepository {
     String discountTypeId = '',
     double? discountValue,
     String discountNotes = '',
+    required String clientRequestId,
   });
+
+  /// Returns the order saved for [clientRequestId], or null if none was.
+  Future<OrderRecord?> findOrderByRequestId(String clientRequestId);
 }

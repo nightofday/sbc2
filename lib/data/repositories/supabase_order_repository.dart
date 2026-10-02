@@ -260,6 +260,7 @@ class SupabaseOrderRepository implements OrderRepository {
     String discountTypeId = '',
     double? discountValue,
     String discountNotes = '',
+    required String clientRequestId,
   }) async {
     if (payments.length != 1) {
       throw const FormatException(
@@ -290,7 +291,7 @@ class SupabaseOrderRepository implements OrderRepository {
         'p_customer_name': _nullable(customerName),
         'p_delivery_reference': _nullable(deliveryReference),
         'p_notes': _nullable(notes),
-        'p_client_request_id': null,
+        'p_client_request_id': clientRequestId,
       },
     );
 
@@ -303,12 +304,23 @@ class SupabaseOrderRepository implements OrderRepository {
       );
     }
 
-    final row = await _findOrderRow('#$orderNumber');
-    if (row == null) {
-      throw const FormatException('The completed order could not be reloaded.');
+    // The sale is committed at this point. A failure to read it back must not
+    // be reported as a failed sale.
+    try {
+      final row = await _findOrderRow('#$orderNumber');
+      if (row != null) return _orderFromMap(row);
+    } catch (_) {
+      throw CheckoutSavedException(orderNumber);
     }
 
-    return _orderFromMap(row);
+    throw CheckoutSavedException(orderNumber);
+  }
+
+  @override
+  Future<OrderRecord?> findOrderByRequestId(String clientRequestId) async {
+    final row = await _findOrderRow('', clientRequestId: clientRequestId);
+
+    return row == null ? null : _orderFromMap(row);
   }
 
   @override
@@ -436,7 +448,10 @@ class SupabaseOrderRepository implements OrderRepository {
     );
   }
 
-  Future<Map<String, dynamic>?> _findOrderRow(String id) async {
+  Future<Map<String, dynamic>?> _findOrderRow(
+    String id, {
+    String? clientRequestId,
+  }) async {
     dynamic query = _client
         .from('orders')
         .select(
@@ -447,7 +462,9 @@ class SupabaseOrderRepository implements OrderRepository {
           'payment_methods(name, code)), sales_invoices(invoice_number)',
         );
 
-    if (id.startsWith('#')) {
+    if (clientRequestId != null) {
+      query = query.eq('client_request_id', clientRequestId);
+    } else if (id.startsWith('#')) {
       final number = int.tryParse(id.substring(1));
       if (number == null) return null;
       query = query.eq('order_number', number);
