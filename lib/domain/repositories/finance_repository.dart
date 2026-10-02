@@ -11,5 +11,6 @@ abstract class FinanceRepository {
     required double amount,
     String referenceNumber = '',
     String notes = '',
+    String? clientRequestId,
   });
 }

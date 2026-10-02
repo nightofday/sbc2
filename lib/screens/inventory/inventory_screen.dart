@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/inventory_repository.dart';
 import '../../models/inventory_item.dart';
 import '../../models/inventory_reference.dart';
+import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
@@ -1218,6 +1219,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
     InventoryItem item,
     InventoryLotRecord lot,
   ) async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final quantityController = TextEditingController();
     final reasonController = TextEditingController();
     final now = DateTime.now();
@@ -1329,6 +1334,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
             try {
               await widget.inventoryRepository.disposeLot(
+                clientRequestId: requestId,
                 inventoryLotId: lot.id,
                 movementType: movementType,
                 quantity: quantity,
@@ -1359,6 +1365,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   Future<void> _showAdjustmentDialog(InventoryItem item) async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final quantityController = TextEditingController();
     final reasonController = TextEditingController();
     final unitCostController = TextEditingController(text: '0');
@@ -1537,6 +1547,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
             try {
               await widget.inventoryRepository.adjustStock(
+                clientRequestId: requestId,
                 inventoryItemId: item.id,
                 movementType: movementType,
                 quantity: quantity,
@@ -1573,6 +1584,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   Future<void> _showStockOutDialog() async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final results = await Future.wait([
       widget.inventoryRepository.getInventoryItems(),
       widget.inventoryRepository.getUnits(),
@@ -1817,6 +1832,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
             try {
               await widget.inventoryRepository.createStockOut(
+                clientRequestId: requestId,
                 purpose: purpose,
                 items: inputs,
                 referenceNumber: referenceController.text,

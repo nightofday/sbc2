@@ -74,6 +74,7 @@ class SupabaseOrderRepository implements OrderRepository {
     required Map<String, double> quantities,
     required String reason,
     String externalReference = '',
+    String? clientRequestId,
   }) async {
     final orderUuid = await _resolveOrderUuid(id);
 
@@ -89,6 +90,7 @@ class SupabaseOrderRepository implements OrderRepository {
         'p_items': items,
         'p_reason': reason.trim(),
         'p_external_reference': _nullable(externalReference),
+        'p_client_request_id': clientRequestId,
       },
     );
   }
@@ -194,10 +196,17 @@ class SupabaseOrderRepository implements OrderRepository {
   }
 
   @override
-  Future<String> startShift({double? openingCash}) async {
+  Future<String> startShift({
+    double? openingCash,
+    String? clientRequestId,
+  }) async {
     final result = await _client.rpc(
       'start_shift',
-      params: {'p_device_id': null, 'p_opening_cash': openingCash},
+      params: {
+        'p_device_id': null,
+        'p_opening_cash': openingCash,
+        'p_client_request_id': clientRequestId,
+      },
     );
 
     final row = Map<String, dynamic>.from(result as Map);
@@ -209,6 +218,7 @@ class SupabaseOrderRepository implements OrderRepository {
     required String shiftId,
     double? closingCashCounted,
     String notes = '',
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'end_shift',
@@ -216,6 +226,7 @@ class SupabaseOrderRepository implements OrderRepository {
         'p_shift_id': shiftId,
         'p_closing_cash_counted': closingCashCounted,
         'p_notes': _nullable(notes),
+        'p_client_request_id': clientRequestId,
       },
     );
   }
@@ -236,6 +247,7 @@ class SupabaseOrderRepository implements OrderRepository {
     required String movementType,
     required double amount,
     required String reason,
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'record_shift_cash_movement',
@@ -244,6 +256,7 @@ class SupabaseOrderRepository implements OrderRepository {
         'p_movement_type': movementType,
         'p_amount': amount,
         'p_reason': reason.trim(),
+        'p_client_request_id': clientRequestId,
       },
     );
   }
@@ -351,6 +364,7 @@ class SupabaseOrderRepository implements OrderRepository {
     String id, {
     String reason = '',
     String authorizedBy = '',
+    String? clientRequestId,
   }) async {
     final orderUuid = await _resolveOrderUuid(id);
     final userId = _client.auth.currentUser?.id;
@@ -411,6 +425,7 @@ class SupabaseOrderRepository implements OrderRepository {
         ],
         'p_reason': reason,
         'p_authorized_by': userId,
+        'p_client_request_id': clientRequestId,
       },
     );
   }

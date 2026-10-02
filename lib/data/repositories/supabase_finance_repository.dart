@@ -51,6 +51,7 @@ class SupabaseFinanceRepository implements FinanceRepository {
     required double amount,
     String referenceNumber = '',
     String notes = '',
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'record_supplier_bill_payment',
@@ -62,6 +63,7 @@ class SupabaseFinanceRepository implements FinanceRepository {
             ? null
             : referenceNumber.trim(),
         'p_notes': notes.trim().isEmpty ? null : notes.trim(),
+        'p_client_request_id': clientRequestId,
       },
     );
   }

@@ -29,12 +29,14 @@ abstract class InventoryRepository {
     String referenceNumber = '',
     String notes = '',
     DateTime? occurredAt,
+    String? clientRequestId,
   });
 
   Future<void> createAndPostStockCount({
     required List<StockCountLineInput> items,
     String notes = '',
     DateTime? countedAt,
+    String? clientRequestId,
   });
 
   Future<void> disposeLot({
@@ -42,6 +44,7 @@ abstract class InventoryRepository {
     required String movementType,
     required double quantity,
     required String reason,
+    String? clientRequestId,
   });
 
   Future<void> createInventoryItemWithInitialStock({
@@ -63,6 +66,7 @@ abstract class InventoryRepository {
     required String reason,
     DateTime? expirationDate,
     double unitCostBase = 0,
+    String? clientRequestId,
   });
 
   Future<void> createInventoryItem(InventoryItem item);

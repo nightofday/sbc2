@@ -26,6 +26,7 @@ abstract class OrderRepository {
     String id, {
     String reason = '',
     String authorizedBy = '',
+    String? clientRequestId,
   });
 
   Future<RefundPreview> getRefundPreview(String id);
@@ -42,6 +43,7 @@ abstract class OrderRepository {
     required Map<String, double> quantities,
     required String reason,
     String externalReference = '',
+    String? clientRequestId,
   });
 
   Future<List<PosMenuItem>> getPosMenu();
@@ -54,12 +56,13 @@ abstract class OrderRepository {
 
   Future<String?> getOpenShiftId();
 
-  Future<String> startShift({double? openingCash});
+  Future<String> startShift({double? openingCash, String? clientRequestId});
 
   Future<void> endShift({
     required String shiftId,
     double? closingCashCounted,
     String notes = '',
+    String? clientRequestId,
   });
 
   Future<ShiftCashSnapshot> getShiftCashSnapshot(String shiftId);
@@ -69,6 +72,7 @@ abstract class OrderRepository {
     required String movementType,
     required double amount,
     required String reason,
+    String? clientRequestId,
   });
 
   Future<OrderRecord> placeOrder({

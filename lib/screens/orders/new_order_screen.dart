@@ -11,6 +11,7 @@ import '../../models/pos_discount.dart';
 import '../../models/pos_menu_item.dart';
 import '../../models/pos_modifier.dart';
 import '../../models/pos_payment_method.dart';
+import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/header_brand_motif.dart';
@@ -45,6 +46,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   bool _endingShift = false;
   bool _submittingOrder = false;
   final CheckoutAttempt _checkoutAttempt = CheckoutAttempt();
+  String? _startShiftRequestId;
 
   @override
   void initState() {
@@ -88,7 +90,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     setState(() => _startingShift = true);
 
     try {
-      final id = await widget.orderRepository.startShift();
+      final id = await widget.orderRepository.startShift(
+        clientRequestId: _startShiftRequestId ??= newRequestId(),
+      );
+      _startShiftRequestId = null;
       if (!mounted) return;
       setState(() => _openShiftId = id);
       _showMessage('Shift started successfully.');
@@ -102,6 +107,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   }
 
   Future<void> _showEndShiftDialog() async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final shiftId = _openShiftId;
     if (shiftId == null || _endingShift) return;
 
@@ -264,6 +273,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
                     try {
                       await widget.orderRepository.endShift(
+                        clientRequestId: requestId,
                         shiftId: shiftId,
                         closingCashCounted: cash,
                         notes: notesController.text.trim(),
@@ -317,6 +327,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   }
 
   Future<void> _showCashMovementDialog() async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final shiftId = _openShiftId;
     if (shiftId == null) return;
 
@@ -463,6 +477,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
               try {
                 await widget.orderRepository.recordShiftCashMovement(
+                  clientRequestId: requestId,
                   shiftId: shiftId,
                   movementType: movementType,
                   amount: amount,

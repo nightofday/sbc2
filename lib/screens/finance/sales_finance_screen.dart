@@ -7,6 +7,7 @@ import '../../domain/repositories/finance_repository.dart';
 import '../../domain/repositories/reporting_repository.dart';
 import '../../models/finance_management.dart';
 import '../../models/reporting.dart';
+import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/section_card.dart';
@@ -340,6 +341,10 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
   }
 
   Future<void> _showSupplierPayment(SupplierBalanceRecord bill) async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final methods = await widget.financeRepository.getPaymentMethods();
 
     if (!mounted || methods.isEmpty) return;
@@ -455,6 +460,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
 
             try {
               await widget.financeRepository.recordSupplierPayment(
+                clientRequestId: requestId,
                 supplierBillId: bill.billId,
                 paymentMethodId: selectedMethod.id,
                 amount: amount,

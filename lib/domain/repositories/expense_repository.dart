@@ -9,7 +9,7 @@ abstract class ExpenseRepository {
 
   Future<List<ExpenseSupplierOption>> getSuppliers();
 
-  Future<void> createExpense(ExpenseRecord expense);
+  Future<void> createExpense(ExpenseRecord expense, {String? clientRequestId});
 
   Future<void> updateExpense(ExpenseRecord expense);
 

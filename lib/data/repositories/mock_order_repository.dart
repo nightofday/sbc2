@@ -58,6 +58,7 @@ class MockOrderRepository implements OrderRepository {
     String id, {
     String reason = '',
     String authorizedBy = '',
+    String? clientRequestId,
   }) async {
     final index = _orders.indexWhere((entry) => entry.id == id);
     if (index == -1) return;
@@ -80,6 +81,7 @@ class MockOrderRepository implements OrderRepository {
     required Map<String, double> quantities,
     required String reason,
     String externalReference = '',
+    String? clientRequestId,
   }) async {
     await refundOrder(id, reason: reason);
   }
@@ -112,13 +114,17 @@ class MockOrderRepository implements OrderRepository {
   Future<String?> getOpenShiftId() async => 'mock-shift';
 
   @override
-  Future<String> startShift({double? openingCash}) async => 'mock-shift';
+  Future<String> startShift({
+    double? openingCash,
+    String? clientRequestId,
+  }) async => 'mock-shift';
 
   @override
   Future<void> endShift({
     required String shiftId,
     double? closingCashCounted,
     String notes = '',
+    String? clientRequestId,
   }) async {}
 
   @override
@@ -141,6 +147,7 @@ class MockOrderRepository implements OrderRepository {
     required String movementType,
     required double amount,
     required String reason,
+    String? clientRequestId,
   }) async {}
 
   @override

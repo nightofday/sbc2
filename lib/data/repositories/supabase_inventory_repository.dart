@@ -168,6 +168,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
     String referenceNumber = '',
     String notes = '',
     DateTime? occurredAt,
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'create_and_post_stock_out',
@@ -179,6 +180,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
         'p_occurred_at': (occurredAt ?? DateTime.now())
             .toUtc()
             .toIso8601String(),
+        'p_client_request_id': clientRequestId,
       },
     );
   }
@@ -188,6 +190,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
     required List<StockCountLineInput> items,
     String notes = '',
     DateTime? countedAt,
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'create_and_post_stock_count',
@@ -195,6 +198,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
         'p_items': items.map((item) => item.toJson()).toList(),
         'p_notes': _nullableText(notes),
         'p_counted_at': (countedAt ?? DateTime.now()).toUtc().toIso8601String(),
+        'p_client_request_id': clientRequestId,
       },
     );
   }
@@ -205,6 +209,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
     required String movementType,
     required double quantity,
     required String reason,
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'dispose_inventory_lot',
@@ -213,6 +218,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
         'p_movement_type': movementType,
         'p_quantity': quantity,
         'p_reason': reason.trim(),
+        'p_client_request_id': clientRequestId,
       },
     );
   }
@@ -255,6 +261,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
     required String reason,
     DateTime? expirationDate,
     double unitCostBase = 0,
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'adjust_inventory_stock',
@@ -267,6 +274,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
             ? null
             : _dateOnly(expirationDate),
         'p_unit_cost_base': unitCostBase,
+        'p_client_request_id': clientRequestId,
       },
     );
   }

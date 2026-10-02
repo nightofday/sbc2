@@ -57,6 +57,7 @@ class MockInventoryRepository implements InventoryRepository {
     String referenceNumber = '',
     String notes = '',
     DateTime? occurredAt,
+    String? clientRequestId,
   }) async {}
 
   @override
@@ -64,6 +65,7 @@ class MockInventoryRepository implements InventoryRepository {
     required List<StockCountLineInput> items,
     String notes = '',
     DateTime? countedAt,
+    String? clientRequestId,
   }) async {}
 
   @override
@@ -72,6 +74,7 @@ class MockInventoryRepository implements InventoryRepository {
     required String movementType,
     required double quantity,
     required String reason,
+    String? clientRequestId,
   }) async {}
 
   @override
@@ -95,6 +98,7 @@ class MockInventoryRepository implements InventoryRepository {
     required String reason,
     DateTime? expirationDate,
     double unitCostBase = 0,
+    String? clientRequestId,
   }) async {}
 
   @override

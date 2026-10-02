@@ -37,5 +37,6 @@ abstract class PurchasingRepository {
     String notes = '',
     bool createSupplierBill = true,
     DateTime? dueDate,
+    String? clientRequestId,
   });
 }

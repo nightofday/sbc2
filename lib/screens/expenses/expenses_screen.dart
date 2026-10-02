@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/expense_repository.dart';
 import '../../models/expense_record.dart';
+import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
@@ -350,6 +351,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Future<void> _showExpenseEditor({ExpenseRecord? existing}) async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     if (_categories.isEmpty || _suppliers.isEmpty) return;
 
     final descriptionController = TextEditingController(
@@ -550,7 +555,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
             try {
               if (existing == null) {
-                await widget.expenseRepository.createExpense(record);
+                await widget.expenseRepository.createExpense(
+                  record,
+                  clientRequestId: requestId,
+                );
               } else {
                 await widget.expenseRepository.updateExpense(record);
               }

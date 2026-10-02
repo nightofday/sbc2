@@ -6,6 +6,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../models/order_record.dart';
 import '../../models/refund_preview.dart';
+import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
@@ -467,6 +468,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
     BuildContext context,
     OrderRecord order,
   ) async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     RefundPreview preview;
 
     try {
@@ -697,6 +702,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
             try {
               await widget.orderRepository.refundOrderItems(
+                clientRequestId: requestId,
                 order.id,
                 quantities: quantities,
                 reason: reason,
@@ -957,6 +963,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
     required OrderRecord order,
     required _OrderAction action,
   }) async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final reasonController = TextEditingController();
     String? errorMessage;
     StateSetter? updateDialogState;
@@ -1030,6 +1040,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             try {
               if (action == _OrderAction.refund) {
                 await widget.orderRepository.refundOrder(
+                  clientRequestId: requestId,
                   order.id,
                   reason: reason,
                 );

@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/purchasing_repository.dart';
 import '../../models/purchasing.dart';
+import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/status_badge.dart';
@@ -579,6 +580,10 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
   }
 
   Future<void> _showReceiveStock({PurchaseOrderSummary? order}) async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     final refs = await Future.wait([
       widget.purchasingRepository.getSuppliers(),
       widget.purchasingRepository.getInventoryItems(),
@@ -872,6 +877,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
             updateDialogState?.call(() => isSaving = true);
             try {
               await widget.purchasingRepository.receiveStock(
+                clientRequestId: requestId,
                 supplierId: supplierId,
                 items: lines,
                 purchaseOrderId: order?.id ?? '',

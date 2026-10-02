@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/inventory_repository.dart';
 import '../../models/inventory_item.dart';
 import '../../models/inventory_reference.dart';
+import '../../models/request_id.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/status_badge.dart';
@@ -155,6 +156,10 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
   }
 
   Future<void> _showCountDialog() async {
+    // One ID per form, so saving it again after a lost response
+    // returns the stored result instead of posting twice.
+    final requestId = newRequestId();
+
     List<InventoryItem> items;
     try {
       items = await widget.inventoryRepository.getInventoryItems();
@@ -336,6 +341,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
             updateDialogState?.call(() => isSaving = true);
             try {
               await widget.inventoryRepository.createAndPostStockCount(
+                clientRequestId: requestId,
                 items: inputs,
                 notes: notesController.text,
               );

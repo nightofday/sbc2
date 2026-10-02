@@ -129,7 +129,10 @@ class SupabaseExpenseRepository implements ExpenseRepository {
   }
 
   @override
-  Future<void> createExpense(ExpenseRecord expense) async {
+  Future<void> createExpense(
+    ExpenseRecord expense, {
+    String? clientRequestId,
+  }) async {
     final categoryId = await _categoryIdForName(expense.category);
 
     await _client.rpc(
@@ -143,6 +146,7 @@ class SupabaseExpenseRepository implements ExpenseRepository {
         'p_supplier_id': _nullable(expense.supplierId),
         'p_reference_number': _nullable(expense.referenceNumber),
         'p_notes': _nullable(expense.notes),
+        'p_client_request_id': clientRequestId,
       },
     );
   }

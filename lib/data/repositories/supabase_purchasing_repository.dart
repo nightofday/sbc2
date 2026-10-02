@@ -181,6 +181,7 @@ class SupabasePurchasingRepository implements PurchasingRepository {
     String notes = '',
     bool createSupplierBill = true,
     DateTime? dueDate,
+    String? clientRequestId,
   }) async {
     await _client.rpc(
       'create_and_post_goods_receipt',
@@ -193,6 +194,7 @@ class SupabasePurchasingRepository implements PurchasingRepository {
         'p_notes': _nullable(notes),
         'p_create_supplier_bill': createSupplierBill,
         'p_due_date': dueDate == null ? null : _dateOnly(dueDate),
+        'p_client_request_id': clientRequestId,
       },
     );
   }
