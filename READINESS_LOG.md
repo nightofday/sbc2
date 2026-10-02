@@ -113,9 +113,9 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | --- | --- | --- |
 | No functions to create, rename, reorder or archive menu, inventory or expense categories | No category function exists in any migration | `CAT-01` |
 | No functions to manage discount types | Only `get_pos_discount_types` exists | `DIS-01` |
-| Nothing ever writes `supplier_items` | Zero inserts in migrations; the app only reads it | `INV-01`, `PUR-01` |
-| No way to read `audit_logs` | 13 write sites, no view, function or screen | `TRACE-01` |
-| No screen or function to edit `business_profile` or `system_settings` | Seeded once, read by a few functions | new; raise with Brian |
+| Nothing ever writes `supplier_items` | Zero inserts in migrations; the app only reads it | `INV-01`, `PUR-01` | *Addressed 3 October 2026: written at receiving (`20261002240000`).*
+| No way to read `audit_logs` | 13 write sites, no view, function or screen | `TRACE-01` | *Addressed 3 October 2026: `get_audit_log` and the Audit Log screen.*
+| No screen or function to edit `business_profile` or `system_settings` | Seeded once, read by a few functions | new; raise with Brian | *Addressed 3 October 2026: Business Details screen (`20261002250000`).*
 | `update_supplier` takes `null`/`0` defaults for contact, email, address and terms | Function signature; matches the `SUP-01` report | `SUP-01` |
 | Checkout request ID exists in the database but the app sends null | `supabase_order_repository.dart` (`E08`) | `POS-01` |
 | Reports have no custom date range, pagination or export | Views are per-day; app limits to 7/30 days and top 10 | `REP-01`–`REP-05` |
@@ -159,8 +159,30 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-03 | The app loads the permission codes of the signed-in role and every destination and action checks `profile.can('…')`; `isCashier` is gone (commit "Gate each screen on a named permission") | `SEC-01`: "not a cashier" was treated as "may do everything" | `test/app_user_profile_test.dart` (4 tests): unknown roles and inactive accounts get nothing |
 | 2026-10-03 | Migration `20261002250000_business_settings.sql`: `update_business_profile` and `update_shift_cash_rules`; direct writes to `business_profile` and `system_settings` removed | Receipt header and shift cash rules had no way to be edited (section 4.2) | pgTAP `22_business_settings.test.sql`, 12 of 12; all 22 files pass; applied to the hosted test project |
 | 2026-10-03 | Business Details screen under Administration; receipts, the sidebar and the offline cache use the saved name, address, phone and TIN (`ReceiptHeader`, `BusinessProfileScope`); starting a shift asks for the opening cash and enforces it when the rule is on | Same; and the till had no way to enter opening cash at all, so turning the rule on would have blocked every shift | `test/business_profile_test.dart` (5 tests, at 1300 px and 360 px) |
+| 2026-10-03 | `DataTableCard` never scrolls sideways: when the columns do not fit, each row becomes labelled values, one, two or three across depending on width. Status columns widened; status codes shown as words (`PARTIALLY_PAID` → "Partially Paid"); every dropdown fits its field | Seen live at 1024 px and 1280 px: tables hid their status and action columns behind a sideways scroll on tablets, the target device. F-13, F-16 | `test/responsive_widgets_test.dart` (tablet case added); live at 1024 px and 1280 px |
+| 2026-10-03 | One money format everywhere (`₱1,540.50`, `-₱200.00`); receipts carry date and time; order details and receipts show the refunded amount; an ordinary size ("Regular") is not printed after the product name; one-tap cash amounts at payment; products are compact rows on a phone and the phone tab shows the cart count and total; the phone app bar shows the business name | Design pass after the live check | `test/till_helpers_test.dart` (4 tests), `test/till_phone_layout_test.dart` |
 
-The first three rows are Flutter-only changes; the rest add thirteen database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 85 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add thirteen database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 91 passed. pgTAP: 22 files, 439 assertions, all passing in rolled-back trial runs against the hosted test project. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+
+### Live check on 3 October 2026
+
+Run as Administrator against the hosted test project, in the browser pane at 1280 × 800 and 1024 × 768. Each action below was performed in the app and its result read from the screen.
+
+| Checked | Result |
+| --- | --- |
+| Sale of one Hot Coffee, cash, table T9 | Order `#149` saved; receipt shows the business name and address, date and time, invoice `SI-00000004`. Order numbers jump because rolled-back test runs consume the sequence (see "How the database changes were tested") |
+| Shift report for the open shift | Gross ₱1,420, discounts ₱41, refunds ₱162, net ₱1,217; payments Cash ₱1,167 + Other ₱50 = ₱1,217; expected cash ₱1,187 = 0 + 1,329 − 162 + 20. Checked by hand against the orders |
+| Supplier payment of ₱200, then reversed | Bill left Payables when paid, returned at ₱200 owed when reversed; both entries listed, marked Reversed and Reversal; the trace shows both with the reason |
+| Write-off of 1 Coca-Cola reversed | History shows the original marked Reversed and a +1 Reversal; usable stock 17 → 18 |
+| Audit Log | Lists sales, the voided release, cash movements and the test category with who and when |
+| Business Details, Shifts, Finance, Reports, Traceability, Menu, Discounts, Inventory screens | Load real data without errors at both sizes |
+
+Not checked live:
+
+- Anything as a Cashier or Manager. Only one sign-in exists on the test project, and creating users needs the `create-employee` function to be deployed.
+- Phone width by hand. The browser pane emulates touch below 768 px and its clicks do not reach Flutter; phone layouts are covered by widget tests at 360–375 px only.
+- Offline, by cutting the network. Covered by tests with a fake server only.
+- A release build, and the Android tablet itself.
 
 ### Offline till status
 
@@ -190,7 +212,7 @@ What does not work offline, by design: voids, refunds, cash pay-in and pay-out, 
 
 Not done:
 
-- No screen lists the audit rows for offline sales that oversold stock or whose total differed. They are in `audit_logs` only (see the audit viewer item).
+- No screen lists the audit rows for offline sales that oversold stock or whose total differed. They are in `audit_logs` only (see the audit viewer item). *The Audit Log screen added on 3 October 2026 lists them; search for "offline".*
 - Offline was verified with a fake server in tests. It was not tested by cutting the network on a real tablet.
 - Sales wait on the device of the user who made them. A different user signing in on that device does not see or send them.
 - A cash sale re-priced higher than the cash tendered is refused at sync and lands in Needs Attention.
@@ -285,7 +307,7 @@ Not done in reporting:
 
 - The older views `v_daily_sales`, `v_product_sales_daily`, `v_product_sales`, `v_daily_profit_estimate`, `v_order_cogs` and `v_shift_summary` used the old definitions. They were dropped in `20261002220000` (see "Dead code removed").
 - "Today" and the other presets use the device's date. On a device set to another time zone they would differ from the café's day.
-- Transaction Traceability is unchanged: last 30 days, 500 rows, posted documents only (`TRACE-01`).
+- Transaction Traceability is unchanged: last 30 days, 500 rows, posted documents only (`TRACE-01`). *Voided and reversed documents were added on 3 October 2026; the 30-day and 500-row limits remain.*
 - No shift (end-of-day) report yet.
 
 ### CAT-01 and DIS-01 status
@@ -311,7 +333,7 @@ Not done:
 - The category chips at the till are still sorted alphabetically in the app; the products under them follow the managed order.
 - A category with no active items does not appear as a chip at the till, because chips are built from the products on sale.
 - Discount totals are not in reports yet. That waits on the report definitions (`FIN-01`, `REP-02`).
-- "Amount Received" at payment still does not follow the total when a discount value is typed (rest of F-11).
+- "Amount Received" at payment still does not follow the total when a discount value is typed (rest of F-11). *Addressed 3 October 2026.*
 
 ### S-04 and S-05 status
 
@@ -326,8 +348,8 @@ Rules that limit a void, each covered by a test:
 
 Not done:
 
-- **Disposals, manual adjustments and supplier bill payments still have no reversal.** A wrong disposal has to be corrected with a manual stock-in.
-- **Voided documents drop out of Transaction Traceability**, which lists only posted documents. The void is in the audit log and the inventory history, but management cannot see it in the trace screen (`TRACE-01`).
+- **Disposals, manual adjustments and supplier bill payments still have no reversal.** A wrong disposal has to be corrected with a manual stock-in. *Addressed 3 October 2026 for disposals and supplier payments; adjustments are corrected by another adjustment (see "Accounts, audit and reversals status").*
+- **Voided documents drop out of Transaction Traceability**, which lists only posted documents. The void is in the audit log and the inventory history, but management cannot see it in the trace screen (`TRACE-01`). *Addressed 3 October 2026.*
 - **Posted expenses can still be edited**, now with a before-and-after audit row. Nothing in the app shows that history, and there is no rule yet for who may edit after posting.
 - **`update_menu_variant` still overwrites every field it is given.** The menu form always sends them all, so nothing is lost today, but it is the same pattern as the supplier defect.
 - **The void buttons sit in the last table column**, which is off-screen at phone width (same problem as F-15).
@@ -423,20 +445,43 @@ Order of work: S-06 (request IDs) and S-01 (business time) come first because of
 
 ## 8. Compared with a commercial POS (Loyverse)
 
-| Capability | Loyverse | This app today |
-| --- | --- | --- |
-| Sell offline and sync later | yes | no (section 7) |
-| Items, variants, modifiers | yes | yes; modifier groups cannot share a name (S-07) |
-| Category management | yes | read-only (`CAT-01`) |
-| Discounts managed by the owner | yes | three hard-coded types, no management screen (`DIS-01`) |
-| Receipt showing discounts and modifiers; print or email | yes | on-screen only, discount line missing (F-08, `POS-02`, `OPS-02`) |
-| Open tickets (save an order and pay later) | yes | schema supports `OPEN` orders; the app always pays immediately |
-| Split payments | yes | schema supports it; switched off |
-| Shift open/close with cash report | yes | open, close and cash movements exist; no shift report |
-| Sales reports by item, category, employee, payment type, discount; any date range; export | yes | last 7 or 30 days, top 10 products, no export (`REP-01`–`REP-05`) |
-| Stock tracking, low-stock list, purchase orders, counts | paid add-on | present; no low-stock or loss report, no corrections (S-05) |
-| Employee PIN sign-in and per-employee sales | yes | email and password only |
-| Customers and loyalty | yes | deliberately outside the baseline |
-| Multiple stores | yes | deliberately single-branch |
-| Lot-level expiry (FEFO), supplier bills and payables, expense records | no | yes — this is where the app already does more |
+Left column: where the app stood on 2 October 2026 before this work. Right column: where it stands now.
 
+| Capability | Loyverse | Before | Now |
+| --- | --- | --- | --- |
+| Sell offline and sync later | yes | no | yes for sales and opening a shift; voids, refunds, cash movements and closing need a connection |
+| Items, variants, modifiers | yes | yes, with limits | yes; shared modifier groups, reordering |
+| Category management | yes | read-only | yes |
+| Discounts managed by the owner | yes | three hard-coded types | yes, with fixed or adjustable values, limits and validity dates. Senior and PWD discounts stay off until the tax rules are confirmed |
+| Receipt showing discounts and modifiers | yes | no discount line, no options | yes, with business header, date and time. On screen only: no printing or email (`OPS-02`) |
+| Open tickets (save and pay later) | yes | no | no. The schema supports it; the till always pays immediately |
+| Split payments | yes | no | no. Switched off in settings |
+| Shift open and close with cash report | yes | no report, no opening cash | yes: opening cash, shift report, shift history |
+| Sales reports, any date range, export | yes | 7 or 30 days, top 10, no export | yes: by day, item, category, payment, discount, employee; copy to a spreadsheet. No file download |
+| Stock tracking, purchase orders, counts | paid add-on | yes, no corrections | yes, with voids and reversals for every posted document |
+| Audit trail readable by the owner | partly | written, never readable | yes, including price, role and settings changes |
+| Employee PIN sign-in | yes | no | no. Email and password only |
+| Customers and loyalty | yes | out of scope | out of scope |
+| Multiple stores | yes | out of scope | out of scope |
+| Lot-level expiry (FEFO), supplier bills and payables, expenses | no | yes | yes |
+
+## 9. What is still open
+
+Business decisions (cannot be settled in code):
+
+1. Confirm the report definitions (gross before discounts; refunds on the refund date).
+2. Senior citizen and PWD discounts, VAT status and what an official receipt must show (`OPS-03`). Until then statutory discounts are disabled and `tax_rates` is unused.
+3. Whether cashiers may give discounts or refunds. Today they cannot; if they may, a second-person approval is needed (S-08).
+4. Whether receipts must be printed, and on what printer (`OPS-02`).
+5. Whether the offline decisions in "Offline till status" are acceptable, especially server re-pricing and server-assigned receipt numbers.
+6. Whether the retired recipe tables may be dropped (needs Brian's history check).
+
+Technical work not done:
+
+1. Deploy the `create-employee` Edge Function and test the Cashier and Manager roles end to end. Nothing in this log was verified as a non-administrator in the running app; the permission rules are covered by database tests only.
+2. Test on the Android tablet and in a release build, including a real loss of network.
+3. Run CI. The GitHub workflow has never run for this branch because local Docker is not installed; the same pgTAP files were run against the hosted project instead.
+4. Open tickets, split payments, PIN sign-in, receipt printing, file export of reports.
+5. A maintained stock balance (S-17), per-device invoice numbering (S-18), a scheduled run of `check_stock_consistency()`.
+6. Existing pgTAP files `02` and `03` still depend on an empty database (S-20).
+7. Split reference data from sample data in `seed.sql` before the café's real setup (`DOC-01`, S-12). The hosted test project contains test rows named `TEST …` from this work.
