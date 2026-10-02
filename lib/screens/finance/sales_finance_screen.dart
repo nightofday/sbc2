@@ -101,6 +101,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
       action: SizedBox(
         width: 180,
         child: DropdownButtonFormField<int>(
+          isExpanded: true,
           initialValue: _days,
           decoration: const InputDecoration(labelText: 'Report Period'),
           items: const [
@@ -536,6 +537,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
               _dialogRow('Balance', _money(bill.balance)),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: selectedMethod.id,
                 decoration: const InputDecoration(
                   labelText: 'Payment Method *',

@@ -391,6 +391,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: categoryId,
                   decoration: const InputDecoration(labelText: 'Category *'),
                   items: categories
@@ -442,6 +443,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: inventoryMode,
                   decoration: const InputDecoration(
                     labelText: 'Inventory Tracking',
@@ -467,6 +469,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                 if (inventoryMode == 'FINISHED_GOOD') ...[
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: finishedInventoryId.isEmpty
                         ? null
                         : finishedInventoryId,

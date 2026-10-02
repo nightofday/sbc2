@@ -219,7 +219,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 'Status',
                 'Action',
               ],
-              flexes: const [2, 2, 3, 2, 1, 2, 1, 2],
+              flexes: const [2, 2, 3, 2, 1, 2, 2, 2],
               rows: releases
                   .map(
                     (release) => [
@@ -472,7 +472,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 'Reason',
                                 '',
                               ],
-                              flexes: const [2, 3, 2, 2, 3, 3, 2],
+                              flexes: const [3, 3, 2, 2, 3, 4, 3],
                               rows: filtered
                                   .map(
                                     (movement) => [
@@ -1370,6 +1370,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: movementType,
                 decoration: const InputDecoration(labelText: 'Reason Type'),
                 items: const [
@@ -1505,6 +1506,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 _detailRow('Current On Hand', item.stock),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: movementType,
                   decoration: const InputDecoration(
                     labelText: 'Adjustment Direction *',
@@ -2238,6 +2240,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: categoryId,
                   decoration: const InputDecoration(labelText: 'Category *'),
                   items: categories
@@ -2255,6 +2258,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: unitId,
                   decoration: const InputDecoration(labelText: 'Base Unit *'),
                   items: units

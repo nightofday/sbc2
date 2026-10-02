@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../common/business_profile_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/app_navigation_item.dart';
@@ -86,8 +87,9 @@ class _AppShellState extends State<AppShell> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 4,
+        // Each page shows its own title; the bar says whose system it is.
         title: Text(
-          _selectedDestinationLabel,
+          BusinessProfileScope.of(context).tradeName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTextStyles.h3,
@@ -140,14 +142,5 @@ class _AppShellState extends State<AppShell> {
       return;
     }
     setState(() => _selectedIndex = index);
-  }
-
-  String get _selectedDestinationLabel {
-    for (final group in widget.groups) {
-      for (final item in group.items) {
-        if (item.destinationIndex == _selectedIndex) return item.label;
-      }
-    }
-    return 'Street Bowl Café';
   }
 }

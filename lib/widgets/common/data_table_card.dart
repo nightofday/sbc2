@@ -26,7 +26,7 @@ class DataTableCard extends StatelessWidget {
   static const double _minimumColumnWidth = 84;
 
   /// Width given to each unit of flex when columns have different weights.
-  static const double _minimumFlexUnitWidth = 44;
+  static const double _minimumFlexUnitWidth = 52;
 
   /// The least width at which every column is still readable side by side.
   double get _minimumTableWidth {

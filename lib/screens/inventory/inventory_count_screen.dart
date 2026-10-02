@@ -125,7 +125,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                 'Status',
                 'Action',
               ],
-              flexes: const [2, 2, 1, 2, 2, 1, 2],
+              flexes: const [2, 2, 1, 2, 2, 2, 2],
               rows: counts
                   .map(
                     (count) => [

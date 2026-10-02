@@ -194,7 +194,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               'Status',
               'Actions',
             ],
-            flexes: const [1, 3, 1, 2, 2, 1, 2, 2, 1],
+            flexes: const [2, 3, 2, 2, 2, 1, 2, 2, 2],
             rows: receipts
                 .map(
                   (receipt) => [
@@ -471,6 +471,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: supplierId,
                   decoration: const InputDecoration(labelText: 'Supplier *'),
                   items: suppliers
@@ -696,6 +697,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: supplierId,
                   decoration: const InputDecoration(labelText: 'Supplier *'),
                   items: suppliers
@@ -1054,6 +1056,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: inventoryId,
                       decoration: const InputDecoration(
                         labelText: 'Inventory Item *',
@@ -1083,6 +1086,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     ),
                     const SizedBox(height: 14),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: purchaseUomId,
                       decoration: const InputDecoration(
                         labelText: 'Purchase Unit *',

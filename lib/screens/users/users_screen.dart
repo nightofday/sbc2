@@ -145,7 +145,7 @@ class _UsersScreenState extends State<UsersScreen> {
                             'Status',
                             'Actions',
                           ],
-                          flexes: const [3, 4, 2, 2, 1],
+                          flexes: const [3, 4, 2, 2, 2],
                           rows: users
                               .map(
                                 (user) => [
@@ -270,6 +270,7 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: roleCode,
                 decoration: const InputDecoration(labelText: 'Role *'),
                 items: roles
@@ -389,6 +390,7 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: roleId.isEmpty ? null : roleId,
                 decoration: const InputDecoration(labelText: 'Role'),
                 items: roles
@@ -408,6 +410,7 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: status,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: const [

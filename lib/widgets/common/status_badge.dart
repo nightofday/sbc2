@@ -8,6 +8,19 @@ class StatusBadge extends StatelessWidget {
 
   const StatusBadge(this.label, {super.key});
 
+  /// Database status codes such as `PARTIALLY_PAID` are shown as words.
+  String get _displayLabel {
+    if (label != label.toUpperCase() || !label.contains(RegExp('[A-Z]'))) {
+      return label;
+    }
+
+    return label
+        .split('_')
+        .where((word) => word.isNotEmpty)
+        .map((word) => word[0] + word.substring(1).toLowerCase())
+        .join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final lower = label.toLowerCase();
@@ -38,7 +51,7 @@ class StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        label,
+        _displayLabel,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTextStyles.caption.copyWith(

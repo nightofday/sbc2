@@ -243,7 +243,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       'Amount',
                       'Status',
                     ],
-                    flexes: const [1, 1, 2, 1, 1, 1],
+                    flexes: const [2, 3, 3, 2, 2, 3],
                     rows: recentOrders
                         .map(
                           (order) => [

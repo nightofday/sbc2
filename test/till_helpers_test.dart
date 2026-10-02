@@ -13,13 +13,19 @@ void main() {
     expect(quickCashAmounts(0), isEmpty);
   });
 
-  test('a line is named without its size when the size is the ordinary one', () {
-    expect(orderLineName('Cookie', 'Regular'), 'Cookie');
-    expect(orderLineName('Cookie', ''), 'Cookie');
-    expect(orderLineName('Cookie', 'Cookie'), 'Cookie');
-    expect(orderLineName('Latte', 'Large'), 'Latte (Large)');
-    expect(orderLineName('Coca-Cola', '330 ml Can'), 'Coca-Cola (330 ml Can)');
-  });
+  test(
+    'a line is named without its size when the size is the ordinary one',
+    () {
+      expect(orderLineName('Cookie', 'Regular'), 'Cookie');
+      expect(orderLineName('Cookie', ''), 'Cookie');
+      expect(orderLineName('Cookie', 'Cookie'), 'Cookie');
+      expect(orderLineName('Latte', 'Large'), 'Latte (Large)');
+      expect(
+        orderLineName('Coca-Cola', '330 ml Can'),
+        'Coca-Cola (330 ml Can)',
+      );
+    },
+  );
 
   test('money always shows two decimals, separators and a leading minus', () {
     expect(formatReportMoney(120), '₱120.00');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/order_item.dart';
 import '../../models/reporting.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
@@ -482,6 +483,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: movementType,
                     decoration: const InputDecoration(
                       labelText: 'Movement Type',
@@ -750,10 +752,17 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             length: 2,
             child: Column(
               children: [
-                const TabBar(
+                TabBar(
                   tabs: [
-                    Tab(text: 'Products'),
-                    Tab(text: 'Current Order'),
+                    const Tab(text: 'Products'),
+                    // The cart is on the other tab, so its size and total
+                    // are shown here while products are being added.
+                    Tab(
+                      text: _cart.isEmpty
+                          ? 'Current Order'
+                          : 'Order (${_cart.fold<int>(0, (sum, line) => sum + line.quantity)}) · '
+                                '${_money(_cart.fold<double>(0, (sum, line) => sum + line.lineTotal))}',
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -880,6 +889,17 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         ? 2
                         : 3;
 
+                    // On a phone a list of compact rows shows several
+                    // products at once; cards would show two.
+                    if (columns == 1) {
+                      return ListView.separated(
+                        itemCount: products.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 8),
+                        itemBuilder: (_, index) =>
+                            _buildProductRow(products[index]),
+                      );
+                    }
+
                     return GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: columns,
@@ -895,6 +915,78 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 ),
         ),
       ],
+    );
+  }
+
+  String _stockLabel(PosMenuItem product) {
+    if (product.isOutOfStock) return 'Out of stock';
+    if (product.hasUnknownStock) return 'Stock not checked offline';
+    return '${_quantity(product.availableQuantity ?? 0)} available';
+  }
+
+  Color _stockColor(PosMenuItem product) {
+    if (product.isOutOfStock) return AppColors.primary;
+    if (product.hasUnknownStock) return AppColors.gray700;
+    return AppColors.success;
+  }
+
+  /// A product as one tappable line, for narrow screens.
+  Widget _buildProductRow(PosMenuItem product) {
+    final sizeLabel = orderLineName(product.name, product.variantName);
+
+    return Material(
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.gray200),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: product.isOutOfStock ? null : () => _addProduct(product),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sizeLabel,
+                      style: AppTextStyles.bodyMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (product.tracksInventory)
+                      Text(
+                        _stockLabel(product),
+                        style: AppTextStyles.caption.copyWith(
+                          color: _stockColor(product),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                _money(product.price),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(
+                Icons.add_circle,
+                size: 30,
+                color: product.isOutOfStock
+                    ? AppColors.gray300
+                    : AppColors.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -936,17 +1028,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           if (product.tracksInventory) ...[
             const SizedBox(height: 4),
             Text(
-              product.isOutOfStock
-                  ? 'Out of stock'
-                  : product.hasUnknownStock
-                  ? 'Stock not checked offline'
-                  : '${_quantity(product.availableQuantity ?? 0)} available',
+              _stockLabel(product),
               style: AppTextStyles.caption.copyWith(
-                color: product.isOutOfStock
-                    ? AppColors.primary
-                    : product.hasUnknownStock
-                    ? AppColors.gray700
-                    : AppColors.success,
+                color: _stockColor(product),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -983,6 +1067,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           const Text('Current Order', style: AppTextStyles.h2),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _orderType,
             decoration: const InputDecoration(labelText: 'Order Type'),
             items: const [
@@ -1500,6 +1585,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 if (discounts.isNotEmpty) ...[
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: selectedDiscount?.id ?? '',
                     decoration: const InputDecoration(
                       labelText: 'Promotional Discount',
@@ -1587,6 +1673,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 ],
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: selectedMethod.id,
                   decoration: const InputDecoration(
                     labelText: 'Payment Method',
