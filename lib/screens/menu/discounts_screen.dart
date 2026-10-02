@@ -430,7 +430,10 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                 child: Text(discount.name, style: AppTextStyles.bodyMedium),
               ),
               const SizedBox(width: 12),
-              StatusBadge(status),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: StatusBadge(status),
+              ),
             ],
           ),
           const SizedBox(height: 4),

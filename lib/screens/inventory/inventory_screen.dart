@@ -245,7 +245,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             : release.recordedByName,
                         style: AppTextStyles.body,
                       ),
-                      StatusBadge(release.status),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: StatusBadge(release.status),
+                      ),
                       Align(
                         alignment: Alignment.centerLeft,
                         child:
@@ -1091,7 +1094,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
           children: [
             Row(
               children: [
-                StatusBadge(latest.status),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: StatusBadge(latest.status),
+                ),
                 if (latest.sku.isNotEmpty) ...[
                   const SizedBox(width: 8),
                   Text(latest.sku, style: AppTextStyles.caption),

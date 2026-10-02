@@ -156,7 +156,10 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          StatusBadge(latest.status),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: StatusBadge(latest.status),
+          ),
           const SizedBox(height: 16),
           _row('Contact Person', _orDash(latest.contactPerson)),
           _row('Phone', _orDash(latest.phone)),

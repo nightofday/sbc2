@@ -674,7 +674,12 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                               style: AppTextStyles.h3,
                             ),
                           ),
-                          StatusBadge(group.isActive ? 'Active' : 'Inactive'),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: StatusBadge(
+                              group.isActive ? 'Active' : 'Inactive',
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 2),

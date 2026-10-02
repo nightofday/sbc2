@@ -357,7 +357,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 child: Text(category.name, style: AppTextStyles.bodyMedium),
               ),
               const SizedBox(width: 12),
-              StatusBadge(category.isActive ? 'Active' : 'Archived'),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: StatusBadge(category.isActive ? 'Active' : 'Archived'),
+              ),
             ],
           ),
           const SizedBox(height: 4),

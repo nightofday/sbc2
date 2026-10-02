@@ -311,7 +311,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
           children: [
             Row(
               children: [
-                StatusBadge(order.status),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: StatusBadge(order.status),
+                ),
                 const Spacer(),
                 Text(
                   _formatFullDateTime(order.createdAt),

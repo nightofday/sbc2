@@ -146,7 +146,10 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                         count.countedByName.isEmpty ? '—' : count.countedByName,
                         style: AppTextStyles.body,
                       ),
-                      StatusBadge(count.status),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: StatusBadge(count.status),
+                      ),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: count.status == 'POSTED'

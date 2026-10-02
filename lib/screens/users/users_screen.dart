@@ -202,7 +202,10 @@ class _UsersScreenState extends State<UsersScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          StatusBadge(latest.status),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: StatusBadge(latest.status),
+          ),
           const SizedBox(height: 16),
           _row('Email', latest.email),
           _row('Role', latest.role),

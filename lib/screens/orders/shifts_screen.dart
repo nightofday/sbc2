@@ -227,7 +227,10 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
             Text(_optionalMoney(shift.expectedCash), style: AppTextStyles.body),
             Text(_optionalMoney(shift.countedCash), style: AppTextStyles.body),
             _difference(shift.variance),
-            StatusBadge(shift.statusLabel),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: StatusBadge(shift.statusLabel),
+            ),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
