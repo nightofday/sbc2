@@ -13,6 +13,14 @@ class PosPaymentMethod {
     required this.requiresReference,
   });
 
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'code': code,
+    'name': name,
+    'is_cash': isCash,
+    'requires_reference': requiresReference,
+  };
+
   factory PosPaymentMethod.fromMap(Map<String, dynamic> map) {
     return PosPaymentMethod(
       id: map['id']?.toString() ?? '',

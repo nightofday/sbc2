@@ -21,6 +21,17 @@ class PosDiscountType {
     this.maxValue,
   });
 
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'code': code,
+    'name': name,
+    'calculation_method': calculationMethod,
+    'default_value': defaultValue,
+    'requires_authorization': requiresAuthorization,
+    'allow_custom_value': allowCustomValue,
+    'max_value': maxValue,
+  };
+
   factory PosDiscountType.fromMap(Map<String, dynamic> map) {
     return PosDiscountType(
       id: map['id']?.toString() ?? '',

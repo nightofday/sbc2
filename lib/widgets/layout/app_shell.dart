@@ -12,12 +12,16 @@ class AppShell extends StatefulWidget {
   final List<Widget> pages;
   final Future<void> Function() onSignOut;
 
+  /// Shown above every page, for app-wide notices.
+  final Widget? banner;
+
   const AppShell({
     super.key,
     required this.profile,
     required this.groups,
     required this.pages,
     required this.onSignOut,
+    this.banner,
   });
 
   @override
@@ -119,7 +123,16 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _buildPages() {
-    return IndexedStack(index: _selectedIndex, children: widget.pages);
+    final pages = IndexedStack(index: _selectedIndex, children: widget.pages);
+    final banner = widget.banner;
+    if (banner == null) return pages;
+
+    return Column(
+      children: [
+        banner,
+        Expanded(child: pages),
+      ],
+    );
   }
 
   void _selectDestination(int index) {

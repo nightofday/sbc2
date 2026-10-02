@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/state/business_refresh_controller.dart';
 import 'core/state/inventory_refresh_controller.dart';
 import 'core/theme/app_theme.dart';
+import 'data/offline/key_value_store.dart';
+import 'data/offline/offline_order_repository.dart';
 import 'data/repositories/supabase_catalog_repository.dart';
 import 'data/repositories/supabase_dashboard_repository.dart';
 import 'data/repositories/supabase_expense_repository.dart';
@@ -21,7 +23,6 @@ import 'domain/repositories/expense_repository.dart';
 import 'domain/repositories/finance_repository.dart';
 import 'domain/repositories/inventory_repository.dart';
 import 'domain/repositories/menu_repository.dart';
-import 'domain/repositories/order_repository.dart';
 import 'domain/repositories/purchasing_repository.dart';
 import 'domain/repositories/reporting_repository.dart';
 import 'domain/repositories/supplier_repository.dart';
@@ -43,10 +44,15 @@ import 'screens/reports/reports_screen.dart';
 import 'screens/reports/transaction_traceability_screen.dart';
 import 'screens/suppliers/suppliers_screen.dart';
 import 'screens/users/users_screen.dart';
+import 'widgets/common/app_dialog.dart';
+import 'widgets/common/offline_status_banner.dart';
 import 'widgets/layout/app_shell.dart';
 
 class StreetBowlApp extends StatefulWidget {
-  const StreetBowlApp({super.key});
+  /// Storage that survives closing the app, for offline sales.
+  final KeyValueStore deviceStore;
+
+  const StreetBowlApp({super.key, required this.deviceStore});
 
   @override
   State<StreetBowlApp> createState() => _StreetBowlAppState();
@@ -55,7 +61,10 @@ class StreetBowlApp extends StatefulWidget {
 class _StreetBowlAppState extends State<StreetBowlApp> {
   late final CatalogRepository _catalogRepository;
   late final DashboardRepository _dashboardRepository;
-  late final OrderRepository _orderRepository;
+  late final OfflineOrderRepository _orderRepository;
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  AppUserProfile? _profile;
+  int _unsentSales = 0;
   late final ReportingRepository _reportingRepository;
   late final PurchasingRepository _purchasingRepository;
   late final InventoryRepository _inventoryRepository;
@@ -72,7 +81,13 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
     super.initState();
     _catalogRepository = SupabaseCatalogRepository();
     _dashboardRepository = SupabaseDashboardRepository();
-    _orderRepository = SupabaseOrderRepository();
+    final serverOrders = SupabaseOrderRepository();
+    _orderRepository = OfflineOrderRepository(
+      remote: serverOrders,
+      uploader: serverOrders,
+      store: widget.deviceStore,
+      identity: _offlineIdentity,
+    );
     _reportingRepository = SupabaseReportingRepository();
     _purchasingRepository = SupabasePurchasingRepository();
     _inventoryRepository = SupabaseInventoryRepository();
@@ -85,10 +100,71 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
     _inventoryRefreshController = InventoryRefreshController(
       onRefresh: _businessRefreshController.refresh,
     );
+    _orderRepository.addListener(_refreshAfterSync);
+  }
+
+  /// Sales that reach the server change stock, orders and the dashboard,
+  /// so open screens reload when the number still on the device drops.
+  void _refreshAfterSync() {
+    final unsent = _orderRepository.waitingSales.length;
+    if (unsent < _unsentSales) _inventoryRefreshController.refresh();
+    _unsentSales = unsent;
+  }
+
+  OfflineIdentity? _offlineIdentity() {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return null;
+
+    final profile = _profile;
+    return OfflineIdentity(
+      userId: user.id,
+      displayName: profile != null && profile.id == user.id
+          ? profile.displayName
+          : user.email ?? '',
+    );
+  }
+
+  /// Signing out with unsent sales leaves them on this device until the
+  /// same person signs in again, so the user is told before it happens.
+  Future<void> _signOut() async {
+    await _orderRepository.syncPending();
+
+    final unsent =
+        _orderRepository.waitingSales.length +
+        _orderRepository.rejectedSales.length;
+    final context = _navigatorKey.currentContext;
+
+    if (unsent > 0 && context != null && context.mounted) {
+      final confirmed = await showSettledDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Sales not sent yet'),
+          content: Text(
+            '$unsent offline ${unsent == 1 ? 'sale is' : 'sales are'} still '
+            'on this device. They stay here and are sent the next time you '
+            'sign in on this device with a connection. Sign out anyway?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Stay signed in'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Sign out'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
+
+    await Supabase.instance.client.auth.signOut();
   }
 
   @override
   void dispose() {
+    _orderRepository.dispose();
     _inventoryRefreshController.dispose();
     _businessRefreshController.dispose();
     super.dispose();
@@ -100,11 +176,16 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
       debugShowCheckedModeBanner: false,
       title: 'Street Bowl Café Management System',
       theme: AppTheme.light,
-      home: AuthGate(authenticatedBuilder: _buildAuthenticatedApp),
+      navigatorKey: _navigatorKey,
+      home: AuthGate(
+        profileCache: widget.deviceStore,
+        authenticatedBuilder: _buildAuthenticatedApp,
+      ),
     );
   }
 
   Widget _buildAuthenticatedApp(AppUserProfile profile) {
+    _profile = profile;
     final isCashier = profile.isCashier;
     final pages = <Widget>[];
 
@@ -349,7 +430,8 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
       profile: profile,
       groups: groups,
       pages: pages,
-      onSignOut: () => Supabase.instance.client.auth.signOut(),
+      onSignOut: _signOut,
+      banner: OfflineStatusBanner(queue: _orderRepository),
     );
   }
 }

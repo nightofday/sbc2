@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/reporting_repository.dart';
@@ -190,7 +190,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       children: [
                         Text(
                           'Unable to load the report.\n'
-                          '${error is PostgrestException ? error.message : error}',
+                          '${errorText(error)}',
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),

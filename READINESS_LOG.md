@@ -145,8 +145,44 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | `DataTableCard` stacks each row with its column headings when the table does not fit a narrow screen (`6fc11d8`) | `UX-03`, F-01, F-15: status and action columns were off-screen on phones in all 19 tables | `test/responsive_widgets_test.dart`: the action button is inside a 360 px screen; the table stays a table at 1200 px |
 | 2026-10-02 | Migration `20261002200000_business_report.sql` (`c66a462`): `get_business_report(from, to)` and a matching `get_dashboard_summary` | `FIN-01`, `REP-01`–`REP-04`, S-02, S-03 | pgTAP `17_business_report.test.sql`, 22 of 22: daily, item, category and payment rows each add up to the summary; Manila day boundary; refund-only and expense-only days; stock movement identity |
 | 2026-10-02 | Reports screen rebuilt on that report with any date range and copy-to-spreadsheet; Finance Overview reads the same report | `REP-01`–`REP-05`, `FIN-01` | `test/reporting_model_test.dart` and `test/reports_screen_test.dart` (6 tests), including formula-safe export and a 360 px layout check |
+| 2026-10-02 | Migration `20261002210000_offline_sales_sync.sql` (`6f0f4c7`): `sync_offline_order` posts a sale made offline under its request ID, dates the order, payment, invoice, stock movements and status history at the time of sale, lets stock go negative for that call only (transaction-local setting `app.offline_sync`, read by the stock guard and by FEFO consumption), and writes an audit row for the sync and another when the till's total differs from the recorded total | Offline till, server side (section 7) | pgTAP `18_offline_sales_sync.test.sql`, 16 of 16; files `01`–`17` unchanged; applied to the hosted test project |
+| 2026-10-02 | Offline till in the app: `OfflineOrderRepository` (`lib/data/offline/`) wraps the server repository, keeps the menu, options, payment methods, discounts, open shift and signed-in profile on the device, stores a sale that cannot reach the server and replays it oldest-first under the same request ID; `OfflineStatusBanner` above every page; offline receipt notice; a sign-out warning and a block on closing a shift while sales are unsent | Offline till, app side | `test/offline_order_repository_test.dart` (18 tests) and `test/offline_till_widget_test.dart` (a sale on the real till screen with the server unplugged, then refused, then accepted) |
+| 2026-10-02 | `errorText()` in `lib/core/error_text.dart`, used wherever a screen showed `error.toString()` (43 places) | Screens showed class names such as `ClientException: Failed to fetch` when the connection dropped | analyzer and the existing 63 tests; not separately tested |
 
-The first three rows are Flutter-only changes; the rest add eight database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 44 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add nine database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 63 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+
+### Offline till status
+
+What was built follows the split recommended in section 7: the till sells offline, the back office needs a connection.
+
+How it behaves:
+
+- While online nothing changes: a sale goes straight to the server and gets its order number.
+- When the server cannot be reached (no network, a timeout after 15 seconds, a gateway error, an expired sign-in), the sale is stored on the device with its request ID and sale time, the cashier gets a receipt marked "Saved on this device", and the order shows in Orders as **Waiting to Sync** under a reference such as `OFFLINE-3FA91C`.
+- The queue is sent every 30 seconds, whenever any till request succeeds again, before each new sale, and on **Send now** in the banner. Sales go oldest first. A new sale never jumps ahead of waiting ones.
+- A sale whose answer was lost is queued too. Because it is replayed under the same request ID, the server returns the order it already stored, so it is never recorded twice.
+- A sale the server refuses (for example no open shift, or an archived product) stays on the device as **Needs Attention**. The banner turns red and its Review dialog shows the reason with **Send again** and **Remove**. Remove asks for confirmation and deletes the sale from the device only.
+- A shift can be opened offline. It is opened on the server, under its own request ID, before the first queued sale is sent.
+- The till opens offline for a user who has signed in on that device before: the profile and role are kept on the device, the server still checks every action at sync.
+- Stock levels kept on the device are stale, so the cached menu shows "Stock not checked offline" and does not block a sale. The server accepts the sale and stock for that item may go below zero.
+
+Decisions taken, to be confirmed:
+
+| Decision | Chosen | Alternative not taken |
+| --- | --- | --- |
+| Device storage | `shared_preferences` (already installed as a dependency of the Supabase client; now listed directly) holding JSON | SQLite. It would add a native dependency and a schema to migrate; the queue is a short list and the cache is a few hundred rows |
+| Prices | The server re-prices the sale from the current menu and audits any difference from what the till charged (`OFFLINE_SALE_TOTAL_DIFFERENCE`) | Trusting the device's prices. That would let a tampered device set its own prices |
+| Receipt numbers | Assigned by the server at sync; the customer's offline receipt carries the `OFFLINE-` reference | Per-device number ranges. Needed only if an official receipt must be printed while offline |
+| Age limit | A sale older than 7 days is refused and must be entered by a manager | No limit |
+
+What does not work offline, by design: voids, refunds, cash pay-in and pay-out, closing a shift, and every back-office screen. Each shows "No connection to the server" rather than failing silently.
+
+Not done:
+
+- No screen lists the audit rows for offline sales that oversold stock or whose total differed. They are in `audit_logs` only (see the audit viewer item).
+- Offline was verified with a fake server in tests. It was not tested by cutting the network on a real tablet.
+- Sales wait on the device of the user who made them. A different user signing in on that device does not see or send them.
+- A cash sale re-priced higher than the cash tendered is refused at sync and lands in Needs Attention.
 
 ### How the database changes were tested without Docker
 

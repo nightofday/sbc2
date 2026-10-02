@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/user_repository.dart';
@@ -65,7 +66,7 @@ class _UsersScreenState extends State<UsersScreen> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Unable to load users.\n${snapshot.error}',
+                'Unable to load users.\n${errorText(snapshot.error)}',
                 textAlign: TextAlign.center,
               ),
             );
@@ -517,7 +518,7 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   String _friendlyError(Object error) {
-    final text = error.toString();
+    final text = errorText(error);
     return text.startsWith('Exception: ')
         ? text.substring('Exception: '.length)
         : text;

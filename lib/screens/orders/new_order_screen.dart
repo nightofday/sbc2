@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../domain/repositories/offline_sales_queue.dart';
 import '../../domain/repositories/order_repository.dart';
+import '../../models/offline_sale.dart';
 import '../../models/order_record.dart';
 import '../../models/pos_checkout.dart';
 import '../../models/pos_discount.dart';
@@ -81,7 +84,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _loadingShift = false);
-      _showError(error.toString());
+      _showError(errorText(error));
     }
   }
 
@@ -100,7 +103,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     } on PostgrestException catch (error) {
       if (mounted) _showError(error.message);
     } catch (error) {
-      if (mounted) _showError(error.toString());
+      if (mounted) _showError(errorText(error));
     } finally {
       if (mounted) setState(() => _startingShift = false);
     }
@@ -300,7 +303,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       });
                     } catch (error) {
                       dialogSetState?.call(() {
-                        errorMessage = error.toString();
+                        errorMessage = errorText(error);
                       });
                     } finally {
                       if (mounted) setState(() => _endingShift = false);
@@ -319,7 +322,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     } on PostgrestException catch (error) {
       if (mounted) _showError(error.message);
     } catch (error) {
-      if (mounted) _showError(error.toString());
+      if (mounted) _showError(errorText(error));
     } finally {
       cashController.dispose();
       notesController.dispose();
@@ -493,7 +496,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 });
               } catch (error) {
                 dialogSetState?.call(() {
-                  errorMessage = error.toString();
+                  errorMessage = errorText(error);
                 });
               }
             },
@@ -504,7 +507,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     } on PostgrestException catch (error) {
       if (mounted) _showError(error.message);
     } catch (error) {
-      if (mounted) _showError(error.toString());
+      if (mounted) _showError(errorText(error));
     }
 
     amountController.dispose();
@@ -716,7 +719,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               const Text('Unable to load POS data', style: AppTextStyles.h3),
               const SizedBox(height: 8),
               Text(
-                error?.toString() ?? 'Unknown error',
+                errorText(error),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -857,10 +860,14 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             Text(
               product.isOutOfStock
                   ? 'Out of stock'
+                  : product.hasUnknownStock
+                  ? 'Stock not checked offline'
                   : '${_quantity(product.availableQuantity ?? 0)} available',
               style: AppTextStyles.caption.copyWith(
                 color: product.isOutOfStock
                     ? AppColors.primary
+                    : product.hasUnknownStock
+                    ? AppColors.gray700
                     : AppColors.success,
                 fontWeight: FontWeight.w600,
               ),
@@ -1731,6 +1738,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         errorMessage = _unknownOutcomeMessage;
                       });
                     }
+                  } on OfflineUnavailableException catch (error) {
+                    // Nothing was sent or stored.
+                    _checkoutAttempt.resolve();
+                    dialogSetState?.call(() {
+                      errorMessage = error.message;
+                    });
                   } catch (_) {
                     dialogSetState?.call(() {
                       errorMessage = _unknownOutcomeMessage;
@@ -1824,6 +1837,23 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             ),
             const SizedBox(height: 4),
             Center(child: Text(order.id, style: AppTextStyles.caption)),
+            if (order.status == OfflineSale.waitingStatus) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.yellow.withValues(alpha: .18),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Saved on this device while offline. It gets its order '
+                  'number and invoice when the connection returns.',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.caption,
+                ),
+              ),
+            ],
             if (order.invoiceNumber.isNotEmpty) ...[
               const SizedBox(height: 3),
               Center(

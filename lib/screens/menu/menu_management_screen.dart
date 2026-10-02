@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/menu_repository.dart';
@@ -96,7 +97,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Unable to load menu.\n${snapshot.error}',
+                'Unable to load menu.\n${errorText(snapshot.error)}',
                 textAlign: TextAlign.center,
               ),
             );
@@ -600,7 +601,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               });
             } catch (error) {
               updateDialogState?.call(() {
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
@@ -625,7 +626,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       if (mounted) _showMessage(error.message);
       return;
     } catch (error) {
-      if (mounted) _showMessage(error.toString());
+      if (mounted) _showMessage(errorText(error));
       return;
     }
 
@@ -790,7 +791,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       } on PostgrestException catch (error) {
         if (mounted) _showMessage(error.message);
       } catch (error) {
-        if (mounted) _showMessage(error.toString());
+        if (mounted) _showMessage(errorText(error));
       }
 
       if (mounted) _showModifiers(variant);
@@ -876,7 +877,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       } on PostgrestException catch (error) {
         if (mounted) _showMessage(error.message);
       } catch (error) {
-        if (mounted) _showMessage(error.toString());
+        if (mounted) _showMessage(errorText(error));
       }
     }
 
@@ -894,7 +895,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       if (mounted) _showMessage(error.message);
       return;
     } catch (error) {
-      if (mounted) _showMessage(error.toString());
+      if (mounted) _showMessage(errorText(error));
       return;
     }
 
@@ -978,7 +979,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
       } on PostgrestException catch (error) {
         if (mounted) _showMessage(error.message);
       } catch (error) {
-        if (mounted) _showMessage(error.toString());
+        if (mounted) _showMessage(errorText(error));
       }
     }
 
@@ -1133,7 +1134,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               });
             } catch (error) {
               dialogSetState?.call(() {
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
@@ -1269,7 +1270,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               });
             } catch (error) {
               dialogSetState?.call(() {
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },

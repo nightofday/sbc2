@@ -19,10 +19,13 @@ class StatusBadge extends StatelessWidget {
       background = AppColors.info.withValues(alpha: .10);
     } else if (lower.contains('low') ||
         lower.contains('void') ||
+        lower.contains('attention') ||
         lower.contains('inactive')) {
       foreground = AppColors.primary;
       background = AppColors.primarySoft;
-    } else if (lower.contains('expir') || lower.contains('open')) {
+    } else if (lower.contains('expir') ||
+        lower.contains('waiting') ||
+        lower.contains('open')) {
       foreground = AppColors.warning;
       background = AppColors.yellow.withValues(alpha: .14);
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/catalog_repository.dart';
@@ -309,7 +310,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
             } on PostgrestException catch (error) {
               fail(error.message);
             } catch (error) {
-              fail(error.toString());
+              fail(errorText(error));
             } finally {
               saving = false;
             }
@@ -364,7 +365,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                 children: [
                   Text(
                     'Unable to load discounts.\n'
-                    '${error is PostgrestException ? error.message : error}',
+                    '${errorText(error)}',
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),

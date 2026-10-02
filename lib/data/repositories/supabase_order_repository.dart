@@ -1,6 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/repositories/offline_sales_queue.dart';
 import '../../domain/repositories/order_repository.dart';
+import '../../models/offline_sale.dart';
 import '../../models/order_item.dart';
 import '../../models/order_record.dart';
 import '../../models/pos_checkout.dart';
@@ -11,7 +13,8 @@ import '../../models/pos_payment_method.dart';
 import '../../models/refund_preview.dart';
 import '../../models/shift_cash_snapshot.dart';
 
-class SupabaseOrderRepository implements OrderRepository {
+class SupabaseOrderRepository
+    implements OrderRepository, OfflineSaleUploader {
   final SupabaseClient _client;
 
   SupabaseOrderRepository({SupabaseClient? client})
@@ -329,6 +332,36 @@ class SupabaseOrderRepository implements OrderRepository {
     }
 
     throw CheckoutSavedException(orderNumber);
+  }
+
+  @override
+  Future<void> uploadOfflineSale(OfflineSale sale) async {
+    await _client.rpc(
+      'sync_offline_order',
+      params: {
+        'p_order_type': _dbOrderType(sale.orderType),
+        'p_items': sale.items.map((item) => item.toJson()).toList(),
+        'p_payment': {
+          'payment_method_id': sale.payment.paymentMethodId,
+          'amount_tendered': sale.payment.amountTendered,
+          'external_reference': sale.payment.externalReference,
+        },
+        'p_client_request_id': sale.requestId,
+        'p_sold_at': sale.soldAt.toUtc().toIso8601String(),
+        'p_client_total': sale.total,
+        'p_discount': sale.discountTypeId.trim().isEmpty
+            ? null
+            : {
+                'discount_type_id': sale.discountTypeId,
+                'manual_value': sale.discountValue,
+                'notes': _nullable(sale.discountNotes),
+              },
+        'p_table_number': _nullable(sale.tableNumber),
+        'p_customer_name': _nullable(sale.customerName),
+        'p_delivery_reference': _nullable(sale.deliveryReference),
+        'p_notes': _nullable(sale.notes),
+      },
+    );
   }
 
   @override

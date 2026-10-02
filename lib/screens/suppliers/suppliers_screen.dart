@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/supplier_repository.dart';
@@ -77,7 +78,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                 if (snapshot.hasError) {
                   return Center(
                     child: Text(
-                      'Unable to load suppliers.\n${snapshot.error}',
+                      'Unable to load suppliers.\n${errorText(snapshot.error)}',
                       textAlign: TextAlign.center,
                     ),
                   );

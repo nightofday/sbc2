@@ -35,6 +35,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   supabase_flutter: ^2.10.3
+  # Device storage for the offline sales queue and cached till data.
+  # Already resolved as a dependency of supabase_flutter.
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

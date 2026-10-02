@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/reporting_repository.dart';
@@ -82,7 +83,7 @@ class _TransactionTraceabilityScreenState
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Unable to load transaction history.\n${snapshot.error}',
+                'Unable to load transaction history.\n${errorText(snapshot.error)}',
                 textAlign: TextAlign.center,
               ),
             );

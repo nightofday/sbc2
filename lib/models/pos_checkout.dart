@@ -13,6 +13,17 @@ class PosCheckoutItem {
     this.specialInstructions = '',
   });
 
+  factory PosCheckoutItem.fromJson(Map<String, dynamic> json) {
+    return PosCheckoutItem(
+      menuVariantId: json['menu_variant_id']?.toString() ?? '',
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      modifierIds: ((json['modifier_ids'] as List?) ?? const [])
+          .map((id) => id.toString())
+          .toList(),
+      specialInstructions: json['special_instructions']?.toString() ?? '',
+    );
+  }
+
   Map<String, dynamic> toJson() => {
     'menu_variant_id': menuVariantId,
     'quantity': quantity,
@@ -37,6 +48,16 @@ class PosPaymentInput {
     this.changeAmount = 0,
     this.externalReference,
   });
+
+  factory PosPaymentInput.fromJson(Map<String, dynamic> json) {
+    return PosPaymentInput(
+      paymentMethodId: json['payment_method_id']?.toString() ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      amountTendered: (json['amount_tendered'] as num?)?.toDouble(),
+      changeAmount: (json['change_amount'] as num?)?.toDouble() ?? 0,
+      externalReference: json['external_reference']?.toString(),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'payment_method_id': paymentMethodId,

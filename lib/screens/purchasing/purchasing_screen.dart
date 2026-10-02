@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/purchasing_repository.dart';
@@ -248,7 +249,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
       if (mounted) _showMessage(error.message);
       return;
     } catch (error) {
-      if (mounted) _showMessage(error.toString());
+      if (mounted) _showMessage(errorText(error));
       return;
     }
 
@@ -395,7 +396,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
         } on PostgrestException catch (error) {
           return error.message;
         } catch (error) {
-          return error.toString();
+          return errorText(error);
         }
       },
     );
@@ -603,7 +604,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
             } catch (error) {
               updateDialogState?.call(() {
                 isSaving = false;
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
@@ -949,7 +950,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
             } catch (error) {
               updateDialogState?.call(() {
                 isSaving = false;
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
@@ -1439,7 +1440,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
   Widget _error(Object? error) {
     return Center(
       child: Text(
-        'Unable to load purchasing data.\n${error ?? ''}',
+        'Unable to load purchasing data.\n${errorText(error)}',
         textAlign: TextAlign.center,
       ),
     );

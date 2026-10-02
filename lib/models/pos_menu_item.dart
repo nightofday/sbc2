@@ -25,7 +25,42 @@ class PosMenuItem {
 
   bool get tracksInventory => inventoryTrackingMode == 'FINISHED_GOOD';
 
-  bool get isOutOfStock => tracksInventory && (availableQuantity ?? 0) <= 0;
+  /// A null quantity means the stock level is unknown, which is the case for
+  /// a menu served from the device cache while offline. It is not treated as
+  /// sold out: the server accepts offline sales and reports any shortfall.
+  bool get isOutOfStock =>
+      tracksInventory && availableQuantity != null && availableQuantity! <= 0;
+
+  bool get hasUnknownStock => tracksInventory && availableQuantity == null;
+
+  /// The same keys [PosMenuItem.fromMap] reads, for the device cache.
+  Map<String, dynamic> toMap() => {
+    'variant_id': variantId,
+    'menu_item_id': menuItemId,
+    'sku': sku,
+    'item_name': name,
+    'variant_name': variantName,
+    'category_name': category,
+    'price': price,
+    'is_default': isDefault,
+    'inventory_tracking_mode': inventoryTrackingMode,
+    'available_quantity': availableQuantity,
+  };
+
+  PosMenuItem withAvailableQuantity(double? quantity) {
+    return PosMenuItem(
+      variantId: variantId,
+      menuItemId: menuItemId,
+      sku: sku,
+      name: name,
+      variantName: variantName,
+      category: category,
+      price: price,
+      isDefault: isDefault,
+      inventoryTrackingMode: inventoryTrackingMode,
+      availableQuantity: quantity,
+    );
+  }
 
   factory PosMenuItem.fromMap(Map<String, dynamic> map) {
     return PosMenuItem(

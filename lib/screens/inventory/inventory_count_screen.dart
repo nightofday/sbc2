@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/state/inventory_refresh_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -187,7 +188,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
         } on PostgrestException catch (error) {
           return error.message;
         } catch (error) {
-          return error.toString();
+          return errorText(error);
         }
       },
     );
@@ -209,7 +210,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
       if (mounted) _showMessage(error.message);
       return;
     } catch (error) {
-      if (mounted) _showMessage(error.toString());
+      if (mounted) _showMessage(errorText(error));
       return;
     }
 
@@ -399,7 +400,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
             } catch (error) {
               updateDialogState?.call(() {
                 isSaving = false;
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
@@ -610,7 +611,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
   Widget _buildError(Object? error) {
     return Center(
       child: Text(
-        error?.toString() ?? 'Unable to load inventory counts.',
+        errorText(error),
         textAlign: TextAlign.center,
         style: AppTextStyles.body.copyWith(color: AppColors.error),
       ),

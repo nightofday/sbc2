@@ -1,17 +1,29 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../data/offline/key_value_store.dart';
+import '../../data/offline/offline_order_repository.dart'
+    show isConnectionFailure;
 import '../../models/app_user_profile.dart';
 import 'login_screen.dart';
 
 class AuthGate extends StatefulWidget {
   final Widget Function(AppUserProfile profile) authenticatedBuilder;
 
-  const AuthGate({super.key, required this.authenticatedBuilder});
+  /// Keeps the last loaded profile so a signed-in till can reopen offline.
+  final KeyValueStore? profileCache;
+
+  const AuthGate({
+    super.key,
+    required this.authenticatedBuilder,
+    this.profileCache,
+  });
 
   @override
   State<AuthGate> createState() => _AuthGateState();
@@ -79,23 +91,53 @@ class _AuthGateState extends State<AuthGate> {
         email: session.user.email ?? '',
       );
 
+      await widget.profileCache?.write(
+        _profileCacheKey(session.user.id),
+        jsonEncode(row),
+      );
+
       if (!mounted) return;
       setState(() {
         _profile = profile;
         _loading = false;
       });
-    } on PostgrestException catch (error) {
-      if (!mounted || refreshingInPlace) return;
-      setState(() {
-        _error = error.message;
-        _loading = false;
-      });
     } catch (error) {
       if (!mounted || refreshingInPlace) return;
+
+      // Without a connection the profile last loaded on this device lets
+      // the till open. The server still checks every action once it syncs.
+      final cached = isConnectionFailure(error)
+          ? _cachedProfile(session.user.id, session.user.email ?? '')
+          : null;
+
       setState(() {
-        _error = error.toString();
+        _profile = cached;
+        _error = cached != null
+            ? null
+            : error is PostgrestException
+            ? error.message
+            : isConnectionFailure(error)
+            ? 'No connection. Connect to the internet to sign in on this '
+                  'device for the first time.'
+            : errorText(error);
         _loading = false;
       });
+    }
+  }
+
+  String _profileCacheKey(String userId) => 'offline.profile.v1.$userId';
+
+  AppUserProfile? _cachedProfile(String userId, String email) {
+    final raw = widget.profileCache?.read(_profileCacheKey(userId));
+    if (raw == null) return null;
+
+    try {
+      return AppUserProfile.fromMap(
+        Map<String, dynamic>.from(jsonDecode(raw) as Map),
+        email: email,
+      );
+    } catch (_) {
+      return null;
     }
   }
 

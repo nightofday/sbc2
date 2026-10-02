@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'data/offline/key_value_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +22,10 @@ Future<void> main() async {
     publishableKey: supabasePublishableKey,
   );
 
-  runApp(const StreetBowlApp());
+  // Holds the offline sales queue and the till's cached data.
+  final deviceStore = await SharedPreferencesStore.open();
+
+  runApp(StreetBowlApp(deviceStore: deviceStore));
 }
 
 class _MissingSupabaseConfigApp extends StatelessWidget {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/order_repository.dart';
@@ -494,7 +495,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     } catch (error) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(error.toString())));
+            .showSnackBar(SnackBar(content: Text(errorText(error))));
       }
       return;
     }
@@ -733,7 +734,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               });
             } catch (error) {
               dialogSetState?.call(() {
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
@@ -768,7 +769,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     } catch (error) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(error.toString())));
+            .showSnackBar(SnackBar(content: Text(errorText(error))));
       }
       return;
     }
@@ -955,7 +956,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               });
             } catch (error) {
               dialogSetState?.call(() {
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
@@ -1078,7 +1079,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               });
             } catch (error) {
               updateDialogState?.call(() {
-                errorMessage = error.toString();
+                errorMessage = errorText(error);
               });
             }
           },
