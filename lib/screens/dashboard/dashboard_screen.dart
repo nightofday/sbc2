@@ -57,7 +57,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _refresh() {
     if (!mounted) return;
-    setState(() => _dashboardFuture = _loadDashboard());
+    // A block body: an arrow would return the Future, which setState rejects
+    // in debug builds before it marks the screen for rebuild.
+    setState(() {
+      _dashboardFuture = _loadDashboard();
+    });
   }
 
   @override
