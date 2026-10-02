@@ -156,15 +156,19 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { error: updateError } = await adminClient
-      .from("profiles")
-      .update({
-        email,
-        display_name: displayName,
-        role_id: role.id,
-        status: "ACTIVE",
-      })
-      .eq("id", created.user.id);
+    // The role is assigned as the administrator who asked, through the same
+    // database function User Management uses. The privileged client cannot
+    // do it: the role guard on profiles only accepts a signed-in user who
+    // manages roles, and the audit log should name that person.
+    const { error: updateError } = await userClient.rpc(
+      "update_employee_profile",
+      {
+        p_user_id: created.user.id,
+        p_display_name: displayName,
+        p_status: "ACTIVE",
+        p_role_id: role.id,
+      },
+    );
 
     if (updateError) {
       await adminClient.auth.admin.deleteUser(created.user.id);
