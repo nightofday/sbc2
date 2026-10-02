@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'header_brand_motif.dart';
 
-/// A page inside the app shell: a title bar with the page's title, a short
-/// line under it, and the page's main action on the right, then the content.
 class AppPage extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -23,47 +23,66 @@ class AppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveSubtitle = subtitle ?? _todayLabel();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 600;
-        final margin = compact ? 16.0 : AppSpacing.page;
-        final titleBlock = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: AppTextStyles.h1),
-            const SizedBox(height: 2),
-            Text(effectiveSubtitle, style: AppTextStyles.caption),
-          ],
-        );
+    return ColoredBox(
+      color: AppColors.gray100,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 600;
+          final pagePadding = compact ? 16.0 : AppSpacing.page;
+          final titleBlock = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTextStyles.h1),
+              const SizedBox(height: 2),
+              Text(
+                effectiveSubtitle,
+                style: AppTextStyles.caption.copyWith(color: AppColors.gray500),
+              ),
+            ],
+          );
 
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(margin, 20, margin, margin),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (compact && action != null) ...[
-                  titleBlock,
-                  const SizedBox(height: 12),
-                  if (constraints.maxWidth < 420)
-                    SizedBox(width: double.infinity, child: action!)
-                  else
-                    Align(alignment: Alignment.centerLeft, child: action!),
-                ] else
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+          return Stack(
+            children: [
+              const Positioned(
+                top: 0,
+                right: 0,
+                left: 0,
+                child: HeaderBrandMotif(),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.all(pagePadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: titleBlock),
-                      ?action,
+                      if (compact && action != null) ...[
+                        titleBlock,
+                        const SizedBox(height: 14),
+                        if (constraints.maxWidth < 420)
+                          SizedBox(width: double.infinity, child: action!)
+                        else
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: action!,
+                          ),
+                      ] else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: titleBlock),
+                            ?action,
+                          ],
+                        ),
+                      const SizedBox(height: 24),
+                      Expanded(child: child),
                     ],
                   ),
-                const SizedBox(height: 20),
-                Expanded(child: child),
-              ],
-            ),
-          ),
-        );
-      },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 

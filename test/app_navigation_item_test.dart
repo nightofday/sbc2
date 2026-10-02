@@ -5,7 +5,8 @@ import 'package:sbc_management_system/models/app_navigation_item.dart';
 void main() {
   test('navigation group identifies its destination indexes', () {
     const group = AppNavigationGroup(
-      label: 'Inventory',
+      label: 'INVENTORY',
+      icon: Icons.inventory_2_outlined,
       items: [
         AppNavigationItem(
           label: 'Stock Overview',

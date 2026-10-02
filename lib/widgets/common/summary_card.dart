@@ -4,13 +4,10 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'section_card.dart';
 
-/// One headline figure, such as net sales, with what it means underneath.
 class SummaryCard extends StatelessWidget {
   final String label;
   final String value;
   final String subtitle;
-
-  /// Marks which figure this is, so cards can be told apart at a glance.
   final Color accentColor;
 
   const SummaryCard({
@@ -24,54 +21,51 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionCard(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero,
       child: SizedBox(
-        height: 96,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        height: 112,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.gray700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  style: AppTextStyles.h1.copyWith(fontSize: 28),
+            Container(
+              width: 5,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(12),
                 ),
               ),
             ),
-            const Spacer(),
-            Text(
-              subtitle,
-              style: AppTextStyles.caption,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: AppTextStyles.caption),
+                    const SizedBox(height: 5),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          value,
+                          maxLines: 1,
+                          style: AppTextStyles.h2.copyWith(fontSize: 23),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      subtitle,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -98,7 +92,7 @@ class SummaryCardGrid extends StatelessWidget {
             : children.length > 4
             ? 4
             : children.length;
-        const gap = 16.0;
+        const gap = 18.0;
         final itemWidth =
             (constraints.maxWidth - (gap * (columns - 1))) / columns;
 

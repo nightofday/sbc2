@@ -76,7 +76,7 @@ Future<T?> showPrototypeDialog<T>({
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.h1,
+                  style: AppTextStyles.h2,
                 ),
               ),
               Flexible(
