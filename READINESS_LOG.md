@@ -71,6 +71,26 @@ Worked as intended: package conversion on receiving, the finished-goods stock ca
 
 Not yet exercised: stock release, disposal, physical count, adjustment, expenses, purchase orders, supplier bill payment, shift close, Cashier and Manager roles, reports beyond Finance.
 
+### Transaction pass, part 2 (same day, after the fixes in section 5)
+
+| Step | Result |
+| --- | --- |
+| Release 1 box of TEST Paper Cups (50 pc per box) | posted as `SO-1`; on hand went 100 → 50 pc |
+| Dispose 1 Coca-Cola from lot `SEED-INV-002` as damaged | "Lot disposal recorded" |
+| Record expense, ₱350, receipt `TEST-OR-001` | posted as `EX-1` |
+| Dashboard after the expense, without reloading | expenses ₱350, net after expenses −₱143 (confirms the F-09 fix live) |
+
+| ID | Finding | Status | Task |
+| --- | --- | --- | --- |
+| F-14 | Releasing by the box asks for "pc in one box" again; the 50 entered at receiving is not remembered. Nothing writes `supplier_items`, so no package definition is stored. | found | `INV-01`, `PUR-01` |
+| F-15 | In Dispose Stock the row is not tappable; the only action is a "Review Lots" button in the last column, off-screen at phone width. | found | `UX-01`, `UX-03` |
+| F-16 | Add Expense overflows by 11 px at 296 px, and the category defaults to the first one ("Utilities") rather than asking. | found | `UX-03`, `UX-04` |
+| F-17 | Once, cancelling a dialog left the screen dimmed and unresponsive with repeated "Unexpected null value" errors, and the screen state had reset. Most likely cause: `AuthGate` rebuilt the whole app on a background auth event. Not reproduced on demand. | changed (see section 5), not verified by test | `SYNC-01`, `UX-04` |
+
+Correction to F-04: the blank email is **not an app defect**. `profiles.email` is filled by the new-user trigger, and the first-admin bootstrap in section 2 replaced that row without the email. The underlying gap is that the email is only synchronised when the auth user is created.
+
+Still not exercised: physical count, stock adjustment, purchase orders, supplier bill payment, shift close, Cashier and Manager logins (creating those accounts needs the dashboard or the undeployed `create-employee` function).
+
 ## 4. Database schema review (first pass)
 
 Method: counted, for each of the 53 public tables and 26 views, the references in `lib/`, in the combined migration SQL (inserts, updates, reads) and in the pgTAP tests, then read the definitions of the outliers. This is a usage review of the migration text, not a full audit, and nothing has been dropped.
@@ -79,8 +99,8 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 
 | Object | What the review found | Recommendation |
 | --- | --- | --- |
-| `devices` | No reads or writes anywhere. Six foreign-key columns on other tables point to it. | Decide with `OPS-02` (offline/printing). Drop with its six columns if device tracking is declined; otherwise leave. |
-| `invoice_print_events` | No reads or writes anywhere. | Same decision as `devices`. |
+| `devices` | No reads or writes anywhere. Six foreign-key columns on other tables point to it. | **Keep.** Offline selling (section 7) needs registered devices and per-device numbering. Superseded the earlier "drop" suggestion. |
+| `invoice_print_events` | No reads or writes anywhere. | Keep if receipt printing is built (`OPS-02`); otherwise drop. |
 | `tax_rates` | Seeded with 4 rows, never read. One foreign key points to it. | Keep until the VAT question is answered (`OPS-03`); drop if the café is non-VAT. |
 | `variant_recipe_components`, `modifier_recipe_components`, `private.retired_*` | Recipe deduction is retired. Tables are empty in a fresh database but still referenced by older functions and tests. | Do not drop yet: AGENTS.md §6 requires a history check first. Flag to Brian. |
 | `v_daily_profit_estimate`, `v_order_cogs` | Read by nothing. The first presents a "profit" figure the business rules say must not be shown as profit. | Drop or replace when `FIN-01` defines the measures. |
@@ -106,5 +126,95 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | --- | --- | --- | --- |
 | 2026-10-02 | Added `CLAUDE.md` (`74b6e60`) | Commands and architecture notes for AI-assisted work | links and claims checked against source |
 | 2026-10-02 | Added this log | Record of the path to readiness | — |
+| 2026-10-02 | `showSettledDialog` in `lib/widgets/common/app_dialog.dart`; `showPrototypeDialog` and the two raw `showDialog` calls now use it (`c4d1ed6`) | F-06: dialogs completed while still animating out, so callers disposed controllers the closing dialog was still using | `test/app_dialog_test.dart` fails without the change and passes with it; live re-run of Receive Stock → Add Item did not crash |
+| 2026-10-02 | Dashboard refresh callback uses a block body (`94c6d98`) | F-09/F-07: the arrow callback returned a Future, which `setState` rejects in debug builds before marking the screen dirty, so the dashboard never redrew | `test/dashboard_refresh_test.dart` fails without the change and passes with it; live check after posting an expense |
+| 2026-10-02 | `AuthGate` refreshes an already loaded profile in place (`bc72e72`) | F-17: every auth event showed the loading screen and unmounted the app | analyzer and existing tests only; no automated test (needs an initialised Supabase client) |
 
-No application code or database schema has been changed yet.
+All three are Flutter changes. `flutter analyze`: no issues. `flutter test`: 24 passed. No database schema has been changed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+
+## 6. SQL audit (all 38 migrations, 10,852 lines, read in full on 2 October 2026)
+
+The schema is stronger than the app built on it: UUID keys, name and price snapshots on order lines, `numeric` money, lot-level FEFO, a stock ledger, permission-checked `SECURITY DEFINER` functions and a default-deny API. The findings below are what stands between that and a system a café can rely on. Nothing here has been changed yet.
+
+### 6.1 Correctness and data integrity
+
+| ID | Finding | Where | Recommendation |
+| --- | --- | --- | --- |
+| S-01 | **Business dates use the server's UTC date.** `current_date` decides expiry (usable vs expired) and is the default for expense and supplier-bill dates. Manila is UTC+8, so between midnight and 8 a.m. the database is still on yesterday. The dashboard, by contrast, converts to Asia/Manila correctly. | `consume_inventory_fefo`, `create_and_post_stock_out`, `v_inventory_stock`, `v_inventory_catalog`, `approve_refund_item_restock`, `create_expense`, `create_and_post_goods_receipt` | One `business_today()` helper reading `business_profile.timezone`; replace every `current_date`. |
+| S-02 | **Refunds are dated two ways.** `v_daily_sales` and `v_product_sales_daily` subtract a refund on the original sale date; `get_dashboard_summary` subtracts it on the refund date. | views vs function | Pick one basis with management and label the other explicitly (`FIN-01`). |
+| S-03 | **"Gross sales" is already net of discounts** (`sum(total_amount)`), and no view exposes pre-discount sales or discount totals. | `v_daily_sales`, `get_dashboard_summary` | Report `subtotal`, `discount_amount`, `total_amount`, refunds and net separately (`FIN-01`, `REP-02`). |
+| S-04 | **Posted records are edited in place.** `update_expense` can change the amount, date and supplier of a posted expense with no history; `void_expense` needs no reason and records no actor or time; `update_supplier` and `update_menu_variant` overwrite every column, including ones the caller did not send. | `20260930142754`, `20260922183339`, `20260923002740` | Patch semantics (`coalesce` to the existing value), plus an audit row for every change to a posted record (`SUP-01`). |
+| S-05 | **Posted stock and purchasing documents cannot be corrected.** Statuses `CANCELLED`/`VOIDED`/`VOID` exist for goods receipts, stock-outs and supplier bills, but no function sets them, and counts, disposals and supplier payments have no reversal at all. | whole schema | Reversal functions that post opposite ledger movements and keep the original (`INV-02`). |
+| S-06 | **Only checkout is retry-safe, and the app does not use it.** `orders.client_request_id` and `payments.idempotency_key` exist; refunds, stock-outs, counts, disposals, shift start/end, cash movements and supplier payments have no request key. Receipts and expenses are protected indirectly by the duplicate supplier-reference check. | all mutating RPCs | A request-ID parameter and unique column on every posting function (`POS-01`). Required for offline. |
+| S-07 | **A modifier group name can exist only once in the whole system** (`modifier_groups.name unique`), and `create_modifier_group_for_menu_item` always creates a new group. A second product cannot have its own "Size" or "Add-ons" group, and groups cannot be shared. | `20260922130003`, `20260923005301` | Drop the global uniqueness or add an "attach existing group" function (`MOD-01`). |
+| S-08 | **"Manager authorization" is self-authorization.** `process_refund_items` and `place_order_v2` pass `auth.uid()` as `authorized_by`; the guard triggers only check that this user holds the permission. | `20260923011712`, `20260923013054` | Acceptable only if cashiers never hold `orders.refund`/`discounts.apply`. For cashier-initiated refunds, add a second-person approval (manager PIN) (`DIS-01`, `SEC-01`). |
+| S-09 | **Two sources of stock truth.** On-hand is the sum of `stock_movements`; usable and expired are sums of `inventory_lots.remaining_quantity`. Nothing checks that they agree. | `v_inventory_stock` | A reconciliation check in the pgTAP suite and a scheduled query; or derive both from lots. |
+| S-10 | **The first admin cannot be created the documented way**, and an admin can change their own role and lock the system out of administration. | `protect_profile_privileges`, `update_employee_profile` | A one-time bootstrap function and a "last active admin" guard (`AUTH-01`). |
+| S-11 | `profiles.email` is copied from `auth.users` only on insert. | `handle_new_auth_user` | Also sync on email change. |
+| S-12 | Migrations `20260923012529` and `20260923013054` are identical, and several schema migrations edit demo rows by SKU (`PRD-005`, `PRD-006`, `PRD-008`, `INV-001`). `seed.sql` creates products and opening stock although it is described as reference data. | migrations, seed | Leave applied migrations alone; for the café's real setup, split reference data from sample data (`DOC-01`). |
+| S-13 | Discount codes (`PROMO_PERCENT`, `PROMO_FIXED`, `MANUAL`) and the cash method code (`CASH`) are hard-coded inside functions. | `place_order_v2`, `get_pos_discount_types`, `end_shift` | A flag column (`is_pos_enabled`, `is_cash`) instead of literals, so management can add a discount without a migration (`DIS-01`). |
+
+### 6.2 Security
+
+| ID | Finding | Recommendation |
+| --- | --- | --- |
+| S-14 | **Financial history can be hard-deleted through the API.** The original `FOR ALL` management policies were split into insert/update/delete policies, so an account with the matching permission can `DELETE` or directly `UPDATE` rows in `expenses`, `purchase_orders`, `supplier_bills`, `stock_counts`, `shifts`, `invoice_sequences`, `system_settings` and the menu tables without going through any function. The app does not do this, but the database allows it. | Remove update/delete policies from transactional tables; keep writes behind functions; add triggers that reject changes to posted rows. |
+| S-15 | **The audit trail is thin and unreadable.** `audit_logs` records about a dozen events (shift, checkout, refund, receipt, stock-out, count, restock). It records nothing for price or menu changes, user role or status changes, expense edits, supplier edits or settings, and no screen reads it. | Audit triggers on master data and posted records; a management audit view (`TRACE-01`). |
+| S-16 | `authenticated` still holds table-level `select, insert, update, delete` on every table that existed at migration `0007`; only RLS stands between a signed-in user and each table. The final default-deny migration tightened `anon` and future objects, not these. | Revoke write grants on tables that are function-only. |
+
+### 6.3 Performance
+
+| ID | Finding | Recommendation |
+| --- | --- | --- |
+| S-17 | **Stock availability is recomputed from the whole ledger on every use.** `v_inventory_stock` sums all of `stock_movements`; `v_pos_menu` joins it; and `guard_order_item_stock_availability` queries `v_pos_menu` once per order line during checkout. Fine today, slower every month. | A maintained per-item balance, or compute usable stock from open lots only. |
+| S-18 | `next_invoice_number` locks a single row, so every checkout queues behind it. Fine for one till; incompatible with offline devices. | Per-device sequences (section 7). |
+
+### 6.4 Missing objects (confirmed by the full read)
+
+Category management functions (`CAT-01`); discount-type management (`DIS-01`); any writer for `supplier_items` (`INV-01`); editing for `business_profile` and `system_settings`; an audit reader (`TRACE-01`); date-range report functions and exports (`REP-01`–`REP-05`); a shift report (`v_shift_summary` exists but is unused); reversal functions (S-05).
+
+## 7. Offline operation (requirement set by Charlie on 2 October 2026)
+
+This changes the documented baseline: README and AGENTS.md treat offline as outside scope pending its own decision (`OPS-02`). It is recorded here as a decision to confirm with Brian and the café before build work starts.
+
+Why the current design cannot work offline: every sale is one online function call; the server assigns the order number, the invoice number and all timestamps with `now()`; prices are re-read from the live menu when the order is inserted; a shift must be open on the server at that moment; and insufficient stock rejects the sale.
+
+Recommended scope, which is also how Loyverse divides it: **the till works offline; the back office stays online.** Selling, payments, shift open/close and cash movements are queued on the device. Purchasing, counts, expenses, menu editing, users and reports need a connection.
+
+What it takes:
+
+| Area | Change |
+| --- | --- |
+| Device storage | A local database on the tablet (SQLite) holding the menu, modifiers, discounts, payment methods and a stock snapshot, plus an outbox of unsent transactions. This adds a dependency and a local data layer, which AGENTS.md §2 says needs a team decision. |
+| Identity of records | The device creates the UUIDs for orders, lines and payments. A new `sync_order(jsonb)` function accepts them and is idempotent on `client_request_id`. |
+| Time | Functions accept the device's `occurred_at`; `completed_at` stops being `now()`. |
+| Prices | The server accepts the price and discount the customer was actually charged, validates them against the menu version, and flags differences instead of re-pricing. |
+| Numbering | Register devices (`devices` table already exists) and number receipts per device, for example `T1-000123`; `invoice_sequences` gains a device column. |
+| Stock | A sale already made offline cannot be refused. The sync accepts it, lets stock go negative for that item and lists it for a manager to resolve. |
+| Shifts and cash | Shift open, close and cash movements carry device timestamps and request IDs; the sync must accept an order whose shift has since closed. |
+| Sign-in | A cached session and a local PIN so a cashier can open the till without a connection; cached permissions; server remains the authority at sync. |
+| Master data sync | `updated_at` and soft-delete markers on every reference table (several have neither today) so the device can fetch only what changed. |
+| User-visible state | "Offline, 3 sales waiting", sync progress, and a manager list of sales that synced with differences. |
+| Tests | Lost-connection checkout, duplicate sync, two devices selling the last item, clock skew, shift closed before sync. |
+
+Order of work: S-06 (request IDs) and S-01 (business time) come first because offline depends on both.
+
+## 8. Compared with a commercial POS (Loyverse)
+
+| Capability | Loyverse | This app today |
+| --- | --- | --- |
+| Sell offline and sync later | yes | no (section 7) |
+| Items, variants, modifiers | yes | yes; modifier groups cannot share a name (S-07) |
+| Category management | yes | read-only (`CAT-01`) |
+| Discounts managed by the owner | yes | three hard-coded types, no management screen (`DIS-01`) |
+| Receipt showing discounts and modifiers; print or email | yes | on-screen only, discount line missing (F-08, `POS-02`, `OPS-02`) |
+| Open tickets (save an order and pay later) | yes | schema supports `OPEN` orders; the app always pays immediately |
+| Split payments | yes | schema supports it; switched off |
+| Shift open/close with cash report | yes | open, close and cash movements exist; no shift report |
+| Sales reports by item, category, employee, payment type, discount; any date range; export | yes | last 7 or 30 days, top 10 products, no export (`REP-01`–`REP-05`) |
+| Stock tracking, low-stock list, purchase orders, counts | paid add-on | present; no low-stock or loss report, no corrections (S-05) |
+| Employee PIN sign-in and per-employee sales | yes | email and password only |
+| Customers and loyalty | yes | deliberately outside the baseline |
+| Multiple stores | yes | deliberately single-branch |
+| Lot-level expiry (FEFO), supplier bills and payables, expense records | no | yes — this is where the app already does more |
+
