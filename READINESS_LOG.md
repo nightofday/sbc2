@@ -18,7 +18,7 @@ Status words are used strictly: **found** (observed, not fixed), **changed** (co
 | Hosted test database | project `ybjyandkpgegrtthokgs`, 38 migrations and `seed.sql` applied | `supabase db push --include-seed` output, no errors |
 | First admin account | created in the dashboard, then activated by SQL | signed in as Administrator |
 | Docker | not installed | pgTAP database tests have **not** been run |
-| `create-employee` Edge Function | deployed to the test project on 3 October 2026 (version 1, JWT required) | creating a staff account from the app has not been run yet |
+| `create-employee` Edge Function | deployed to the test project on 3 October 2026 (version 1, JWT required) | a Cashier account was created with it from User Management on 3 October 2026 |
 
 Found during setup:
 
@@ -163,9 +163,9 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-03 | One money format everywhere (`₱1,540.50`, `-₱200.00`); receipts carry date and time; order details and receipts show the refunded amount; an ordinary size ("Regular") is not printed after the product name; one-tap cash amounts at payment; products are compact rows on a phone and the phone tab shows the cart count and total; the phone app bar shows the business name | Design pass after the live check | `test/till_helpers_test.dart` (4 tests), `test/till_phone_layout_test.dart` |
 | 2026-10-03 | Hold and continue an order on the till (`HeldOrder`, `HeldOrdersStore`): a cart with its table or customer name is set aside on the device and picked up later at the current menu prices; a product removed from the menu meanwhile is left out and reported | Open tickets: a table that is still ordering had to be paid at once or lost | `test/held_orders_test.dart` (3 tests). Device-local by design: nothing is posted, no stock moves and no report shows it until it is paid, and another device cannot see it |
 | 2026-10-03 | Copy Receipt on both receipt dialogs (`receiptText`) | A receipt could not leave the screen; printing is undecided (`OPS-02`) | `test/till_helpers_test.dart` |
-| 2026-10-03 | `supabase/functions/create-employee/index.ts` assigns the new employee's role through `update_employee_profile` as the requesting administrator, instead of updating `profiles` with the service key | Read of the code against the database guards: `protect_profile_privileges` refuses a role change from a caller with no user, which is what the service key is, so the function would create the sign-in, fail to assign the role, and delete the sign-in again | **Not run.** Deployed to the test project on 3 October 2026 (next row); creating an employee through it has not been tried yet. The reasoning is from the trigger and function source only |
+| 2026-10-03 | `supabase/functions/create-employee/index.ts` assigns the new employee's role through `update_employee_profile` as the requesting administrator, instead of updating `profiles` with the service key | Read of the code against the database guards: `protect_profile_privileges` refuses a role change from a caller with no user, which is what the service key is, so the function would create the sign-in, fail to assign the role, and delete the sign-in again | Deployed on 3 October 2026 (next row). Charlie then created a Cashier account from User Management: the profile is `CASHIER` / `ACTIVE` with its email, and the audit log records Charlie, not a blank actor, as the person who set the role |
 | 2026-10-03 | `android/app/src/main/AndroidManifest.xml` declares the `INTERNET` permission; app name set to "Street Bowl Café" on Android, iOS and web instead of `sbc_management_system` / "A new Flutter project." | **Release blocker found by reading the manifests:** only the debug and profile manifests had the permission, so a release build installed on the tablet could not reach the server at all | `flutter build web --release` compiles. The Android build itself was **not run**: no Android SDK on this machine |
-| 2026-10-03 | `create-employee` deployed to the test project with `supabase functions deploy create-employee` (asked for by Charlie) | Needed to create Cashier and Manager accounts and test those roles | Function listed as `ACTIVE`, version 1, `verify_jwt` on; a request without a sign-in is refused with 401. No account has been created through it yet |
+| 2026-10-03 | `create-employee` deployed to the test project with `supabase functions deploy create-employee` (asked for by Charlie) | Needed to create Cashier and Manager accounts and test those roles | Function listed as `ACTIVE`, version 1, `verify_jwt` on; a request without a sign-in is refused with 401. Charlie created a Cashier account through it the same day (previous row) |
 | 2026-10-03 | `showPrototypeDialog` builds its dialog from plain layout widgets instead of `AlertDialog`; status badges in tables are left-aligned instead of stretched | **Reported by Charlie:** the New Purchase Order form went blank after adding an item. `AlertDialog` measures its content's intrinsic size and the line list uses a `LayoutBuilder`, which cannot be measured; the same applied to every shared dialog with width-adaptive content | Reproduced live, then fixed and re-run live: PO-15 created, approved and received (GR-127, 10 pc, ₱150). Regression test in `test/responsive_widgets_test.dart`. |
 
 The first three rows are Flutter-only changes; the rest add thirteen database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 96 passed. pgTAP: 22 files, 439 assertions, all passing in rolled-back trial runs against the hosted test project. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
@@ -187,7 +187,8 @@ Run as Administrator against the hosted test project, in the browser pane at 128
 
 Not checked live:
 
-- Anything as a Cashier or Manager. Only one sign-in exists on the test project. The `create-employee` function is now deployed, but no account has been created through it yet.
+- A Manager account. Not created yet.
+- Cashier, partly: Charlie created a Cashier account and reported on 3 October 2026 that it works. I did not watch that session; the database shows the account but, at the time of writing, no shift or sale made by it.
 - Phone width by hand. The browser pane emulates touch below 768 px and its clicks do not reach Flutter; phone layouts are covered by widget tests at 360–375 px only.
 - Offline, by cutting the network. Covered by tests with a fake server only.
 - A release build, and the Android tablet itself.
@@ -486,7 +487,7 @@ Business decisions (cannot be settled in code):
 
 Technical work not done:
 
-1. Create a Cashier and a Manager from User Management (the `create-employee` function was deployed on 3 October 2026 but has not been run), then test both roles end to end. If account creation fails, the error message points at the role assignment step rewritten that day.
+1. Create a Manager from User Management and test that role. The Cashier role was created through `create-employee` and reported working by Charlie on 3 October 2026; a full cashier shift (open, sell, cash movement, close, shift report) as that user is still worth running once.
 2. Build the Android release and test it on the tablet, including a real loss of network. The web release build compiles; the Android build has never been run here (no Android SDK). Before publishing, replace the application ID `com.example.sbc_management_system` and set up release signing.
 3. Run CI. The GitHub workflow has never run for this branch because local Docker is not installed; the same pgTAP files were run against the hosted project instead.
 4. Open tickets shared between devices (held orders are on one device only), split payments, PIN sign-in, receipt printing, file export of reports.
