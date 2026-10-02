@@ -35,9 +35,41 @@ All 14 destinations opened as Administrator in the phone-width layout against th
 | F-02 | `supabase/seed.sql` is described as reference data only but creates 8 menu products and 3 stock items with opening quantities and stock-in movements. | found | `DOC-01` |
 | F-03 | "Add Expense" is disabled until a supplier exists. Deliberate, but a first-run trap. | found | `UX-04` |
 | F-04 | The Email column is blank for the admin row in User Management. Cause not investigated. | found | `AUTH-01` |
-| F-05 | In New Order, the cart showed Chocolate Cake × 4 while the app warned "only has 2 available". Whether checkout rejects it has not been tested. | found, unverified | `POS-01` |
+| F-05 | In New Order, the cart once showed Chocolate Cake × 4 while the app warned "only has 2 available". **Not reproduced** in the transaction pass: both the Add button and the cart "+" stopped at 2. | not reproduced | — |
 
 Not covered yet: any transaction (sale, refund, receiving, release, disposal, count, expense), tablet and desktop layouts, Cashier and Manager logins.
+
+## 3a. Transaction pass (2 October 2026, Administrator, hosted test database)
+
+Run in debug mode at a 296 px wide viewport, which is narrower than the 320 px minimum in `UX-03`; layout overflows seen at this width are marked as such. Test records are prefixed `TEST`.
+
+Steps completed and results:
+
+| Step | Result |
+| --- | --- |
+| Add supplier "TEST Grocery Mart" | saved; listed |
+| Add inventory item "TEST Paper Cups" (pc) | saved |
+| Receive 2 boxes at 50 pc per box, ₱100 per box, invoice `TEST-INV-001` | posted as `GR-1`; Stock Overview shows Usable 100 pc; supplier payable appears in Finance |
+| Sell 1 Cookie + 2 Chocolate Cake, 10% promotional discount, cash | order `#1`, invoice `SI-00000001`, subtotal ₱410, discount ₱41, total ₱369 |
+| Refund 1 Chocolate Cake | refund ₱162 (discount correctly allocated: ₱162 per cake, ₱45 per cookie) |
+| Compare Dashboard, Finance | agree after reload: net sales ₱207, refunds ₱162, 1 order |
+
+Findings:
+
+| ID | Finding | Status | Task |
+| --- | --- | --- | --- |
+| F-06 | **App crashed to the Flutter error screen** when saving a line in Receive Stock → Add Item (first attempt). Console: "A TextEditingController was used after being disposed", then framework assertions. The same steps worked on the second attempt, so it is intermittent. Likely cause: `_showLineEditor` in `lib/screens/purchasing/purchasing_screen.dart` disposes its controllers immediately after the dialog returns, while the closing dialog can still rebuild. The same dispose-after-dialog pattern appears in most screens. Seen in debug mode only; release-mode behavior not tested. | found | new (P0 candidate) |
+| F-07 | "setState() callback argument returned a Future" is logged in the purchasing and payment flows. | found | `UX-04` |
+| F-08 | The receipt and the order detail list items at full price (₱50 + ₱360) and a total of ₱369 with **no discount line**. | found; confirms `POS-02` | `POS-02` |
+| F-09 | After a sale and a refund, the **Dashboard still showed ₱0.00 and 0 orders** while Finance showed ₱207. It was correct only after reloading the page. | found; confirms `SYNC-01` | `SYNC-01` |
+| F-10 | Finance labels ₱369 as "Gross Sales"; that figure is already after the ₱41 discount. Pre-discount sales (₱410) and the discount are not shown anywhere. | found; confirms `FIN-01` | `FIN-01`, `REP-02` |
+| F-11 | The payment dialog defaults the method to "Other", and "Amount Received" stays at the pre-discount ₱410 after a discount is applied. | found | `UX-01`, `UX-04` |
+| F-12 | Add Supplier offers only name and phone. Email, address, contact person and terms cannot be entered, so `SUP-01` (details wiped on edit) cannot be reproduced through the app alone. | found | `SUP-01`, `PUR-01` |
+| F-13 | Layout overflows at 296 px: item dropdown in Received Item (24 px, `purchasing_screen.dart:987`) and discount dropdown in Proceed to Payment (32 px). Below the supported minimum width; recheck at 320 px. | found | `UX-03` |
+
+Worked as intended: package conversion on receiving, the finished-goods stock cap in the cart, proportional discount allocation in the refund preview, invoice numbering.
+
+Not yet exercised: stock release, disposal, physical count, adjustment, expenses, purchase orders, supplier bill payment, shift close, Cashier and Manager roles, reports beyond Finance.
 
 ## 4. Database schema review (first pass)
 
