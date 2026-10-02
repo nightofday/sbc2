@@ -1,0 +1,37 @@
+name: Database CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - brian/full-system-integration
+      - brian/inventory-consultation-alignment
+      - brian/inventory-workflow-navigation
+  pull_request:
+    branches:
+      - main
+      - brian/full-system-integration
+      - brian/inventory-workflow-navigation
+
+jobs:
+  database-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v2
+        with:
+          version: 2.109.1
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Verify presentation seed test fixture
+        run: diff -u supabase/demo_seed.sql supabase/tests/database/fixtures/demo_seed.psql
+
+      - name: Run pgTAP database tests
+        run: supabase test db
