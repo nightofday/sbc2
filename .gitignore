@@ -50,3 +50,6 @@ app.*.map.json
 # Local Node/Supabase CLI dependencies
 node_modules/
 supabase/.temp/
+
+# Local-only notes such as test account passwords. Never committed.
+*.local.md

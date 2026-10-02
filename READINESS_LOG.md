@@ -170,6 +170,18 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 
 The first three rows are Flutter-only changes; the rest add thirteen database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 96 passed. pgTAP: 22 files, 439 assertions, all passing in rolled-back trial runs against the hosted test project. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
+### Test accounts
+
+Three sign-ins exist on the hosted test project, one per role, all `ACTIVE`:
+
+| Role | Email | Created |
+| --- | --- | --- |
+| Administrator | demo@demo.com | first-admin bootstrap, 2 October 2026 |
+| Cashier | cashier@demo.com | User Management through `create-employee`, 3 October 2026 |
+| Manager | manager@demo.com | User Management through `create-employee`, 3 October 2026 |
+
+The passwords are kept outside git in `TEST_ACCOUNTS.local.md` in the repository folder on Charlie's machine (ignored by `*.local.md`). They are test-project accounts only and share one password, so change them before the project holds real data.
+
 ### Live check on 3 October 2026
 
 Run as Administrator against the hosted test project, in the browser pane at 1280 × 800 and 1024 × 768. Each action below was performed in the app and its result read from the screen.
@@ -187,8 +199,7 @@ Run as Administrator against the hosted test project, in the browser pane at 128
 
 Not checked live:
 
-- A Manager account. Not created yet.
-- Cashier, partly: Charlie created a Cashier account and reported on 3 October 2026 that it works. I did not watch that session; the database shows the account but, at the time of writing, no shift or sale made by it.
+- Cashier and Manager were tested by Charlie on 3 October 2026, not by me. Charlie reported both working; the database shows both accounts active with the right roles.
 - Phone width by hand. The browser pane emulates touch below 768 px and its clicks do not reach Flutter; phone layouts are covered by widget tests at 360–375 px only.
 - Offline, by cutting the network. Covered by tests with a fake server only.
 - A release build, and the Android tablet itself.
@@ -487,7 +498,7 @@ Business decisions (cannot be settled in code):
 
 Technical work not done:
 
-1. Create a Manager from User Management and test that role. The Cashier role was created through `create-employee` and reported working by Charlie on 3 October 2026; a full cashier shift (open, sell, cash movement, close, shift report) as that user is still worth running once.
+1. Done 3 October 2026: Cashier and Manager accounts were created through `create-employee` and tested by Charlie. Still worth running once as the Cashier: a full shift (open with cash, sell, cash movement, close, shift report).
 2. Build the Android release and test it on the tablet, including a real loss of network. The web release build compiles; the Android build has never been run here (no Android SDK). Before publishing, replace the application ID `com.example.sbc_management_system` and set up release signing.
 3. Run CI. The GitHub workflow has never run for this branch because local Docker is not installed; the same pgTAP files were run against the hosted project instead.
 4. Open tickets shared between devices (held orders are on one device only), split payments, PIN sign-in, receipt printing, file export of reports.
