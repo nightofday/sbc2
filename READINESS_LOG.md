@@ -129,8 +129,35 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | `showSettledDialog` in `lib/widgets/common/app_dialog.dart`; `showPrototypeDialog` and the two raw `showDialog` calls now use it (`c4d1ed6`) | F-06: dialogs completed while still animating out, so callers disposed controllers the closing dialog was still using | `test/app_dialog_test.dart` fails without the change and passes with it; live re-run of Receive Stock → Add Item did not crash |
 | 2026-10-02 | Dashboard refresh callback uses a block body (`94c6d98`) | F-09/F-07: the arrow callback returned a Future, which `setState` rejects in debug builds before marking the screen dirty, so the dashboard never redrew | `test/dashboard_refresh_test.dart` fails without the change and passes with it; live check after posting an expense |
 | 2026-10-02 | `AuthGate` refreshes an already loaded profile in place (`bc72e72`) | F-17: every auth event showed the loading screen and unmounted the app | analyzer and existing tests only; no automated test (needs an initialised Supabase client) |
+| 2026-10-02 | Migration `20261002132705_business_date_helper.sql`: `business_today()` replaces every `current_date`; expense and supplier-bill date defaults use it (`aca52a7`) | S-01: the server date is UTC, a day behind Manila until 08:00 | pgTAP `10_business_date.test.sql`, 9 of 9 passing; no public function or view contains `current_date` afterwards; applied to the hosted test project |
+| 2026-10-02 | Migration `20261002134000_checkout_request_id.sql`: `create_order`, `place_order`, `place_order_v2` return a stored order only to its creator, return a since-refunded sale instead of failing, and take an advisory lock per request (`aca52a7`) | POS-01 / S-06, server side | pgTAP `11_checkout_request_id.test.sql`, 9 of 9 passing; applied to the hosted test project. The advisory lock itself is not tested: that needs two concurrent sessions |
+| 2026-10-02 | App sends a request ID with every checkout and recovers after a lost response (`a955e52`): `CheckoutAttempt`, `newRequestId`, `CheckoutSavedException` in `lib/models/pos_checkout.dart`; `findOrderByRequestId` on `OrderRepository`; POS screen logic | POS-01, app side: the app sent null, so a sale that committed just before the connection dropped could be charged twice | `test/checkout_request_id_test.dart` (4 tests, including a simulated lost response on the POS screen: two submissions, one request ID, one order); live sale stored a request ID (order `#8`) |
 
-All three are Flutter changes. `flutter analyze`: no issues. `flutter test`: 24 passed. No database schema has been changed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the last three add two database migrations. `flutter analyze`: no issues. `flutter test`: 28 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+
+### How the database changes were tested without Docker
+
+Docker is not installed, so `supabase test db` could not run. Instead each migration and test file was executed against the hosted test project with `supabase db query --linked`, inside a transaction that ends in a deliberate error so that nothing is committed. Results on 2 October 2026:
+
+| File | Result |
+| --- | --- |
+| `10_business_date` and `11_checkout_request_id` (new) | 9 of 9 and 9 of 9 |
+| `01`, `04`, `05`, `06`, `07`, `09` with the new migrations | all assertions pass (22, 12, 10, 13, 12, 14) |
+| `02`, `03` with the new migrations | pass (35, 20) once the `TEST` rows from section 3a are removed inside the transaction; on the populated database they fail before and after the migrations, because they select "the latest" refund item or stock-out by random UUID order |
+| `08_api_security_hardening` | 17 of 18, before and after: see S-19 |
+
+This is equivalent in content to the CI run but is not the CI run. Database CI has not executed for these changes.
+
+Side effect: identity sequences do not roll back, so these trial runs consumed order numbers 2 to 7 on the test project. The next real order was `#8`.
+
+| ID | Finding | Status |
+| --- | --- | --- |
+| S-19 | On the hosted project, `authenticated` can execute `set_updated_at()`. The repository's own test 10 in `08_api_security_hardening` therefore fails there. Low risk: it is a trigger function and cannot be called through the API, but the hosted project's default privileges differ from the local CI database, so "passes in CI" does not prove the hosted grants. | found |
+| S-20 | pgTAP files `02` and `03` pick rows with `order by id desc limit 1` on random UUIDs. They are only reliable on an empty database. | found |
+
+### Still open under S-06
+
+Only order placement is retry-safe. Refunds, stock releases, counts, disposals, shift start and end, cash movements and supplier payments still have no request ID, on either side.
 
 ## 6. SQL audit (all 38 migrations, 10,852 lines, read in full on 2 October 2026)
 
