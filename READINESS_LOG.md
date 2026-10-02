@@ -132,8 +132,10 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | Migration `20261002132705_business_date_helper.sql`: `business_today()` replaces every `current_date`; expense and supplier-bill date defaults use it (`aca52a7`) | S-01: the server date is UTC, a day behind Manila until 08:00 | pgTAP `10_business_date.test.sql`, 9 of 9 passing; no public function or view contains `current_date` afterwards; applied to the hosted test project |
 | 2026-10-02 | Migration `20261002134000_checkout_request_id.sql`: `create_order`, `place_order`, `place_order_v2` return a stored order only to its creator, return a since-refunded sale instead of failing, and take an advisory lock per request (`aca52a7`) | POS-01 / S-06, server side | pgTAP `11_checkout_request_id.test.sql`, 9 of 9 passing; applied to the hosted test project. The advisory lock itself is not tested: that needs two concurrent sessions |
 | 2026-10-02 | App sends a request ID with every checkout and recovers after a lost response (`a955e52`): `CheckoutAttempt`, `newRequestId`, `CheckoutSavedException` in `lib/models/pos_checkout.dart`; `findOrderByRequestId` on `OrderRepository`; POS screen logic | POS-01, app side: the app sent null, so a sale that committed just before the connection dropped could be charged twice | `test/checkout_request_id_test.dart` (4 tests, including a simulated lost response on the POS screen: two submissions, one request ID, one order); live sale stored a request ID (order `#8`) |
+| 2026-10-02 | Migration `20261002150000_request_ids_for_posting_functions.sql`: `client_requests` table, two internal helpers, and an optional `p_client_request_id` on shift start and end, cash movements, refunds (`process_refund`, `process_refund_items`), stock release, adjustment, disposal, count, goods receipt, supplier payment and expense creation (`62b9d20`) | S-06: a retry after a lost response posted these twice | pgTAP `12_posting_request_ids.test.sql`, 33 of 33 passing; existing files `01`–`11` unchanged in result; applied to the hosted test project; no old overloads remain (12 functions, one signature each) |
+| 2026-10-02 | Every posting form sends a request ID (`5d8b726`): one ID per form instance, passed through the repository interfaces to the functions above | S-06, app side | `flutter analyze` clean, 28 Flutter tests pass; one live cash movement (`PAY_IN` ₱20) stored a `client_requests` row linked to it |
 
-The first three rows are Flutter-only changes; the last three add two database migrations. `flutter analyze`: no issues. `flutter test`: 28 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add three database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 28 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### How the database changes were tested without Docker
 
@@ -142,6 +144,7 @@ Docker is not installed, so `supabase test db` could not run. Instead each migra
 | File | Result |
 | --- | --- |
 | `10_business_date` and `11_checkout_request_id` (new) | 9 of 9 and 9 of 9 |
+| `12_posting_request_ids` (new) | 33 of 33 |
 | `01`, `04`, `05`, `06`, `07`, `09` with the new migrations | all assertions pass (22, 12, 10, 13, 12, 14) |
 | `02`, `03` with the new migrations | pass (35, 20) once the `TEST` rows from section 3a are removed inside the transaction; on the populated database they fail before and after the migrations, because they select "the latest" refund item or stock-out by random UUID order |
 | `08_api_security_hardening` | 17 of 18, before and after: see S-19 |
@@ -155,9 +158,18 @@ Side effect: identity sequences do not roll back, so these trial runs consumed o
 | S-19 | On the hosted project, `authenticated` can execute `set_updated_at()`. The repository's own test 10 in `08_api_security_hardening` therefore fails there. Low risk: it is a trigger function and cannot be called through the API, but the hosted project's default privileges differ from the local CI database, so "passes in CI" does not prove the hosted grants. | found |
 | S-20 | pgTAP files `02` and `03` pick rows with `order by id desc limit 1` on random UUIDs. They are only reliable on an empty database. | found |
 
-### Still open under S-06
+### S-06 status
 
-Only order placement is retry-safe. Refunds, stock releases, counts, disposals, shift start and end, cash movements and supplier payments still have no request ID, on either side.
+Every function that posts a sale, a payment, a refund, a stock movement, a shift event or an expense now accepts a request ID, and the app sends one.
+
+Limits that remain:
+
+- **The ID lives in memory.** Checkout keeps it in the POS screen; other forms create one when they open. Reloading the page, or closing a form and opening it again, starts a new ID. Offline selling (section 7) needs IDs stored on the device.
+- **Only the POS screen tells the cashier what happened** after a lost response. The other forms simply become safe to save again; they do not yet explain that the first attempt may have been saved (`UX-04`).
+- **Concurrency is untested.** Each function takes an advisory lock per request so two simultaneous submissions queue, but that needs two database sessions to prove and was not exercised.
+- **`void_order`, `approve_refund_item_restock`, `approve_purchase_order` and the master-data functions have no request ID.** The first three already refuse a second application; master-data edits are repeatable without harm.
+- **`client_requests` grows without limit.** One small row per posted request; it needs a retention rule before long-term use.
+- The request log returns the stored document on replay even if it has since changed, for example a shift that was later closed.
 
 ## 6. SQL audit (all 38 migrations, 10,852 lines, read in full on 2 October 2026)
 
@@ -167,12 +179,12 @@ The schema is stronger than the app built on it: UUID keys, name and price snaps
 
 | ID | Finding | Where | Recommendation |
 | --- | --- | --- | --- |
-| S-01 | **Business dates use the server's UTC date.** `current_date` decides expiry (usable vs expired) and is the default for expense and supplier-bill dates. Manila is UTC+8, so between midnight and 8 a.m. the database is still on yesterday. The dashboard, by contrast, converts to Asia/Manila correctly. | `consume_inventory_fefo`, `create_and_post_stock_out`, `v_inventory_stock`, `v_inventory_catalog`, `approve_refund_item_restock`, `create_expense`, `create_and_post_goods_receipt` | One `business_today()` helper reading `business_profile.timezone`; replace every `current_date`. |
+| S-01 | *(Addressed 2 October 2026, see section 5.)* **Business dates used the server's UTC date.** `current_date` decides expiry (usable vs expired) and is the default for expense and supplier-bill dates. Manila is UTC+8, so between midnight and 8 a.m. the database is still on yesterday. The dashboard, by contrast, converts to Asia/Manila correctly. | `consume_inventory_fefo`, `create_and_post_stock_out`, `v_inventory_stock`, `v_inventory_catalog`, `approve_refund_item_restock`, `create_expense`, `create_and_post_goods_receipt` | One `business_today()` helper reading `business_profile.timezone`; replace every `current_date`. |
 | S-02 | **Refunds are dated two ways.** `v_daily_sales` and `v_product_sales_daily` subtract a refund on the original sale date; `get_dashboard_summary` subtracts it on the refund date. | views vs function | Pick one basis with management and label the other explicitly (`FIN-01`). |
 | S-03 | **"Gross sales" is already net of discounts** (`sum(total_amount)`), and no view exposes pre-discount sales or discount totals. | `v_daily_sales`, `get_dashboard_summary` | Report `subtotal`, `discount_amount`, `total_amount`, refunds and net separately (`FIN-01`, `REP-02`). |
 | S-04 | **Posted records are edited in place.** `update_expense` can change the amount, date and supplier of a posted expense with no history; `void_expense` needs no reason and records no actor or time; `update_supplier` and `update_menu_variant` overwrite every column, including ones the caller did not send. | `20260930142754`, `20260922183339`, `20260923002740` | Patch semantics (`coalesce` to the existing value), plus an audit row for every change to a posted record (`SUP-01`). |
 | S-05 | **Posted stock and purchasing documents cannot be corrected.** Statuses `CANCELLED`/`VOIDED`/`VOID` exist for goods receipts, stock-outs and supplier bills, but no function sets them, and counts, disposals and supplier payments have no reversal at all. | whole schema | Reversal functions that post opposite ledger movements and keep the original (`INV-02`). |
-| S-06 | **Only checkout is retry-safe, and the app does not use it.** `orders.client_request_id` and `payments.idempotency_key` exist; refunds, stock-outs, counts, disposals, shift start/end, cash movements and supplier payments have no request key. Receipts and expenses are protected indirectly by the duplicate supplier-reference check. | all mutating RPCs | A request-ID parameter and unique column on every posting function (`POS-01`). Required for offline. |
+| S-06 | *(Addressed 2 October 2026, see section 5.)* **Only checkout was retry-safe, and the app did not use it.** `orders.client_request_id` and `payments.idempotency_key` exist; refunds, stock-outs, counts, disposals, shift start/end, cash movements and supplier payments have no request key. Receipts and expenses are protected indirectly by the duplicate supplier-reference check. | all mutating RPCs | A request-ID parameter and unique column on every posting function (`POS-01`). Required for offline. |
 | S-07 | **A modifier group name can exist only once in the whole system** (`modifier_groups.name unique`), and `create_modifier_group_for_menu_item` always creates a new group. A second product cannot have its own "Size" or "Add-ons" group, and groups cannot be shared. | `20260922130003`, `20260923005301` | Drop the global uniqueness or add an "attach existing group" function (`MOD-01`). |
 | S-08 | **"Manager authorization" is self-authorization.** `process_refund_items` and `place_order_v2` pass `auth.uid()` as `authorized_by`; the guard triggers only check that this user holds the permission. | `20260923011712`, `20260923013054` | Acceptable only if cashiers never hold `orders.refund`/`discounts.apply`. For cashier-initiated refunds, add a second-person approval (manager PIN) (`DIS-01`, `SEC-01`). |
 | S-09 | **Two sources of stock truth.** On-hand is the sum of `stock_movements`; usable and expired are sums of `inventory_lots.remaining_quantity`. Nothing checks that they agree. | `v_inventory_stock` | A reconciliation check in the pgTAP suite and a scheduled query; or derive both from lots. |
