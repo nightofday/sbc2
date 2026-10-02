@@ -97,6 +97,9 @@ class MenuModifierGroupRecord {
   final bool isActive;
   final List<MenuModifierRecord> modifiers;
 
+  /// How many products use this group. More than one means it is shared.
+  final int productCount;
+
   const MenuModifierGroupRecord({
     required this.menuItemId,
     required this.groupId,
@@ -106,6 +109,7 @@ class MenuModifierGroupRecord {
     required this.isRequired,
     required this.isActive,
     required this.modifiers,
+    this.productCount = 1,
   });
 }
 
@@ -121,4 +125,44 @@ class MenuModifierRecord {
     required this.priceDelta,
     required this.isActive,
   });
+}
+
+/// A modifier group that exists somewhere on the menu, with the products
+/// that use it. Shown when choosing an existing group for another product.
+class ModifierGroupLibraryRecord {
+  final String groupId;
+  final String groupName;
+  final int minSelections;
+  final int? maxSelections;
+  final bool isRequired;
+  final bool isActive;
+  final int activeOptionCount;
+  final int productCount;
+  final String productNames;
+
+  const ModifierGroupLibraryRecord({
+    required this.groupId,
+    required this.groupName,
+    required this.minSelections,
+    required this.maxSelections,
+    required this.isRequired,
+    required this.isActive,
+    required this.activeOptionCount,
+    required this.productCount,
+    required this.productNames,
+  });
+
+  factory ModifierGroupLibraryRecord.fromMap(Map<String, dynamic> map) {
+    return ModifierGroupLibraryRecord(
+      groupId: map['modifier_group_id']?.toString() ?? '',
+      groupName: map['group_name']?.toString() ?? '',
+      minSelections: (map['min_selections'] as num?)?.toInt() ?? 0,
+      maxSelections: (map['max_selections'] as num?)?.toInt(),
+      isRequired: map['is_required'] == true,
+      isActive: map['is_active'] == true,
+      activeOptionCount: (map['active_option_count'] as num?)?.toInt() ?? 0,
+      productCount: (map['product_count'] as num?)?.toInt() ?? 0,
+      productNames: map['product_names']?.toString() ?? '',
+    );
+  }
 }

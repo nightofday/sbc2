@@ -18,6 +18,50 @@ class DataTableCard extends StatelessWidget {
     this.flexes,
   });
 
+  /// Below this width a table that does not fit is shown as stacked rows.
+  static const double _stackedBreakpoint = 600;
+
+  Widget _buildStacked() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (rows[rowIndex].isNotEmpty) rows[rowIndex].first,
+                for (int i = 1; i < rows[rowIndex].length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 104,
+                          child: Text(
+                            i < headers.length ? headers[i] : '',
+                            style: AppTextStyles.caption.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: rows[rowIndex][i]),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (rowIndex != rows.length - 1)
+            const Divider(height: 1, color: AppColors.gray200),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final columnFlexes = flexes ?? List.filled(headers.length, 1);
@@ -28,6 +72,14 @@ class DataTableCard extends StatelessWidget {
         builder: (context, constraints) {
           final minimumTableWidth = headers.length * 132.0;
           final tableWidth = math.max(constraints.maxWidth, minimumTableWidth);
+
+          // On a phone a wide table had to be scrolled sideways, which hid
+          // the status and action columns. Stack each row instead so every
+          // value and button is on screen.
+          if (constraints.maxWidth < _stackedBreakpoint &&
+              constraints.maxWidth < minimumTableWidth) {
+            return _buildStacked();
+          }
 
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,

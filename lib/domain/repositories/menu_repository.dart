@@ -11,6 +11,27 @@ abstract class MenuRepository {
     String menuItemId,
   );
 
+  /// Every modifier group on the menu, for reuse on another product.
+  Future<List<ModifierGroupLibraryRecord>> getModifierGroupLibrary();
+
+  /// Uses an existing, shared group on [menuItemId].
+  Future<void> attachModifierGroup({
+    required String menuItemId,
+    required String groupId,
+  });
+
+  /// Takes a group off one product without deleting it.
+  Future<void> detachModifierGroup({
+    required String menuItemId,
+    required String groupId,
+  });
+
+  /// Sets the order options are offered in.
+  Future<void> reorderModifiers({
+    required String groupId,
+    required List<String> modifierIds,
+  });
+
   Future<String> createModifierGroup({
     required String menuItemId,
     required String groupName,

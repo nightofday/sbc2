@@ -7,6 +7,33 @@ import 'package:sbc_management_system/widgets/common/summary_card.dart';
 import 'package:sbc_management_system/widgets/layout/app_page.dart';
 
 void main() {
+  testWidgets('a wide table stacks on a phone so its action is on screen', (
+    tester,
+  ) async {
+    _setViewport(tester, const Size(360, 700));
+    await tester.pumpWidget(_wideTable());
+
+    final button = tester.getRect(find.widgetWithText(OutlinedButton, 'Void'));
+    expect(button.left, greaterThanOrEqualTo(0));
+    expect(button.right, lessThanOrEqualTo(360));
+    // Each value is labelled with its column heading.
+    expect(find.text('Status'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the same table stays a table on a wide screen', (tester) async {
+    _setViewport(tester, const Size(1200, 700));
+    await tester.pumpWidget(_wideTable());
+
+    final document = tester.getTopLeft(find.text('SO-1'));
+    final button = tester.getTopLeft(
+      find.widgetWithText(OutlinedButton, 'Void'),
+    );
+    // Columns sit side by side on one row.
+    expect(button.dx, greaterThan(document.dx + 600));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('filter bar stacks controls on narrow screens', (tester) async {
     _setViewport(tester, const Size(360, 700));
     await tester.pumpWidget(
@@ -150,6 +177,37 @@ void main() {
     expect(find.byType(SingleChildScrollView), findsWidgets);
     expect(tester.takeException(), isNull);
   });
+}
+
+Widget _wideTable() {
+  return MaterialApp(
+    home: Scaffold(
+      body: SingleChildScrollView(
+        child: DataTableCard(
+          headers: const [
+            'Document',
+            'Date',
+            'Purpose',
+            'Reference',
+            'Items',
+            'Status',
+            'Action',
+          ],
+          rows: [
+            [
+              const Text('SO-1'),
+              const Text('10/2 9:18 PM'),
+              const Text('Released to service counter'),
+              const Text('—'),
+              const Text('1'),
+              const Text('POSTED'),
+              OutlinedButton(onPressed: () {}, child: const Text('Void')),
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 void _setViewport(WidgetTester tester, Size size) {
