@@ -135,8 +135,11 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | Migration `20261002150000_request_ids_for_posting_functions.sql`: `client_requests` table, two internal helpers, and an optional `p_client_request_id` on shift start and end, cash movements, refunds (`process_refund`, `process_refund_items`), stock release, adjustment, disposal, count, goods receipt, supplier payment and expense creation (`62b9d20`) | S-06: a retry after a lost response posted these twice | pgTAP `12_posting_request_ids.test.sql`, 33 of 33 passing; existing files `01`–`11` unchanged in result; applied to the hosted test project; no old overloads remain (12 functions, one signature each) |
 | 2026-10-02 | Every posting form sends a request ID (`5d8b726`): one ID per form instance, passed through the repository interfaces to the functions above | S-06, app side | `flutter analyze` clean, 28 Flutter tests pass; one live cash movement (`PAY_IN` ₱20) stored a `client_requests` row linked to it |
 | 2026-10-02 | Migration `20261002160000_close_direct_write_paths.sql`: all client write policies and write grants removed from 30 transactional tables; delete policies and delete grants removed from 20 master-data tables; `set_updated_at()` revoked from clients | S-14, S-16, S-19: posted records could be inserted, edited or deleted through the Data API, bypassing every function | pgTAP `13_direct_write_paths.test.sql`: 10 of 13 fail before the migration, 13 of 13 pass after; files `01`–`12` unchanged; `08_api_security_hardening` now 18 of 18 on the hosted project; write policies on the test project went from 98 to 48, none on transactional tables; app loads and reads with no permission errors |
+| 2026-10-02 | Migration `20261002170000_auditable_edits_and_voids.sql` (`ac9e7b7`): `update_expense` writes the row before and after to `audit_logs`; `void_expense` requires a reason and stores it with who and when; `update_supplier` changes only the fields it is given; new `void_stock_out`, `void_stock_count`, `void_goods_receipt` | S-04, S-05, `SUP-01` (database side), `INV-02` (partly) | pgTAP `14_auditable_edits_and_voids.test.sql`, 39 of 39; files `01`–`13` unchanged; applied to the hosted test project |
+| 2026-10-02 | Suppliers carry separate contact person, phone, email, address, payment terms and notes in the model, repository and forms; archiving sends the status alone (`8879246`) | `SUP-01` (app side), F-12 | `test/supplier_editor_test.dart`: renaming through the real form sends every other detail back unchanged |
+| 2026-10-02 | `showReasonDialog`; void actions for expenses, goods receipts, supply releases and inventory counts (`43fe0ff`) | S-04/S-05 (app side): a function without a way to reach it is not a finished workflow | `test/reason_dialog_test.dart` (2 tests); live: `SO-1` voided from the app, stock went 50 → 100 in both lot and ledger, the original movement and a `REVERSAL` remain, one audit row written |
 
-The first three rows are Flutter-only changes; the rest add four database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 28 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add five database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 31 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### How the database changes were tested without Docker
 
@@ -146,6 +149,8 @@ Docker is not installed, so `supabase test db` could not run. Instead each migra
 | --- | --- |
 | `10_business_date` and `11_checkout_request_id` (new) | 9 of 9 and 9 of 9 |
 | `12_posting_request_ids` (new) | 33 of 33 |
+| `13_direct_write_paths` (new) | 13 of 13 (10 of 13 fail before its migration) |
+| `14_auditable_edits_and_voids` (new) | 39 of 39 |
 | `01`, `04`, `05`, `06`, `07`, `09` with the new migrations | all assertions pass (22, 12, 10, 13, 12, 14) |
 | `02`, `03` with the new migrations | pass (35, 20) once the `TEST` rows from section 3a are removed inside the transaction; on the populated database they fail before and after the migrations, because they select "the latest" refund item or stock-out by random UUID order |
 | `08_api_security_hardening` | 17 of 18, before and after: see S-19 |
@@ -158,6 +163,26 @@ Side effect: identity sequences do not roll back, so these trial runs consumed o
 | --- | --- | --- |
 | S-19 | *(Fixed 2 October 2026 in `20261002160000`.)* On the hosted project, `authenticated` could execute `set_updated_at()`. The repository's own test 10 in `08_api_security_hardening` therefore fails there. Low risk: it is a trigger function and cannot be called through the API, but the hosted project's default privileges differ from the local CI database, so "passes in CI" does not prove the hosted grants. | found |
 | S-20 | pgTAP files `02` and `03` pick rows with `order by id desc limit 1` on random UUIDs. They are only reliable on an empty database. | found |
+
+### S-04 and S-05 status
+
+How a void works: nothing is deleted. The function posts `REVERSAL` movements against the same lots the original movements touched, marks the document (`VOIDED` for releases, `CANCELLED` for counts and receipts) with the reason, the user and the time, and writes an audit row.
+
+Rules that limit a void, each covered by a test:
+
+- A goods receipt can be voided only while all the stock it added is still in its lots and its supplier bill has no payments. The unpaid bill is voided with it, a linked purchase order returns to the status its remaining receipts justify, and the supplier invoice number becomes available again.
+- A count can be voided only while any stock it added is still there.
+- A release can always be voided while it is posted.
+- Voiding needs `inventory.adjust` (releases, counts) or `purchases.manage` (receipts). A cashier is refused.
+
+Not done:
+
+- **Disposals, manual adjustments and supplier bill payments still have no reversal.** A wrong disposal has to be corrected with a manual stock-in.
+- **Voided documents drop out of Transaction Traceability**, which lists only posted documents. The void is in the audit log and the inventory history, but management cannot see it in the trace screen (`TRACE-01`).
+- **Posted expenses can still be edited**, now with a before-and-after audit row. Nothing in the app shows that history, and there is no rule yet for who may edit after posting.
+- **`update_menu_variant` still overwrites every field it is given.** The menu form always sends them all, so nothing is lost today, but it is the same pattern as the supplier defect.
+- **The void buttons sit in the last table column**, which is off-screen at phone width (same problem as F-15).
+- **Existing suppliers created before this change** have their phone in the right column but no other details; nothing needed migrating on the test project.
 
 ### What S-14 did not change
 
@@ -191,8 +216,8 @@ The schema is stronger than the app built on it: UUID keys, name and price snaps
 | S-01 | *(Addressed 2 October 2026, see section 5.)* **Business dates used the server's UTC date.** `current_date` decides expiry (usable vs expired) and is the default for expense and supplier-bill dates. Manila is UTC+8, so between midnight and 8 a.m. the database is still on yesterday. The dashboard, by contrast, converts to Asia/Manila correctly. | `consume_inventory_fefo`, `create_and_post_stock_out`, `v_inventory_stock`, `v_inventory_catalog`, `approve_refund_item_restock`, `create_expense`, `create_and_post_goods_receipt` | One `business_today()` helper reading `business_profile.timezone`; replace every `current_date`. |
 | S-02 | **Refunds are dated two ways.** `v_daily_sales` and `v_product_sales_daily` subtract a refund on the original sale date; `get_dashboard_summary` subtracts it on the refund date. | views vs function | Pick one basis with management and label the other explicitly (`FIN-01`). |
 | S-03 | **"Gross sales" is already net of discounts** (`sum(total_amount)`), and no view exposes pre-discount sales or discount totals. | `v_daily_sales`, `get_dashboard_summary` | Report `subtotal`, `discount_amount`, `total_amount`, refunds and net separately (`FIN-01`, `REP-02`). |
-| S-04 | **Posted records are edited in place.** `update_expense` can change the amount, date and supplier of a posted expense with no history; `void_expense` needs no reason and records no actor or time; `update_supplier` and `update_menu_variant` overwrite every column, including ones the caller did not send. | `20260930142754`, `20260922183339`, `20260923002740` | Patch semantics (`coalesce` to the existing value), plus an audit row for every change to a posted record (`SUP-01`). |
-| S-05 | **Posted stock and purchasing documents cannot be corrected.** Statuses `CANCELLED`/`VOIDED`/`VOID` exist for goods receipts, stock-outs and supplier bills, but no function sets them, and counts, disposals and supplier payments have no reversal at all. | whole schema | Reversal functions that post opposite ledger movements and keep the original (`INV-02`). |
+| S-04 | *(Addressed for expenses and suppliers 2 October 2026; see "S-04 and S-05 status".)* **Posted records were edited in place.** `update_expense` can change the amount, date and supplier of a posted expense with no history; `void_expense` needs no reason and records no actor or time; `update_supplier` and `update_menu_variant` overwrite every column, including ones the caller did not send. | `20260930142754`, `20260922183339`, `20260923002740` | Patch semantics (`coalesce` to the existing value), plus an audit row for every change to a posted record (`SUP-01`). |
+| S-05 | *(Addressed for receipts, releases and counts 2 October 2026; see "S-04 and S-05 status".)* **Posted stock and purchasing documents could not be corrected.** Statuses `CANCELLED`/`VOIDED`/`VOID` exist for goods receipts, stock-outs and supplier bills, but no function sets them, and counts, disposals and supplier payments have no reversal at all. | whole schema | Reversal functions that post opposite ledger movements and keep the original (`INV-02`). |
 | S-06 | *(Addressed 2 October 2026, see section 5.)* **Only checkout was retry-safe, and the app did not use it.** `orders.client_request_id` and `payments.idempotency_key` exist; refunds, stock-outs, counts, disposals, shift start/end, cash movements and supplier payments have no request key. Receipts and expenses are protected indirectly by the duplicate supplier-reference check. | all mutating RPCs | A request-ID parameter and unique column on every posting function (`POS-01`). Required for offline. |
 | S-07 | **A modifier group name can exist only once in the whole system** (`modifier_groups.name unique`), and `create_modifier_group_for_menu_item` always creates a new group. A second product cannot have its own "Size" or "Add-ons" group, and groups cannot be shared. | `20260922130003`, `20260923005301` | Drop the global uniqueness or add an "attach existing group" function (`MOD-01`). |
 | S-08 | **"Manager authorization" is self-authorization.** `process_refund_items` and `place_order_v2` pass `auth.uid()` as `authorized_by`; the guard triggers only check that this user holds the permission. | `20260923011712`, `20260923013054` | Acceptable only if cashiers never hold `orders.refund`/`discounts.apply`. For cashier-initiated refunds, add a second-person approval (manager PIN) (`DIS-01`, `SEC-01`). |
