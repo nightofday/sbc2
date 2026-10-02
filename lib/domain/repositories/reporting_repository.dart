@@ -1,7 +1,11 @@
 import '../../models/reporting.dart';
 
 abstract class ReportingRepository {
-  Future<ReportingSnapshot> getSnapshot({required int days});
+  /// The report for the business days [from] to [to], both included.
+  Future<BusinessReport> getBusinessReport({
+    required DateTime from,
+    required DateTime to,
+  });
 
   Future<List<TransactionTraceRecord>> getTransactionTrace({required int days});
 }

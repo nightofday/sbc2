@@ -34,7 +34,7 @@ class SalesFinanceScreen extends StatefulWidget {
 
 class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
   int _days = 7;
-  late Future<ReportingSnapshot> _snapshotFuture;
+  late Future<BusinessReport> _reportFuture;
   late Future<List<SupplierBalanceRecord>> _balancesFuture;
 
   @override
@@ -60,7 +60,12 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
   }
 
   void _reload() {
-    _snapshotFuture = widget.reportingRepository.getSnapshot(days: _days);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    _reportFuture = widget.reportingRepository.getBusinessReport(
+      from: today.subtract(Duration(days: _days - 1)),
+      to: today,
+    );
     _balancesFuture = widget.financeRepository.getSupplierBalances();
   }
 
@@ -103,8 +108,8 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
           },
         ),
       ),
-      child: FutureBuilder<ReportingSnapshot>(
-        future: _snapshotFuture,
+      child: FutureBuilder<BusinessReport>(
+        future: _reportFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -119,9 +124,18 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
             );
           }
 
-          final data = snapshot.data!;
-          final finance = data.finance;
-          final dailyRows = data.dailySales.reversed.take(10).toList();
+          final report = snapshot.data!;
+          final finance = report.summary;
+          final days = report.section('by_day');
+          // Newest first, and only days on which something happened.
+          final dailyRows = days.rows.reversed
+              .where(
+                (row) =>
+                    ((row['orders'] as num?) ?? 0) > 0 ||
+                    ((row['refunds'] as num?) ?? 0) > 0,
+              )
+              .take(10)
+              .toList();
 
           return SingleChildScrollView(
             child: Column(
@@ -141,9 +155,9 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                       accentColor: AppColors.orange,
                     ),
                     SummaryCard(
-                      label: 'Net After Expenses',
-                      value: _money(finance.netAfterExpenses),
-                      subtitle: 'Net sales less posted expenses',
+                      label: 'Net Sales Less Expenses',
+                      value: _money(finance.netSalesLessExpenses),
+                      subtitle: 'Net sales less posted expenses. Not profit.',
                       accentColor: AppColors.black,
                     ),
                   ],
@@ -165,33 +179,23 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                             'Date',
                             'Orders',
                             'Gross Sales',
+                            'Discounts',
                             'Refunds',
                             'Net Sales',
                           ],
-                          flexes: const [2, 1, 2, 2, 2],
+                          flexes: const [2, 1, 2, 2, 2, 2],
                           rows: dailyRows
                               .map(
                                 (row) => [
-                                  Text(
-                                    _date(row.date),
-                                    style: AppTextStyles.bodyMedium,
-                                  ),
-                                  Text(
-                                    '${row.orders}',
-                                    style: AppTextStyles.body,
-                                  ),
-                                  Text(
-                                    _money(row.grossSales),
-                                    style: AppTextStyles.body,
-                                  ),
-                                  Text(
-                                    _money(row.refunds),
-                                    style: AppTextStyles.body,
-                                  ),
-                                  Text(
-                                    _money(row.netSales),
-                                    style: AppTextStyles.bodyMedium,
-                                  ),
+                                  for (final column in days.columns.take(6))
+                                    Text(
+                                      days.display(row, column),
+                                      style:
+                                          column.key == 'date' ||
+                                              column.key == 'net_sales'
+                                          ? AppTextStyles.bodyMedium
+                                          : AppTextStyles.body,
+                                    ),
                                 ],
                               )
                               .toList(),
@@ -209,6 +213,8 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                         const SizedBox(height: 24),
                         _FinanceRow('Gross Sales', _money(finance.grossSales)),
                         const SizedBox(height: 14),
+                        _FinanceRow('Discounts', _money(finance.discounts)),
+                        const SizedBox(height: 14),
                         _FinanceRow('Refunds', _money(finance.refunds)),
                         const SizedBox(height: 14),
                         _FinanceRow('Net Sales', _money(finance.netSales)),
@@ -216,8 +222,8 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                         _FinanceRow('Expenses', _money(finance.expenses)),
                         const Divider(height: 32),
                         _FinanceRow(
-                          'Net After Expenses',
-                          _money(finance.netAfterExpenses),
+                          'Net Sales Less Expenses',
+                          _money(finance.netSalesLessExpenses),
                           emphasis: true,
                         ),
                         const SizedBox(height: 22),
