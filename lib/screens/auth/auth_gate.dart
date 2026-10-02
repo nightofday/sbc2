@@ -50,7 +50,13 @@ class _AuthGateState extends State<AuthGate> {
       return;
     }
 
-    if (mounted) {
+    // Supabase also emits auth events while the user is working, such as the
+    // periodic token refresh. Showing the loading screen then would unmount
+    // the whole app and discard an open cart or form, so an already loaded
+    // profile for the same user is refreshed in place.
+    final refreshingInPlace = _profile?.id == session.user.id;
+
+    if (mounted && !refreshingInPlace) {
       setState(() {
         _loading = true;
         _error = null;
@@ -79,13 +85,13 @@ class _AuthGateState extends State<AuthGate> {
         _loading = false;
       });
     } on PostgrestException catch (error) {
-      if (!mounted) return;
+      if (!mounted || refreshingInPlace) return;
       setState(() {
         _error = error.message;
         _loading = false;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || refreshingInPlace) return;
       setState(() {
         _error = error.toString();
         _loading = false;
