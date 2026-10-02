@@ -138,8 +138,11 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | Migration `20261002170000_auditable_edits_and_voids.sql` (`ac9e7b7`): `update_expense` writes the row before and after to `audit_logs`; `void_expense` requires a reason and stores it with who and when; `update_supplier` changes only the fields it is given; new `void_stock_out`, `void_stock_count`, `void_goods_receipt` | S-04, S-05, `SUP-01` (database side), `INV-02` (partly) | pgTAP `14_auditable_edits_and_voids.test.sql`, 39 of 39; files `01`–`13` unchanged; applied to the hosted test project |
 | 2026-10-02 | Suppliers carry separate contact person, phone, email, address, payment terms and notes in the model, repository and forms; archiving sends the status alone (`8879246`) | `SUP-01` (app side), F-12 | `test/supplier_editor_test.dart`: renaming through the real form sends every other detail back unchanged |
 | 2026-10-02 | `showReasonDialog`; void actions for expenses, goods receipts, supply releases and inventory counts (`43fe0ff`) | S-04/S-05 (app side): a function without a way to reach it is not a finished workflow | `test/reason_dialog_test.dart` (2 tests); live: `SO-1` voided from the app, stock went 50 → 100 in both lot and ledger, the original movement and a `REVERSAL` remain, one audit row written |
+| 2026-10-02 | Migration `20261002180000_category_and_discount_management.sql` (`e6aafe4`): category list/create/update/reorder functions over the three category tables; discount types gain till-enabled flag, fixed or adjustable value, maximum and validity dates, with create and update functions; the till list and checkout use them instead of three hard-coded codes | `CAT-01`, `DIS-01`, S-13 | pgTAP `15_category_and_discount_management.test.sql`, 41 of 41; files `01`–`14` unchanged; applied to the hosted test project |
+| 2026-10-02 | Categories and Discounts screens under Menu & Products; fixed-value promotions cannot be edited at payment; receipts and order details show subtotal and a named discount line (`951e0ff`) | `CAT-01`, `DIS-01`, F-08 (`POS-02`, discount part) | `test/catalog_management_test.dart` (4 tests); live: both screens load real data, a test category was added from the app |
+| 2026-10-02 | Every list query asks for ascending order explicitly (`a8fa006`) | F-18: the Supabase client sorts descending by default and 32 queries gave no direction, so lists were reversed | live: the till now shows Coffee first, in category order; before, it started with Baked Goods |
 
-The first three rows are Flutter-only changes; the rest add five database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 31 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add six database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 35 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### How the database changes were tested without Docker
 
@@ -151,6 +154,7 @@ Docker is not installed, so `supabase test db` could not run. Instead each migra
 | `12_posting_request_ids` (new) | 33 of 33 |
 | `13_direct_write_paths` (new) | 13 of 13 (10 of 13 fail before its migration) |
 | `14_auditable_edits_and_voids` (new) | 39 of 39 |
+| `15_category_and_discount_management` (new) | 41 of 41 |
 | `01`, `04`, `05`, `06`, `07`, `09` with the new migrations | all assertions pass (22, 12, 10, 13, 12, 14) |
 | `02`, `03` with the new migrations | pass (35, 20) once the `TEST` rows from section 3a are removed inside the transaction; on the populated database they fail before and after the migrations, because they select "the latest" refund item or stock-out by random UUID order |
 | `08_api_security_hardening` | 17 of 18, before and after: see S-19 |
@@ -163,6 +167,32 @@ Side effect: identity sequences do not roll back, so these trial runs consumed o
 | --- | --- | --- |
 | S-19 | *(Fixed 2 October 2026 in `20261002160000`.)* On the hosted project, `authenticated` could execute `set_updated_at()`. The repository's own test 10 in `08_api_security_hardening` therefore fails there. Low risk: it is a trigger function and cannot be called through the API, but the hosted project's default privileges differ from the local CI database, so "passes in CI" does not prove the hosted grants. | found |
 | S-20 | pgTAP files `02` and `03` pick rows with `order by id desc limit 1` on random UUIDs. They are only reliable on an empty database. | found |
+
+### CAT-01 and DIS-01 status
+
+What management can now do without a developer:
+
+- **Categories** (Menu & Products → Categories): add, rename, move up or down, archive and reactivate menu, inventory and expense categories. Names are unique ignoring case and spaces. Archiving a category that is in use is allowed and says how many records use it; those records keep the category, and it stops being offered for new ones. Nothing is reassigned or deleted.
+- **Discounts** (Menu & Products → Discounts): add and edit promotions as a percentage or an amount, decide whether the till may change the value and up to what limit, set optional start and end dates, and switch a promotion off. The server applies a fixed promotion's own value whatever the till sends.
+
+Found while doing this:
+
+| ID | Finding | Status |
+| --- | --- | --- |
+| F-18 | Every list in the app was sorted in reverse. The Supabase client's `.order(column)` is descending unless `ascending: true` is passed, and 32 queries gave no direction. Effects seen earlier in this log: the till listed categories backwards, and the payment method list started with "Other" instead of Cash (part of F-11). | changed (`a8fa006`) |
+
+Decisions left for Brian and the café, not made here:
+
+- **Who may apply a discount.** Unchanged: it needs `discounts.apply`, and every promotion requires an authoriser with `discounts.manage`. Cashiers hold neither, so a cashier is still offered no discounts. New promotions follow the same rule. Opening discounts to cashiers, with or without a manager's approval at the till, is a business decision (`DIS-01`).
+- **Statutory discounts** (Senior, PWD) cannot be enabled for the till or edited, by a database constraint, until the tax rules are confirmed (`OPS-03`).
+
+Not done:
+
+- The category chips at the till are still sorted alphabetically in the app; the products under them follow the managed order.
+- A category with no active items does not appear as a chip at the till, because chips are built from the products on sale.
+- Discount totals are not in reports yet. That waits on the report definitions (`FIN-01`, `REP-02`).
+- Modifier management (`MOD-01`) is untouched, including the rule that a modifier group name can exist only once (S-07).
+- "Amount Received" at payment still does not follow the total when a discount value is typed (rest of F-11).
 
 ### S-04 and S-05 status
 
@@ -225,7 +255,7 @@ The schema is stronger than the app built on it: UUID keys, name and price snaps
 | S-10 | **The first admin cannot be created the documented way**, and an admin can change their own role and lock the system out of administration. | `protect_profile_privileges`, `update_employee_profile` | A one-time bootstrap function and a "last active admin" guard (`AUTH-01`). |
 | S-11 | `profiles.email` is copied from `auth.users` only on insert. | `handle_new_auth_user` | Also sync on email change. |
 | S-12 | Migrations `20260923012529` and `20260923013054` are identical, and several schema migrations edit demo rows by SKU (`PRD-005`, `PRD-006`, `PRD-008`, `INV-001`). `seed.sql` creates products and opening stock although it is described as reference data. | migrations, seed | Leave applied migrations alone; for the café's real setup, split reference data from sample data (`DOC-01`). |
-| S-13 | Discount codes (`PROMO_PERCENT`, `PROMO_FIXED`, `MANUAL`) and the cash method code (`CASH`) are hard-coded inside functions. | `place_order_v2`, `get_pos_discount_types`, `end_shift` | A flag column (`is_pos_enabled`, `is_cash`) instead of literals, so management can add a discount without a migration (`DIS-01`). |
+| S-13 | *(Discount codes addressed 2 October 2026; the `CASH` code remains.)* Discount codes (`PROMO_PERCENT`, `PROMO_FIXED`, `MANUAL`) and the cash method code (`CASH`) were hard-coded inside functions. | `place_order_v2`, `get_pos_discount_types`, `end_shift` | A flag column (`is_pos_enabled`, `is_cash`) instead of literals, so management can add a discount without a migration (`DIS-01`). |
 
 ### 6.2 Security
 
