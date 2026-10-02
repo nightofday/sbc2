@@ -141,8 +141,12 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | Migration `20261002180000_category_and_discount_management.sql` (`e6aafe4`): category list/create/update/reorder functions over the three category tables; discount types gain till-enabled flag, fixed or adjustable value, maximum and validity dates, with create and update functions; the till list and checkout use them instead of three hard-coded codes | `CAT-01`, `DIS-01`, S-13 | pgTAP `15_category_and_discount_management.test.sql`, 41 of 41; files `01`–`14` unchanged; applied to the hosted test project |
 | 2026-10-02 | Categories and Discounts screens under Menu & Products; fixed-value promotions cannot be edited at payment; receipts and order details show subtotal and a named discount line (`951e0ff`) | `CAT-01`, `DIS-01`, F-08 (`POS-02`, discount part) | `test/catalog_management_test.dart` (4 tests); live: both screens load real data, a test category was added from the app |
 | 2026-10-02 | Every list query asks for ascending order explicitly (`a8fa006`) | F-18: the Supabase client sorts descending by default and 32 queries gave no direction, so lists were reversed | live: the till now shows Coffee first, in category order; before, it started with Baked Goods |
+| 2026-10-02 | Migration `20261002190000_modifier_management.sql` (`8ec00fb`) and the modifiers dialog and Manage menu (`6fc11d8`): group names need not be unique; attach, detach and reorder functions; a group library; a required group with no active options no longer blocks checkout; labelled actions instead of icon-only buttons | `MOD-01`, S-07 | pgTAP `16_modifier_management.test.sql`, 23 of 23; `test/modifier_management_test.dart` (3 tests) |
+| 2026-10-02 | `DataTableCard` stacks each row with its column headings when the table does not fit a narrow screen (`6fc11d8`) | `UX-03`, F-01, F-15: status and action columns were off-screen on phones in all 19 tables | `test/responsive_widgets_test.dart`: the action button is inside a 360 px screen; the table stays a table at 1200 px |
+| 2026-10-02 | Migration `20261002200000_business_report.sql` (`c66a462`): `get_business_report(from, to)` and a matching `get_dashboard_summary` | `FIN-01`, `REP-01`–`REP-04`, S-02, S-03 | pgTAP `17_business_report.test.sql`, 22 of 22: daily, item, category and payment rows each add up to the summary; Manila day boundary; refund-only and expense-only days; stock movement identity |
+| 2026-10-02 | Reports screen rebuilt on that report with any date range and copy-to-spreadsheet; Finance Overview reads the same report | `REP-01`–`REP-05`, `FIN-01` | `test/reporting_model_test.dart` and `test/reports_screen_test.dart` (6 tests), including formula-safe export and a 360 px layout check |
 
-The first three rows are Flutter-only changes; the rest add six database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 35 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add eight database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 44 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### How the database changes were tested without Docker
 
@@ -155,6 +159,8 @@ Docker is not installed, so `supabase test db` could not run. Instead each migra
 | `13_direct_write_paths` (new) | 13 of 13 (10 of 13 fail before its migration) |
 | `14_auditable_edits_and_voids` (new) | 39 of 39 |
 | `15_category_and_discount_management` (new) | 41 of 41 |
+| `16_modifier_management` (new) | 23 of 23 |
+| `17_business_report` (new) | 22 of 22 |
 | `01`, `04`, `05`, `06`, `07`, `09` with the new migrations | all assertions pass (22, 12, 10, 13, 12, 14) |
 | `02`, `03` with the new migrations | pass (35, 20) once the `TEST` rows from section 3a are removed inside the transaction; on the populated database they fail before and after the migrations, because they select "the latest" refund item or stock-out by random UUID order |
 | `08_api_security_hardening` | 17 of 18, before and after: see S-19 |
@@ -167,6 +173,33 @@ Side effect: identity sequences do not roll back, so these trial runs consumed o
 | --- | --- | --- |
 | S-19 | *(Fixed 2 October 2026 in `20261002160000`.)* On the hosted project, `authenticated` could execute `set_updated_at()`. The repository's own test 10 in `08_api_security_hardening` therefore fails there. Low risk: it is a trigger function and cannot be called through the API, but the hosted project's default privileges differ from the local CI database, so "passes in CI" does not prove the hosted grants. | found |
 | S-20 | pgTAP files `02` and `03` pick rows with `order by id desc limit 1` on random UUIDs. They are only reliable on an empty database. | found |
+
+### Report definitions (FIN-01) — decided on 2 October 2026, to be confirmed by management
+
+Charlie asked for industry-standard choices to be made so work could continue. These are the definitions now used by the Dashboard, Finance Overview and Reports. They follow what commercial POS systems report. They are a recommendation that the café and Brian should confirm; changing one later means changing one database function.
+
+| Measure | Definition |
+| --- | --- |
+| Gross sales | Completed sales at menu prices, including priced modifiers, before discounts |
+| Discounts | Discounts given on those sales |
+| Refunds | Money refunded, counted on the day the refund was made |
+| Net sales | Gross sales − discounts − refunds |
+| Average order | (Gross sales − discounts) ÷ completed orders |
+| Business day | The calendar day in the café's time zone (`business_profile.timezone`, Asia/Manila) |
+| Expenses | Posted expenses by their expense date |
+| Net sales less expenses | Exactly that. It is labelled as not being profit, because it leaves out stock purchases and losses |
+| Stock received, paid to suppliers, cost of stock lost | Shown beside sales, never added to expenses or to each other |
+
+A sale on Monday that is refunded on Tuesday is a Monday sale and a Tuesday refund. The Refunds table shows the original sale day for each refund.
+
+Export: every table, and the whole report, can be copied as tab-separated text and pasted into Google Sheets or Excel. This is the "importable export" the README names as the minimum. There is no file download and no direct Sheets synchronisation (`OPS-04`).
+
+Not done in reporting:
+
+- The older views `v_daily_sales`, `v_product_sales_daily`, `v_product_sales`, `v_daily_profit_estimate`, `v_order_cogs` and `v_shift_summary` still use the old definitions. The app no longer reads them; they are removed in the dead-code pass below if nothing else needs them.
+- "Today" and the other presets use the device's date. On a device set to another time zone they would differ from the café's day.
+- Transaction Traceability is unchanged: last 30 days, 500 rows, posted documents only (`TRACE-01`).
+- No shift (end-of-day) report yet.
 
 ### CAT-01 and DIS-01 status
 
@@ -191,7 +224,6 @@ Not done:
 - The category chips at the till are still sorted alphabetically in the app; the products under them follow the managed order.
 - A category with no active items does not appear as a chip at the till, because chips are built from the products on sale.
 - Discount totals are not in reports yet. That waits on the report definitions (`FIN-01`, `REP-02`).
-- Modifier management (`MOD-01`) is untouched, including the rule that a modifier group name can exist only once (S-07).
 - "Amount Received" at payment still does not follow the total when a discount value is typed (rest of F-11).
 
 ### S-04 and S-05 status
