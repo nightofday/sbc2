@@ -150,8 +150,7 @@ class OfflineOrderRepository extends ChangeNotifier
 
       // Oldest first, so stock and the cash drawer move in the order the
       // sales were made.
-      final queue = waitingSales
-        ..sort((a, b) => a.soldAt.compareTo(b.soldAt));
+      final queue = waitingSales..sort((a, b) => a.soldAt.compareTo(b.soldAt));
 
       for (final sale in queue) {
         try {
@@ -657,8 +656,9 @@ class OfflineOrderRepository extends ChangeNotifier
       final optionNames = <String>[];
 
       if (product != null) {
-        final options = (_modifierCache[product.menuItemId] ?? const [])
-            .expand((group) => group.options);
+        final options = (_modifierCache[product.menuItemId] ?? const []).expand(
+          (group) => group.options,
+        );
         for (final option in options) {
           if (!item.modifierIds.contains(option.id)) continue;
           unitPrice += option.priceDelta;
@@ -686,14 +686,16 @@ class OfflineOrderRepository extends ChangeNotifier
       subtotal += unitPrice * item.quantity;
     }
 
-    final method = (_readList(_paymentMethodsKey, PosPaymentMethod.fromMap) ??
-            const <PosPaymentMethod>[])
-        .where((entry) => entry.id == payment.paymentMethodId)
-        .firstOrNull;
-    final discount = (_readList(_discountsKey, PosDiscountType.fromMap) ??
-            const <PosDiscountType>[])
-        .where((entry) => entry.id == discountTypeId)
-        .firstOrNull;
+    final method =
+        (_readList(_paymentMethodsKey, PosPaymentMethod.fromMap) ??
+                const <PosPaymentMethod>[])
+            .where((entry) => entry.id == payment.paymentMethodId)
+            .firstOrNull;
+    final discount =
+        (_readList(_discountsKey, PosDiscountType.fromMap) ??
+                const <PosDiscountType>[])
+            .where((entry) => entry.id == discountTypeId)
+            .firstOrNull;
 
     return OfflineSale(
       requestId: requestId,

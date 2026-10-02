@@ -14,8 +14,7 @@ import '../../models/refund_preview.dart';
 import '../../models/shift_cash_snapshot.dart';
 import '../../models/shift_report.dart';
 
-class SupabaseOrderRepository
-    implements OrderRepository, OfflineSaleUploader {
+class SupabaseOrderRepository implements OrderRepository, OfflineSaleUploader {
   final SupabaseClient _client;
 
   SupabaseOrderRepository({SupabaseClient? client})
@@ -253,7 +252,9 @@ class SupabaseOrderRepository
     );
 
     return ((result as List?) ?? const [])
-        .map((row) => ShiftSummary.fromMap(Map<String, dynamic>.from(row as Map)))
+        .map(
+          (row) => ShiftSummary.fromMap(Map<String, dynamic>.from(row as Map)),
+        )
         .toList();
   }
 

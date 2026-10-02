@@ -233,7 +233,9 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            entry.label.isEmpty ? entry.title : '${entry.title}: ${entry.label}',
+            entry.label.isEmpty
+                ? entry.title
+                : '${entry.title}: ${entry.label}',
             style: AppTextStyles.bodyMedium,
           ),
           const SizedBox(height: 2),

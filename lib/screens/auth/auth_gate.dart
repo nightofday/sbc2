@@ -78,7 +78,10 @@ class _AuthGateState extends State<AuthGate> {
     try {
       final row = await _supabase
           .from('profiles')
-          .select('id, display_name, status, roles(code, name)')
+          .select(
+            'id, display_name, status, '
+            'roles(code, name, role_permissions(permissions(code)))',
+          )
           .eq('id', session.user.id)
           .maybeSingle();
 

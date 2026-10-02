@@ -15,7 +15,9 @@ Future<PackageMemory> loadPackageMemory(SupabaseClient client) async {
 
   return PackageMemory(
     (rows as List)
-        .map((raw) => PackageSize.fromMap(Map<String, dynamic>.from(raw as Map)))
+        .map(
+          (raw) => PackageSize.fromMap(Map<String, dynamic>.from(raw as Map)),
+        )
         .toList(),
   );
 }

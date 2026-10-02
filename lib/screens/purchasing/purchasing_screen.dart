@@ -524,7 +524,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           inventory,
                           units,
                           receiptMode: false,
-                        supplierId: supplierId,
+                          supplierId: supplierId,
                         );
 
                         if (line == null) return;
@@ -804,7 +804,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                             inventory,
                             units,
                             receiptMode: true,
-                          supplierId: supplierId,
+                            supplierId: supplierId,
                           );
                           if (line == null) return;
                           setDialogState(() => lines.add(line));

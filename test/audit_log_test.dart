@@ -88,9 +88,7 @@ void main() {
       final repository = _AuditRepository();
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: AuditLogScreen(reportingRepository: repository),
-          ),
+          home: Scaffold(body: AuditLogScreen(reportingRepository: repository)),
         ),
       );
       await tester.pumpAndSettle();

@@ -34,9 +34,8 @@ class AuditEntry {
   });
 
   factory AuditEntry.fromMap(Map<String, dynamic> map) {
-    Map<String, dynamic> data(String key) => map[key] is Map
-        ? Map<String, dynamic>.from(map[key] as Map)
-        : const {};
+    Map<String, dynamic> data(String key) =>
+        map[key] is Map ? Map<String, dynamic>.from(map[key] as Map) : const {};
 
     return AuditEntry(
       id: map['id']?.toString() ?? '',

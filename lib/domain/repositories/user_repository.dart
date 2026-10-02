@@ -20,5 +20,4 @@ abstract class UserRepository {
     required String status,
     required String roleId,
   });
-
 }

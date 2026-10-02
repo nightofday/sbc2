@@ -717,10 +717,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               const SizedBox(height: 12),
               const Text('Unable to load POS data', style: AppTextStyles.h3),
               const SizedBox(height: 8),
-              Text(
-                errorText(error),
-                textAlign: TextAlign.center,
-              ),
+              Text(errorText(error), textAlign: TextAlign.center),
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () {

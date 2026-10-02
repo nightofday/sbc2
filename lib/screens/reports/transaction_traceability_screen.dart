@@ -178,10 +178,9 @@ class _TransactionTraceabilityScreenState
                                       if (record.voidReason.isNotEmpty)
                                         Text(
                                           'Reason: ${record.voidReason}',
-                                          style: AppTextStyles.caption
-                                              .copyWith(
-                                                color: AppColors.gray700,
-                                              ),
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: AppColors.gray700,
+                                          ),
                                         ),
                                     ],
                                   ),

@@ -92,5 +92,4 @@ class SupabaseUserRepository implements UserRepository {
       },
     );
   }
-
 }

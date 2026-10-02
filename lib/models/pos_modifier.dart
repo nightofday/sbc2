@@ -59,8 +59,9 @@ class PosModifierGroup {
       isRequired: map['is_required'] == true,
       options: ((map['options'] as List?) ?? const [])
           .map(
-            (raw) =>
-                PosModifierOption.fromMap(Map<String, dynamic>.from(raw as Map)),
+            (raw) => PosModifierOption.fromMap(
+              Map<String, dynamic>.from(raw as Map),
+            ),
           )
           .toList(),
     );

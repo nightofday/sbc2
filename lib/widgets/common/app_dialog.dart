@@ -177,4 +177,3 @@ Future<bool> showReasonDialog({
   controller.dispose();
   return confirmed;
 }
-

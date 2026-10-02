@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import 'support/fake_order_repository.dart';
+
 import 'package:sbc_management_system/models/order_record.dart';
 import 'package:sbc_management_system/models/pos_checkout.dart';
 import 'package:sbc_management_system/models/pos_menu_item.dart';

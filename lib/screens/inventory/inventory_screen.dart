@@ -523,14 +523,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                             : movement.canBeReversed &&
                                                   widget.canManageInventory
                                             ? OutlinedButton(
-                                                onPressed: () =>
-                                                    _voidLotDisposal(
-                                                      movement,
-                                                      itemById[movement
-                                                                  .inventoryItemId]
-                                                              ?.name ??
-                                                          'this item',
-                                                    ),
+                                                onPressed: () => _voidLotDisposal(
+                                                  movement,
+                                                  itemById[movement
+                                                              .inventoryItemId]
+                                                          ?.name ??
+                                                      'this item',
+                                                ),
                                                 child: const Text('Reverse'),
                                               )
                                             : const SizedBox.shrink(),

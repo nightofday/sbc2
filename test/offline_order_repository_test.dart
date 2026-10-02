@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sbc_management_system/data/offline/key_value_store.dart';
 import 'package:sbc_management_system/data/offline/offline_order_repository.dart';
+
 import 'support/fake_order_repository.dart';
+
 import 'package:sbc_management_system/domain/repositories/offline_sales_queue.dart';
 import 'package:sbc_management_system/models/offline_sale.dart';
 import 'package:sbc_management_system/models/order_record.dart';
@@ -73,9 +75,7 @@ class _FakeServer extends FakeOrderRepository implements OfflineSaleUploader {
         minSelections: 0,
         maxSelections: 2,
         isRequired: false,
-        options: [
-          PosModifierOption(id: 'egg', name: 'Egg', priceDelta: 20),
-        ],
+        options: [PosModifierOption(id: 'egg', name: 'Egg', priceDelta: 20)],
       ),
     ];
   }
@@ -143,7 +143,11 @@ class _FakeServer extends FakeOrderRepository implements OfflineSaleUploader {
   }) async {
     _connect();
     placedRequestIds.add(clientRequestId);
-    return _store(clientRequestId, DateTime(2026, 10, 2), payments.first.amount);
+    return _store(
+      clientRequestId,
+      DateTime(2026, 10, 2),
+      payments.first.amount,
+    );
   }
 
   @override
@@ -231,23 +235,31 @@ void main() {
     expect(till.isOffline, isFalse);
   });
 
-  test('a sale taken with no connection is kept and shown as waiting', () async {
-    final till = openTill();
-    await warmUp(till);
-    server.reachable = false;
+  test(
+    'a sale taken with no connection is kept and shown as waiting',
+    () async {
+      final till = openTill();
+      await warmUp(till);
+      server.reachable = false;
 
-    final order = await _sell(till, 'aaaaaaaa-1111', modifierIds: ['egg'], amount: 170);
+      final order = await _sell(
+        till,
+        'aaaaaaaa-1111',
+        modifierIds: ['egg'],
+        amount: 170,
+      );
 
-    expect(order.status, OfflineSale.waitingStatus);
-    expect(order.id, 'OFFLINE-AAAAAA');
-    expect(order.amount, 170);
-    expect(order.employee, 'Ana');
-    expect(order.paymentMethod, 'Cash');
-    expect(order.items.single.productName, 'Rice Bowl (Regular) + Egg');
-    expect(order.items.single.unitPrice, 170);
-    expect(till.isOffline, isTrue);
-    expect(till.waitingSales.single.soldAt, clock);
-  });
+      expect(order.status, OfflineSale.waitingStatus);
+      expect(order.id, 'OFFLINE-AAAAAA');
+      expect(order.amount, 170);
+      expect(order.employee, 'Ana');
+      expect(order.paymentMethod, 'Cash');
+      expect(order.items.single.productName, 'Rice Bowl (Regular) + Egg');
+      expect(order.items.single.unitPrice, 170);
+      expect(till.isOffline, isTrue);
+      expect(till.waitingSales.single.soldAt, clock);
+    },
+  );
 
   test('waiting sales survive closing the app', () async {
     final till = openTill();
@@ -261,28 +273,31 @@ void main() {
     expect(reopened.waitingSales.single.total, 150);
   });
 
-  test('syncing sends each sale once, oldest first, at its sale time', () async {
-    final till = openTill();
-    await warmUp(till);
-    server.reachable = false;
+  test(
+    'syncing sends each sale once, oldest first, at its sale time',
+    () async {
+      final till = openTill();
+      await warmUp(till);
+      server.reachable = false;
 
-    await _sell(till, 'request-1');
-    clock = clock.add(const Duration(minutes: 5));
-    await _sell(till, 'request-2');
+      await _sell(till, 'request-1');
+      clock = clock.add(const Duration(minutes: 5));
+      await _sell(till, 'request-2');
 
-    server.reachable = true;
-    await till.syncPending();
-    await till.syncPending();
+      server.reachable = true;
+      await till.syncPending();
+      await till.syncPending();
 
-    expect(server.uploads.map((sale) => sale.requestId), [
-      'request-1',
-      'request-2',
-    ]);
-    expect(server.uploads.first.soldAt, DateTime(2026, 10, 2, 12, 30));
-    expect(server.uploads.last.soldAt, DateTime(2026, 10, 2, 12, 35));
-    expect(till.waitingSales, isEmpty);
-    expect(till.isOffline, isFalse);
-  });
+      expect(server.uploads.map((sale) => sale.requestId), [
+        'request-1',
+        'request-2',
+      ]);
+      expect(server.uploads.first.soldAt, DateTime(2026, 10, 2, 12, 30));
+      expect(server.uploads.last.soldAt, DateTime(2026, 10, 2, 12, 35));
+      expect(till.waitingSales, isEmpty);
+      expect(till.isOffline, isFalse);
+    },
+  );
 
   test('a sale whose answer was lost is not saved twice', () async {
     final till = openTill();
@@ -341,10 +356,7 @@ void main() {
     expect(till.waitingSales, isEmpty);
     expect(till.rejectedSales, hasLength(2));
     expect(till.rejectedSales.first.rejection, 'No open shift');
-    expect(
-      (await till.getOrders()).first.status,
-      OfflineSale.rejectedStatus,
-    );
+    expect((await till.getOrders()).first.status, OfflineSale.rejectedStatus);
 
     // Once the cause is fixed it can be sent again.
     server.rejectUploadsWith = null;
@@ -427,30 +439,33 @@ void main() {
     await expectLater(openTill().getPosMenu(), throwsA(isA<SocketException>()));
   });
 
-  test('a shift opened offline is opened on the server before its sales', () async {
-    final till = openTill();
-    await till.getPosMenu();
-    await till.getPaymentMethods();
-    server
-      ..openShiftId = null
-      ..reachable = false;
+  test(
+    'a shift opened offline is opened on the server before its sales',
+    () async {
+      final till = openTill();
+      await till.getPosMenu();
+      await till.getPaymentMethods();
+      server
+        ..openShiftId = null
+        ..reachable = false;
 
-    final localShift = await till.startShift(
-      openingCash: 500,
-      clientRequestId: 'shift-request',
-    );
-    expect(localShift, startsWith('offline-shift-'));
-    expect(await till.getOpenShiftId(), localShift);
+      final localShift = await till.startShift(
+        openingCash: 500,
+        clientRequestId: 'shift-request',
+      );
+      expect(localShift, startsWith('offline-shift-'));
+      expect(await till.getOpenShiftId(), localShift);
 
-    await _sell(till, 'request-1');
+      await _sell(till, 'request-1');
 
-    server.reachable = true;
-    await till.syncPending();
+      server.reachable = true;
+      await till.syncPending();
 
-    expect(server.shiftStartRequestIds, ['shift-request']);
-    expect(server.uploads.single.requestId, 'request-1');
-    expect(await till.getOpenShiftId(), 'shift-started');
-  });
+      expect(server.shiftStartRequestIds, ['shift-request']);
+      expect(server.uploads.single.requestId, 'request-1');
+      expect(await till.getOpenShiftId(), 'shift-started');
+    },
+  );
 
   test('a shift cannot close while sales are still on the device', () async {
     final till = openTill();
@@ -525,7 +540,9 @@ void main() {
   test('connection failures are told apart from server refusals', () {
     expect(isConnectionFailure(const SocketException('down')), isTrue);
     expect(
-      isConnectionFailure(const PostgrestException(message: 'Gateway', code: '504')),
+      isConnectionFailure(
+        const PostgrestException(message: 'Gateway', code: '504'),
+      ),
       isTrue,
     );
     expect(
@@ -565,6 +582,9 @@ class _RefusingServer extends _FakeServer {
     String discountNotes = '',
     required String clientRequestId,
   }) async {
-    throw const PostgrestException(message: 'Insufficient stock', code: 'P0001');
+    throw const PostgrestException(
+      message: 'Insufficient stock',
+      code: 'P0001',
+    );
   }
 }

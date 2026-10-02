@@ -216,7 +216,9 @@ class ShiftReport {
       discounts: _money(sales['discounts']),
       refunds: _money(sales['refunds']),
       netSales: _money(sales['net_sales']),
-      payments: rows('by_payment_method').map(ShiftPaymentTotal.fromMap).toList(),
+      payments: rows('by_payment_method')
+          .map(ShiftPaymentTotal.fromMap)
+          .toList(),
       cashMovements: rows('cash_movements')
           .map(ShiftCashMovement.fromMap)
           .toList(),

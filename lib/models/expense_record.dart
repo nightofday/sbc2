@@ -26,7 +26,6 @@ class ExpenseRecord {
     this.referenceNumber = '',
     this.notes = '',
   });
-
 }
 
 class ExpenseSupplierOption {

@@ -188,7 +188,9 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
 
   Widget _buildAuthenticatedApp(AppUserProfile profile) {
     _profile = profile;
-    final isCashier = profile.isCashier;
+    // Each destination names the permission it needs, so a role sees only
+    // what it was granted and a role added later sees nothing by default.
+    final can = profile.can;
     final pages = <Widget>[];
 
     AppNavigationItem destination({
@@ -233,7 +235,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
             icon: Icons.receipt_long_outlined,
             page: OrdersScreen(
               orderRepository: _orderRepository,
-              canManageOrders: !isCashier,
+              canManageOrders: can('orders.refund') || can('orders.void'),
               refreshListenable: _businessRefreshController,
               onDataChanged: _inventoryRefreshController.refresh,
             ),
@@ -246,7 +248,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               refreshListenable: _businessRefreshController,
             ),
           ),
-          if (!isCashier)
+          if (can('finance.view'))
             destination(
               label: 'Finance Overview',
               icon: Icons.account_balance_wallet_outlined,
@@ -259,7 +261,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
             ),
         ],
       ),
-      if (!isCashier)
+      if (can('menu.manage'))
         AppNavigationGroup(
           label: 'MENU & PRODUCTS',
           icon: Icons.restaurant_menu_outlined,
@@ -303,11 +305,11 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
             page: InventoryScreen(
               inventoryRepository: _inventoryRepository,
               refreshController: _inventoryRefreshController,
-              canManageInventory: !isCashier,
+              canManageInventory: can('inventory.manage'),
               view: InventoryView.overview,
             ),
           ),
-          if (!isCashier) ...[
+          if (can('inventory.adjust')) ...[
             destination(
               label: 'Release Supplies',
               icon: Icons.output_outlined,
@@ -359,7 +361,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
           ],
         ],
       ),
-      if (!isCashier) ...[
+      if (can('purchases.view'))
         AppNavigationGroup(
           label: 'PURCHASING',
           icon: Icons.shopping_cart_checkout_outlined,
@@ -372,16 +374,18 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
                 onInventoryChanged: _inventoryRefreshController.refresh,
               ),
             ),
-            destination(
-              label: 'Suppliers',
-              icon: Icons.local_shipping_outlined,
-              page: SuppliersScreen(
-                supplierRepository: _supplierRepository,
-                onDataChanged: _businessRefreshController.refresh,
+            if (can('suppliers.view'))
+              destination(
+                label: 'Suppliers',
+                icon: Icons.local_shipping_outlined,
+                page: SuppliersScreen(
+                  supplierRepository: _supplierRepository,
+                  onDataChanged: _businessRefreshController.refresh,
+                ),
               ),
-            ),
           ],
         ),
+      if (can('expenses.view'))
         AppNavigationGroup(
           label: 'EXPENSES',
           icon: Icons.payments_outlined,
@@ -397,6 +401,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
             ),
           ],
         ),
+      if (can('reports.view'))
         AppNavigationGroup(
           label: 'REPORTS',
           icon: Icons.bar_chart_outlined,
@@ -419,6 +424,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
             ),
           ],
         ),
+      if (can('users.view'))
         AppNavigationGroup(
           label: 'ADMINISTRATION',
           icon: Icons.admin_panel_settings_outlined,
@@ -428,20 +434,20 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               icon: Icons.people_outline,
               page: UsersScreen(
                 userRepository: _userRepository,
-                canManageRoles: profile.roleCode.toUpperCase() == 'ADMIN',
+                canManageRoles: can('roles.manage'),
               ),
             ),
-            destination(
-              label: 'Audit Log',
-              icon: Icons.fact_check_outlined,
-              page: AuditLogScreen(
-                reportingRepository: _reportingRepository,
-                refreshListenable: _businessRefreshController,
+            if (can('audit.view'))
+              destination(
+                label: 'Audit Log',
+                icon: Icons.fact_check_outlined,
+                page: AuditLogScreen(
+                  reportingRepository: _reportingRepository,
+                  refreshListenable: _businessRefreshController,
+                ),
               ),
-            ),
           ],
         ),
-      ],
     ];
 
     return AppShell(

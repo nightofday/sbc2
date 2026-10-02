@@ -65,8 +65,14 @@ void main() {
     expect(movement('DAMAGED').canBeReversed, isTrue);
     expect(movement('EXPIRED').canBeReversed, isTrue);
     expect(movement('DAMAGED', reversed: true).canBeReversed, isFalse);
-    expect(movement('SALE_CONSUMPTION', reference: 'ORDER').canBeReversed, isFalse);
-    expect(movement('REVERSAL', reference: 'LOT_DISPOSAL_VOID').canBeReversed, isFalse);
+    expect(
+      movement('SALE_CONSUMPTION', reference: 'ORDER').canBeReversed,
+      isFalse,
+    );
+    expect(
+      movement('REVERSAL', reference: 'LOT_DISPOSAL_VOID').canBeReversed,
+      isFalse,
+    );
   });
 
   test('a supplier payment can be reversed once, a reversal never', () {
