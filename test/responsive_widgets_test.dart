@@ -150,6 +150,45 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a dialog can hold content that adapts to its width', (
+    tester,
+  ) async {
+    _setViewport(tester, const Size(1280, 800));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showPrototypeDialog(
+                context: context,
+                title: 'Adaptive Dialog',
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LayoutBuilder(
+                      builder: (_, constraints) =>
+                          Text('Width ${constraints.maxWidth.round()}'),
+                    ),
+                  ],
+                ),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    // AlertDialog measured intrinsic size, which a LayoutBuilder cannot
+    // answer, and the purchase order form went blank after adding an item.
+    expect(tester.takeException(), isNull);
+    expect(find.text('Width 520'), findsOneWidget);
+    expect(find.text('Close'), findsOneWidget);
+  });
+
   testWidgets('prototype dialogs scroll instead of overflowing', (
     tester,
   ) async {

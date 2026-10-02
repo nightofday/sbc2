@@ -48,39 +48,74 @@ Future<T?> showPrototypeDialog<T>({
         viewport.width - (horizontalInset * 2) - (contentHorizontalPadding * 2),
       );
 
-      return AlertDialog(
-        scrollable: true,
+      final contentWidth = width.clamp(0.0, availableWidth).toDouble();
+
+      // Built from plain layout widgets rather than AlertDialog, which
+      // measures its content's intrinsic size. Content that adapts to its
+      // width with a LayoutBuilder cannot be measured that way, and the
+      // whole dialog rendered blank.
+      return Dialog(
         insetPadding: EdgeInsets.symmetric(
           horizontal: horizontalInset,
           vertical: 24,
         ),
-        title: Text(
-          title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.h2,
-        ),
-        contentPadding: EdgeInsets.fromLTRB(
-          contentHorizontalPadding,
-          18,
-          contentHorizontalPadding,
-          8,
-        ),
-        content: SizedBox(
-          width: width.clamp(0.0, availableWidth).toDouble(),
-          child: content,
-        ),
-        actionsOverflowDirection: VerticalDirection.down,
-        actionsOverflowAlignment: OverflowBarAlignment.end,
-        actionsOverflowButtonSpacing: 8,
-        actions: actions.isEmpty
-            ? [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Close'),
+        child: SizedBox(
+          width: contentWidth + contentHorizontalPadding * 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  contentHorizontalPadding,
+                  24,
+                  contentHorizontalPadding,
+                  0,
                 ),
-              ]
-            : actions,
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.h2,
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    contentHorizontalPadding,
+                    18,
+                    contentHorizontalPadding,
+                    8,
+                  ),
+                  child: content,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  contentHorizontalPadding,
+                  8,
+                  contentHorizontalPadding,
+                  20,
+                ),
+                child: OverflowBar(
+                  alignment: MainAxisAlignment.end,
+                  overflowAlignment: OverflowBarAlignment.end,
+                  overflowDirection: VerticalDirection.down,
+                  spacing: 8,
+                  overflowSpacing: 8,
+                  children: actions.isEmpty
+                      ? [
+                          TextButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            child: const Text('Close'),
+                          ),
+                        ]
+                      : actions,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     },
   );
