@@ -252,7 +252,7 @@ select ok(
     where d.defaclrole = (
       select p.proowner
       from pg_proc p
-      where p.oid = 'public.create_expense(uuid,text,numeric,date,uuid,uuid,text,text)'::regprocedure
+      where p.oid = 'public.create_expense(uuid,text,numeric,date,uuid,uuid,text,text,uuid)'::regprocedure
     )
       and d.defaclnamespace = 'public'::regnamespace
       and d.defaclobjtype = 'f'
@@ -268,7 +268,7 @@ select is(
     where d.defaclrole = (
       select p.proowner
       from pg_proc p
-      where p.oid = 'public.create_expense(uuid,text,numeric,date,uuid,uuid,text,text)'::regprocedure
+      where p.oid = 'public.create_expense(uuid,text,numeric,date,uuid,uuid,text,text,uuid)'::regprocedure
     )
       and d.defaclnamespace = 'public'::regnamespace
       and d.defaclobjtype = 'f'
