@@ -192,6 +192,25 @@ on conflict (sku) do update set
   finished_inventory_item_id = null,
   sort_order = excluded.sort_order;
 
+-- Group names are no longer unique, so match on the name instead of using
+-- ON CONFLICT: update the demo groups if present, otherwise create them.
+with desired(name, min_selections, max_selections, is_required, sort_order) as (
+  values
+    ('Bowl Add-ons', 0, 2, false, 10),
+    ('Coffee Sweetness', 1, 1, true, 10)
+),
+updated as (
+  update public.modifier_groups mg
+  set
+    min_selections = d.min_selections,
+    max_selections = d.max_selections,
+    is_required = d.is_required,
+    is_active = true,
+    sort_order = d.sort_order
+  from desired d
+  where mg.name = d.name
+  returning mg.name
+)
 insert into public.modifier_groups(
   name,
   min_selections,
@@ -200,15 +219,19 @@ insert into public.modifier_groups(
   is_active,
   sort_order
 )
-values
-  ('Bowl Add-ons', 0, 2, false, true, 10),
-  ('Coffee Sweetness', 1, 1, true, true, 10)
-on conflict (name) do update set
-  min_selections = excluded.min_selections,
-  max_selections = excluded.max_selections,
-  is_required = excluded.is_required,
-  is_active = true,
-  sort_order = excluded.sort_order;
+select
+  d.name,
+  d.min_selections,
+  d.max_selections,
+  d.is_required,
+  true,
+  d.sort_order
+from desired d
+where not exists (
+  select 1
+  from public.modifier_groups mg
+  where mg.name = d.name
+);
 
 with desired(group_name, name, price_delta, sort_order) as (
   values
