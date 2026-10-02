@@ -157,7 +157,17 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
         children: [
           StatusBadge(latest.status),
           const SizedBox(height: 16),
-          _row('Contact', latest.contact),
+          _row('Contact Person', _orDash(latest.contactPerson)),
+          _row('Phone', _orDash(latest.phone)),
+          _row('Email', _orDash(latest.email)),
+          _row('Address', _orDash(latest.address)),
+          _row(
+            'Payment Terms',
+            latest.paymentTermsDays == 0
+                ? 'Pay on delivery'
+                : '${latest.paymentTermsDays} days',
+          ),
+          _row('Notes', _orDash(latest.notes)),
           _row('Items Supplied', latest.itemsSupplied),
         ],
       ),
@@ -177,15 +187,37 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
     );
   }
 
-  Future<void> _showAddSupplier() async {
-    final nameController = TextEditingController();
-    final contactController = TextEditingController();
+  Future<void> _showAddSupplier() => _showSupplierEditor();
+
+  Future<void> _showEditSupplier(SupplierRecord supplier) =>
+      _showSupplierEditor(existing: supplier);
+
+  String _orDash(String value) => value.trim().isEmpty ? '—' : value.trim();
+
+  /// One form for adding and editing. Each stored detail has its own field,
+  /// so saving sends back what was loaded for anything the user left alone.
+  Future<void> _showSupplierEditor({SupplierRecord? existing}) async {
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    final contactPersonController = TextEditingController(
+      text: existing?.contactPerson ?? '',
+    );
+    final phoneController = TextEditingController(text: existing?.phone ?? '');
+    final emailController = TextEditingController(text: existing?.email ?? '');
+    final addressController = TextEditingController(
+      text: existing?.address ?? '',
+    );
+    final termsController = TextEditingController(
+      text: (existing?.paymentTermsDays ?? 0).toString(),
+    );
+    final notesController = TextEditingController(text: existing?.notes ?? '');
+    bool active = (existing?.status ?? 'Active').toLowerCase() == 'active';
+    bool saving = false;
     String? errorMessage;
     StateSetter? updateDialogState;
 
     await showPrototypeDialog(
       context: context,
-      title: 'Add Supplier',
+      title: existing == null ? 'Add Supplier' : 'Edit Supplier',
       width: 520,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -199,9 +231,51 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
               ),
               const SizedBox(height: 14),
               TextField(
-                controller: contactController,
-                decoration: const InputDecoration(labelText: 'Phone / Contact'),
+                controller: contactPersonController,
+                decoration: const InputDecoration(labelText: 'Contact Person'),
               ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Phone'),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(labelText: 'Address'),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: termsController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Payment Terms (days)',
+                  helperText:
+                      'Days allowed to pay a bill. 0 = pay on delivery.',
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: notesController,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Notes'),
+              ),
+              if (existing != null) ...[
+                const SizedBox(height: 6),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Active Supplier'),
+                  value: active,
+                  onChanged: (value) => setDialogState(() => active = value),
+                ),
+              ],
               if (errorMessage != null) ...[
                 const SizedBox(height: 10),
                 Text(
@@ -220,6 +294,8 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
         ),
         ElevatedButton(
           onPressed: () async {
+            if (saving) return;
+
             if (nameController.text.trim().isEmpty) {
               updateDialogState?.call(() {
                 errorMessage = 'Supplier name is required.';
@@ -227,106 +303,63 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
               return;
             }
 
+            final terms = int.tryParse(termsController.text.trim());
+            if (terms == null || terms < 0) {
+              updateDialogState?.call(() {
+                errorMessage =
+                    'Payment terms must be a whole number of days, 0 or more.';
+              });
+              return;
+            }
+
+            final record =
+                (existing ??
+                        const SupplierRecord(
+                          name: '',
+                          contact: '',
+                          itemsSupplied: '',
+                          status: 'Active',
+                        ))
+                    .copyWith(
+                      name: nameController.text.trim(),
+                      contactPerson: contactPersonController.text.trim(),
+                      phone: phoneController.text.trim(),
+                      email: emailController.text.trim(),
+                      address: addressController.text.trim(),
+                      paymentTermsDays: terms,
+                      notes: notesController.text.trim(),
+                      status: active ? 'Active' : 'Inactive',
+                    );
+
+            saving = true;
             try {
-              await widget.supplierRepository.createSupplier(
-                SupplierRecord(
-                  name: nameController.text.trim(),
-                  contact: contactController.text.trim(),
-                  itemsSupplied: '',
-                  status: 'Active',
-                ),
-              );
+              if (existing == null) {
+                await widget.supplierRepository.createSupplier(record);
+              } else {
+                await widget.supplierRepository.updateSupplier(record);
+              }
 
               if (!mounted) return;
               Navigator.pop(context);
               _notifyDataChanged();
             } on PostgrestException catch (error) {
               updateDialogState?.call(() => errorMessage = error.message);
+            } finally {
+              saving = false;
             }
           },
-          child: const Text('Save Supplier'),
+          child: Text(existing == null ? 'Save Supplier' : 'Save Changes'),
         ),
       ],
     );
 
     nameController.dispose();
-    contactController.dispose();
-  }
-
-  Future<void> _showEditSupplier(SupplierRecord supplier) async {
-    final nameController = TextEditingController(text: supplier.name);
-    final contactController = TextEditingController(text: supplier.contact);
-    bool active = supplier.status.toLowerCase() == 'active';
-    String? errorMessage;
-    StateSetter? updateDialogState;
-
-    await showPrototypeDialog(
-      context: context,
-      title: 'Edit Supplier',
-      width: 520,
-      content: StatefulBuilder(
-        builder: (_, setDialogState) {
-          updateDialogState = setDialogState;
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Supplier Name *'),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: contactController,
-                decoration: const InputDecoration(labelText: 'Phone / Contact'),
-              ),
-              const SizedBox(height: 6),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Active Supplier'),
-                value: active,
-                onChanged: (value) => setDialogState(() => active = value),
-              ),
-              if (errorMessage != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  errorMessage!,
-                  style: AppTextStyles.caption.copyWith(color: AppColors.error),
-                ),
-              ],
-            ],
-          );
-        },
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            try {
-              await widget.supplierRepository.updateSupplier(
-                supplier.copyWith(
-                  name: nameController.text.trim(),
-                  contact: contactController.text.trim(),
-                  status: active ? 'Active' : 'Inactive',
-                ),
-              );
-
-              if (!mounted) return;
-              Navigator.pop(context);
-              _notifyDataChanged();
-            } on PostgrestException catch (error) {
-              updateDialogState?.call(() => errorMessage = error.message);
-            }
-          },
-          child: const Text('Save Changes'),
-        ),
-      ],
-    );
-
-    nameController.dispose();
-    contactController.dispose();
+    contactPersonController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    addressController.dispose();
+    termsController.dispose();
+    notesController.dispose();
   }
 
   Widget _row(String label, String value) {

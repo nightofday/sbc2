@@ -9,53 +9,60 @@ class SupabaseSupplierRepository implements SupplierRepository {
   SupabaseSupplierRepository({SupabaseClient? client})
     : _client = client ?? Supabase.instance.client;
 
+  static const _columns =
+      'id, name, contact_person, phone, email, address, payment_terms_days, '
+      'notes, is_active';
+
+  SupplierRecord _fromRow(
+    Map<String, dynamic> row, {
+    required String itemsSupplied,
+  }) {
+    String text(String key) => (row[key]?.toString() ?? '').trim();
+
+    final contactParts = <String>[
+      if (text('contact_person').isNotEmpty) text('contact_person'),
+      if (text('phone').isNotEmpty) text('phone'),
+      if (text('email').isNotEmpty) text('email'),
+    ];
+
+    return SupplierRecord(
+      id: text('id'),
+      name: text('name'),
+      contact: contactParts.isEmpty ? '—' : contactParts.join(' • '),
+      itemsSupplied: itemsSupplied,
+      status: row['is_active'] == true ? 'Active' : 'Inactive',
+      contactPerson: text('contact_person'),
+      phone: text('phone'),
+      email: text('email'),
+      address: text('address'),
+      paymentTermsDays: (row['payment_terms_days'] as num?)?.toInt() ?? 0,
+      notes: text('notes'),
+    );
+  }
+
   @override
   Future<List<SupplierRecord>> getSuppliers() async {
-    final rows = await _client
-        .from('suppliers')
-        .select('id, name, contact_person, phone, email, is_active')
-        .order('name');
+    final rows = await _client.from('suppliers').select(_columns).order('name');
 
-    return (rows as List).map((raw) {
-      final row = Map<String, dynamic>.from(raw as Map);
-      final contactParts = <String>[
-        if ((row['contact_person']?.toString() ?? '').trim().isNotEmpty)
-          row['contact_person'].toString(),
-        if ((row['phone']?.toString() ?? '').trim().isNotEmpty)
-          row['phone'].toString(),
-        if ((row['email']?.toString() ?? '').trim().isNotEmpty)
-          row['email'].toString(),
-      ];
-
-      return SupplierRecord(
-        id: row['id']?.toString() ?? '',
-        name: row['name']?.toString() ?? '',
-        contact: contactParts.isEmpty ? '—' : contactParts.join(' • '),
-        itemsSupplied: 'View supplier items',
-        status: row['is_active'] == true ? 'Active' : 'Inactive',
-      );
-    }).toList();
+    return (rows as List)
+        .map(
+          (raw) => _fromRow(
+            Map<String, dynamic>.from(raw as Map),
+            itemsSupplied: 'View supplier items',
+          ),
+        )
+        .toList();
   }
 
   @override
   Future<SupplierRecord?> getSupplierById(String id) async {
     final rows = await _client
         .from('suppliers')
-        .select('id, name, contact_person, phone, email, is_active')
+        .select(_columns)
         .eq('id', id)
         .limit(1);
 
     if ((rows as List).isEmpty) return null;
-
-    final row = Map<String, dynamic>.from(rows.first as Map);
-    final contactParts = <String>[
-      if ((row['contact_person']?.toString() ?? '').trim().isNotEmpty)
-        row['contact_person'].toString(),
-      if ((row['phone']?.toString() ?? '').trim().isNotEmpty)
-        row['phone'].toString(),
-      if ((row['email']?.toString() ?? '').trim().isNotEmpty)
-        row['email'].toString(),
-    ];
 
     final itemRows = await _client
         .from('supplier_items')
@@ -70,14 +77,11 @@ class SupabaseSupplierRepository implements SupplierRepository {
       }
     }
 
-    return SupplierRecord(
-      id: row['id']?.toString() ?? '',
-      name: row['name']?.toString() ?? '',
-      contact: contactParts.isEmpty ? '—' : contactParts.join(' • '),
+    return _fromRow(
+      Map<String, dynamic>.from(rows.first as Map),
       itemsSupplied: itemNames.isEmpty
           ? 'None linked yet'
           : itemNames.join(', '),
-      status: row['is_active'] == true ? 'Active' : 'Inactive',
     );
   }
 
@@ -87,18 +91,18 @@ class SupabaseSupplierRepository implements SupplierRepository {
       'create_supplier',
       params: {
         'p_name': supplier.name,
-        'p_contact_person': null,
-        'p_phone': supplier.contact,
-        'p_email': null,
-        'p_address': null,
-        'p_payment_terms_days': 0,
-        'p_notes': supplier.itemsSupplied == 'View supplier items'
-            ? null
-            : supplier.itemsSupplied,
+        'p_contact_person': supplier.contactPerson,
+        'p_phone': supplier.phone,
+        'p_email': supplier.email,
+        'p_address': supplier.address,
+        'p_payment_terms_days': supplier.paymentTermsDays,
+        'p_notes': supplier.notes,
       },
     );
   }
 
+  // Every editable field is sent with its own value. The database treats an
+  // empty string as "clear this field" and null as "leave it unchanged".
   @override
   Future<void> updateSupplier(SupplierRecord supplier) async {
     await _client.rpc(
@@ -106,22 +110,23 @@ class SupabaseSupplierRepository implements SupplierRepository {
       params: {
         'p_supplier_id': supplier.id,
         'p_name': supplier.name,
-        'p_contact_person': null,
-        'p_phone': supplier.contact,
-        'p_email': null,
-        'p_address': null,
-        'p_payment_terms_days': 0,
-        'p_notes': supplier.itemsSupplied,
+        'p_contact_person': supplier.contactPerson,
+        'p_phone': supplier.phone,
+        'p_email': supplier.email,
+        'p_address': supplier.address,
+        'p_payment_terms_days': supplier.paymentTermsDays,
+        'p_notes': supplier.notes,
         'p_is_active': supplier.status.toLowerCase() == 'active',
       },
     );
   }
 
+  // Archiving changes the status only; no other field is sent.
   @override
   Future<void> deleteSupplier(String id) async {
-    final supplier = await getSupplierById(id);
-    if (supplier == null) return;
-
-    await updateSupplier(supplier.copyWith(status: 'Inactive'));
+    await _client.rpc(
+      'update_supplier',
+      params: {'p_supplier_id': id, 'p_name': null, 'p_is_active': false},
+    );
   }
 }
