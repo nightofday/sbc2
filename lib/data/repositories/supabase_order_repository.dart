@@ -12,6 +12,7 @@ import '../../models/pos_modifier.dart';
 import '../../models/pos_payment_method.dart';
 import '../../models/refund_preview.dart';
 import '../../models/shift_cash_snapshot.dart';
+import '../../models/shift_report.dart';
 
 class SupabaseOrderRepository
     implements OrderRepository, OfflineSaleUploader {
@@ -38,28 +39,6 @@ class SupabaseOrderRepository
     return (rows as List)
         .map((row) => _orderFromMap(Map<String, dynamic>.from(row as Map)))
         .toList();
-  }
-
-  @override
-  Future<OrderRecord?> getOrderById(String id) async {
-    final row = await _findOrderRow(id);
-    if (row == null) return null;
-    return _orderFromMap(row);
-  }
-
-  @override
-  Future<void> createOrder(OrderRecord order) async {
-    throw UnsupportedError(
-      'Live orders must be created through placeOrder() so pricing and payment '
-      'are validated by PostgreSQL.',
-    );
-  }
-
-  @override
-  Future<void> updateOrder(OrderRecord order) async {
-    throw UnsupportedError(
-      'Live order changes must use the protected order RPCs.',
-    );
   }
 
   @override
@@ -244,6 +223,36 @@ class SupabaseOrderRepository
     );
 
     return ShiftCashSnapshot.fromMap(Map<String, dynamic>.from(result as Map));
+  }
+
+  @override
+  Future<ShiftReport> getShiftReport(String shiftId) async {
+    final result = await _client.rpc(
+      'get_shift_report',
+      params: {'p_shift_id': shiftId},
+    );
+
+    return ShiftReport.fromMap(Map<String, dynamic>.from(result as Map));
+  }
+
+  @override
+  Future<List<ShiftSummary>> getShifts({
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    String dateOnly(DateTime date) =>
+        '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
+
+    final result = await _client.rpc(
+      'list_shifts',
+      params: {'p_from': dateOnly(from), 'p_to': dateOnly(to)},
+    );
+
+    return ((result as List?) ?? const [])
+        .map((row) => ShiftSummary.fromMap(Map<String, dynamic>.from(row as Map)))
+        .toList();
   }
 
   @override

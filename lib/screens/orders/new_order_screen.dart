@@ -15,6 +15,7 @@ import '../../models/pos_menu_item.dart';
 import '../../models/pos_modifier.dart';
 import '../../models/pos_payment_method.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/shift_report_view.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/header_brand_motif.dart';
@@ -289,14 +290,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         _cart.clear();
                       });
 
-                      if (cash == null) {
-                        _showMessage('Shift ended successfully.');
-                      } else {
-                        final variance = cash - snapshot.expectedCash;
-                        _showMessage(
-                          'Shift ended. Cash variance: ${_signedMoney(variance)}',
-                        );
-                      }
+                      _showMessage('Shift ended.');
+                      await showShiftReportDialog(
+                        context: context,
+                        report: widget.orderRepository.getShiftReport(shiftId),
+                      );
                     } on PostgrestException catch (error) {
                       dialogSetState?.call(() {
                         errorMessage = error.message;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sbc_management_system/data/repositories/mock_order_repository.dart';
+import 'support/fake_order_repository.dart';
 import 'package:sbc_management_system/domain/repositories/dashboard_repository.dart';
 import 'package:sbc_management_system/models/dashboard_summary.dart';
 import 'package:sbc_management_system/screens/dashboard/dashboard_screen.dart';
@@ -37,7 +37,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: DashboardScreen(
-            orderRepository: MockOrderRepository(),
+            orderRepository: FakeOrderRepository(),
             dashboardRepository: dashboardRepository,
             refreshListenable: refresh,
           ),

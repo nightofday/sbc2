@@ -39,6 +39,7 @@ import 'screens/menu/categories_screen.dart';
 import 'screens/menu/discounts_screen.dart';
 import 'screens/menu/menu_management_screen.dart';
 import 'screens/orders/orders_screen.dart';
+import 'screens/orders/shifts_screen.dart';
 import 'screens/purchasing/purchasing_screen.dart';
 import 'screens/reports/reports_screen.dart';
 import 'screens/reports/transaction_traceability_screen.dart';
@@ -234,6 +235,14 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               canManageOrders: !isCashier,
               refreshListenable: _businessRefreshController,
               onDataChanged: _inventoryRefreshController.refresh,
+            ),
+          ),
+          destination(
+            label: 'Shifts',
+            icon: Icons.schedule_outlined,
+            page: ShiftsScreen(
+              orderRepository: _orderRepository,
+              refreshListenable: _businessRefreshController,
             ),
           ),
           if (!isCashier)

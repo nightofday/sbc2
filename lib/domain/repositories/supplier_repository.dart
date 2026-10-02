@@ -9,5 +9,4 @@ abstract class SupplierRepository {
 
   Future<void> updateSupplier(SupplierRecord supplier);
 
-  Future<void> deleteSupplier(String id);
 }

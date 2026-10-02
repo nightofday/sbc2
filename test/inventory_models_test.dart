@@ -1,29 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:sbc_management_system/data/repositories/mock_inventory_repository.dart';
 import 'package:sbc_management_system/models/inventory_item.dart';
 import 'package:sbc_management_system/models/inventory_reference.dart';
 
 void main() {
-  test('mock inventory repository updates stock in memory', () async {
-    final repository = MockInventoryRepository();
-    final items = await repository.getInventoryItems();
-
-    expect(items.length, 6);
-
-    final water = items.firstWhere((item) => item.id == 'INV-001');
-    expect(water.stock, '24 pc');
-
-    await repository.updateInventoryItem(water.copyWith(stock: '26 pc'));
-
-    final updated = await repository.getInventoryItemById('INV-001');
-    expect(updated?.stock, '26 pc');
-
-    final bowls = await repository.getInventoryItemById('INV-005');
-    expect(bowls?.name, 'Takeout Bowls');
-    expect(bowls?.stock, '75 pc');
-  });
-
   test('inventory movement keeps its item reference for activity feeds', () {
     final movement = InventoryMovementRecord.fromMap({
       'inventory_item_id': 'item-123',
@@ -94,12 +74,6 @@ void main() {
       'adjustment_expiration_date': '2026-10-15',
       'unit_cost_base': 80.0,
     });
-  });
-
-  test('mock inventory exposes the recent activity contract', () async {
-    final repository = MockInventoryRepository();
-
-    expect(await repository.getAllRecentMovements(), isEmpty);
   });
 
   test('inventory item separates usable, expired, and on-hand stock', () {

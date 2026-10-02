@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sbc_management_system/data/repositories/mock_order_repository.dart';
+import 'support/fake_order_repository.dart';
 import 'package:sbc_management_system/models/order_record.dart';
 import 'package:sbc_management_system/models/pos_checkout.dart';
 import 'package:sbc_management_system/models/pos_menu_item.dart';
@@ -12,7 +12,7 @@ import 'package:sbc_management_system/screens/orders/new_order_screen.dart';
 
 /// Saves the sale on the first call but loses the response, as a dropped
 /// connection would, then answers normally.
-class _LostResponseOrderRepository extends MockOrderRepository {
+class _LostResponseOrderRepository extends FakeOrderRepository {
   final List<String> requestIds = [];
   final Map<String, OrderRecord> savedByRequestId = {};
   bool loseNextResponse = true;

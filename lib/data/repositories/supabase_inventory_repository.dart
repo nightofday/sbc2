@@ -313,20 +313,6 @@ class SupabaseInventoryRepository implements InventoryRepository {
   }
 
   @override
-  Future<void> createInventoryItem(InventoryItem item) async {
-    throw UnsupportedError(
-      'Use createInventoryItemWithInitialStock() for live inventory items.',
-    );
-  }
-
-  @override
-  Future<void> updateInventoryItem(InventoryItem item) async {
-    throw UnsupportedError(
-      'Inventory quantity changes must use adjustStock().',
-    );
-  }
-
-  @override
   Future<void> deleteInventoryItem(String id) async {
     final rows = await _client
         .from('v_inventory_catalog')

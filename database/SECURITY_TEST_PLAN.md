@@ -129,9 +129,9 @@ Historical orders/payments/invoices/stock movements must not be hard-deleted dur
 ## 13. Reporting smoke tests
 
 Verify `v_inventory_stock`, `v_low_stock`, `v_expiring_inventory_lots`,
-`v_daily_sales`, `v_product_sales_daily`, `v_business_transaction_trace`,
-`v_order_cogs`, `v_shift_summary`, `v_supplier_balances` and
-`v_daily_profit_estimate` against manually calculated sample data. Confirm that
+`v_business_transaction_trace`, `v_supplier_balances`, and the functions
+`get_business_report`, `get_dashboard_summary` and `get_shift_report` against
+manually calculated sample data. Confirm that
 cashiers receive no rows from the management transaction trace.
 
 ## 14. Production blockers

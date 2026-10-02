@@ -170,42 +170,40 @@ set local role authenticated;
 set local request.jwt.claim.role = 'authenticated';
 set local request.jwt.claim.sub = '70000000-0000-0000-0000-000000000001';
 
+-- The period report is the one place product sales are defined.
+create temporary table phase_seven_item on commit drop as
+select item.value as row
+from jsonb_array_elements(
+  public.get_business_report(
+    public.business_today(), public.business_today()
+  ) -> 'by_item'
+) as item
+where item.value ->> 'item_name' = 'Phase Seven Bowl';
+
 select is(
-  (
-    select quantity_sold
-    from public.v_product_sales_daily
-    where menu_variant_id = '70000000-0000-0000-0000-000000000012'
-  ),
+  (select (row ->> 'quantity_sold')::numeric from phase_seven_item),
   2.0000::numeric,
   'period product reporting preserves gross quantity sold'
 );
 
 select is(
-  (
-    select quantity_refunded
-    from public.v_product_sales_daily
-    where menu_variant_id = '70000000-0000-0000-0000-000000000012'
-  ),
+  (select (row ->> 'quantity_refunded')::numeric from phase_seven_item),
   0.5000::numeric,
   'period product reporting exposes refunded quantity'
 );
 
 select is(
   (
-    select net_quantity_sold
-    from public.v_product_sales_daily
-    where menu_variant_id = '70000000-0000-0000-0000-000000000012'
+    select (row ->> 'quantity_sold')::numeric
+      - (row ->> 'quantity_refunded')::numeric
+    from phase_seven_item
   ),
   1.5000::numeric,
   'period product reporting calculates net quantity sold'
 );
 
 select is(
-  (
-    select net_line_sales
-    from public.v_product_sales_daily
-    where menu_variant_id = '70000000-0000-0000-0000-000000000012'
-  ),
+  (select (row ->> 'net_sales')::numeric from phase_seven_item),
   150.00::numeric,
   'period product reporting subtracts line refunds'
 );

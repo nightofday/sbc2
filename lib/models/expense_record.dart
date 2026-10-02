@@ -27,35 +27,6 @@ class ExpenseRecord {
     this.notes = '',
   });
 
-  ExpenseRecord copyWith({
-    String? id,
-    int? expenseNumber,
-    String? expenseType,
-    String? date,
-    String? description,
-    String? category,
-    double? amount,
-    DateTime? expenseDate,
-    String? supplierId,
-    String? supplierName,
-    String? referenceNumber,
-    String? notes,
-  }) {
-    return ExpenseRecord(
-      id: id ?? this.id,
-      expenseNumber: expenseNumber ?? this.expenseNumber,
-      expenseType: expenseType ?? this.expenseType,
-      date: date ?? this.date,
-      description: description ?? this.description,
-      category: category ?? this.category,
-      amount: amount ?? this.amount,
-      expenseDate: expenseDate ?? this.expenseDate,
-      supplierId: supplierId ?? this.supplierId,
-      supplierName: supplierName ?? this.supplierName,
-      referenceNumber: referenceNumber ?? this.referenceNumber,
-      notes: notes ?? this.notes,
-    );
-  }
 }
 
 class ExpenseSupplierOption {

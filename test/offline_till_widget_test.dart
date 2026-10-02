@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sbc_management_system/data/offline/key_value_store.dart';
 import 'package:sbc_management_system/data/offline/offline_order_repository.dart';
-import 'package:sbc_management_system/data/repositories/mock_order_repository.dart';
+import 'support/fake_order_repository.dart';
 import 'package:sbc_management_system/domain/repositories/offline_sales_queue.dart';
 import 'package:sbc_management_system/models/offline_sale.dart';
 import 'package:sbc_management_system/models/order_record.dart';
@@ -13,7 +13,7 @@ import 'package:sbc_management_system/screens/orders/new_order_screen.dart';
 import 'package:sbc_management_system/widgets/common/offline_status_banner.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
-class _Server extends MockOrderRepository implements OfflineSaleUploader {
+class _Server extends FakeOrderRepository implements OfflineSaleUploader {
   bool reachable = true;
   String? rejectUploadsWith;
   final List<OfflineSale> uploads = [];

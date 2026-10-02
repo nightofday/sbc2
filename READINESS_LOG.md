@@ -103,8 +103,8 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | `invoice_print_events` | No reads or writes anywhere. | Keep if receipt printing is built (`OPS-02`); otherwise drop. |
 | `tax_rates` | Seeded with 4 rows, never read. One foreign key points to it. | Keep until the VAT question is answered (`OPS-03`); drop if the café is non-VAT. |
 | `variant_recipe_components`, `modifier_recipe_components`, `private.retired_*` | Recipe deduction is retired. Tables are empty in a fresh database but still referenced by older functions and tests. | Do not drop yet: AGENTS.md §6 requires a history check first. Flag to Brian. |
-| `v_daily_profit_estimate`, `v_order_cogs` | Read by nothing. The first presents a "profit" figure the business rules say must not be shown as profit. | Drop or replace when `FIN-01` defines the measures. |
-| `v_product_sales`, `v_low_stock`, `v_expiring_inventory_lots`, `v_shift_summary` | Read by neither the app nor other SQL. | Either wire into reports (`REP-02`, `REP-04`) or drop. |
+| `v_daily_profit_estimate`, `v_order_cogs` | Read by nothing. The first presents a "profit" figure the business rules say must not be shown as profit. | **Dropped** in `20261002220000`. |
+| `v_product_sales`, `v_low_stock`, `v_expiring_inventory_lots`, `v_shift_summary` | Read by neither the app nor other SQL. | `v_low_stock` and `v_expiring_inventory_lots` are now read by Reports. `v_product_sales` and `v_shift_summary` were **dropped** in `20261002220000`; `get_shift_report` replaces the second. |
 | `credit_notes` | Written by the refund functions, never read. | Keep (history); surface in order/refund detail (`POS-02`). |
 
 ### 4.2 Needed but missing
@@ -148,8 +148,11 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | Migration `20261002210000_offline_sales_sync.sql` (`6f0f4c7`): `sync_offline_order` posts a sale made offline under its request ID, dates the order, payment, invoice, stock movements and status history at the time of sale, lets stock go negative for that call only (transaction-local setting `app.offline_sync`, read by the stock guard and by FEFO consumption), and writes an audit row for the sync and another when the till's total differs from the recorded total | Offline till, server side (section 7) | pgTAP `18_offline_sales_sync.test.sql`, 16 of 16; files `01`–`17` unchanged; applied to the hosted test project |
 | 2026-10-02 | Offline till in the app: `OfflineOrderRepository` (`lib/data/offline/`) wraps the server repository, keeps the menu, options, payment methods, discounts, open shift and signed-in profile on the device, stores a sale that cannot reach the server and replays it oldest-first under the same request ID; `OfflineStatusBanner` above every page; offline receipt notice; a sign-out warning and a block on closing a shift while sales are unsent | Offline till, app side | `test/offline_order_repository_test.dart` (18 tests) and `test/offline_till_widget_test.dart` (a sale on the real till screen with the server unplugged, then refused, then accepted) |
 | 2026-10-02 | `errorText()` in `lib/core/error_text.dart`, used wherever a screen showed `error.toString()` (43 places) | Screens showed class names such as `ClientException: Failed to fetch` when the connection dropped | analyzer and the existing 63 tests; not separately tested |
+| 2026-10-02 | Migration `20261002220000_shift_report_and_unused_objects.sql`: `get_shift_report(shift)` and `list_shifts(from, to)`; six unused views and three unused functions dropped | Shift (Z) report, which every commercial POS has and this app lacked; dead-code removal | pgTAP `19_shift_report.test.sql`, 20 of 20; all 19 files pass with it; applied to the hosted test project |
+| 2026-10-02 | Shifts screen under Sales & Finance for every role (cashiers see their own shifts); the shift report opens from the list and automatically after a shift is closed, with a copy button | Same | `test/shift_report_test.dart` (5 tests, at 1300 px and 360 px) |
+| 2026-10-02 | Dead Dart code removed: five mock repositories and `mock_data.dart` (805 lines), ten repository methods no screen calls, four unused `copyWith` methods and `dialogField` | Requested clean-up; the mocks shipped sample data inside the app | `flutter analyze` clean; 66 tests pass |
 
-The first three rows are Flutter-only changes; the rest add nine database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 63 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add ten database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 66 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### Offline till status
 
@@ -183,6 +186,28 @@ Not done:
 - Offline was verified with a fake server in tests. It was not tested by cutting the network on a real tablet.
 - Sales wait on the device of the user who made them. A different user signing in on that device does not see or send them.
 - A cash sale re-priced higher than the cash tendered is refused at sync and lands in Needs Attention.
+
+### Dead code removed
+
+How it was found: for Dart, every repository method was checked for a caller in `lib/screens`, `lib/widgets` or `lib/app.dart`, and every public member of a model was deleted on trial and kept deleted only if `flutter analyze` stayed clean. For the database, each public function and view was checked for a reference in the app, in another function's body, in a trigger, in a policy and in another view (query against the hosted project's catalog).
+
+| Removed | Why it was dead |
+| --- | --- |
+| `lib/data/mock_data.dart`, `mock_expense_repository.dart`, `mock_supplier_repository.dart`, `mock_user_repository.dart`, `mock_inventory_repository.dart` | Nothing in the app used them. Two tests only tested the inventory mock itself; they were removed and the file renamed `test/inventory_models_test.dart` |
+| `mock_order_repository.dart` | Used only as a base class by tests. Moved to `test/support/fake_order_repository.dart` without the sample data |
+| `OrderRepository.createOrder`, `updateOrder`, `getOrderById` | The Supabase versions threw `UnsupportedError`; no screen called them |
+| `ExpenseRepository.getExpenseById`, `InventoryRepository.createInventoryItem` / `updateInventoryItem`, `SupplierRepository.deleteSupplier`, `UserRepository.createUser` / `updateUser` / `deleteUser` | No caller. The screens use the newer methods (`createEmployee`, `updateEmployee`, item creation with initial stock, archive instead of delete) |
+| `copyWith` on `UserRecord`, `ExpenseRecord`, `InventoryItem`, `OrderItem`; `dialogField` | No caller |
+| Views `v_daily_sales`, `v_product_sales`, `v_product_sales_daily`, `v_daily_profit_estimate`, `v_order_cogs`, `v_shift_summary` | Superseded by `get_business_report` and `get_shift_report`; the profit view showed a figure the business rules forbid. `07_reporting_traceability_alignment.test.sql` read one of them and now reads the business report instead, with the same four expectations |
+| Functions `place_order` (first version), `update_order_item_quantity`, `remove_order_item` | An order-editing flow the till never used; checkout is `place_order_v2` only |
+
+Deliberately kept:
+
+- `variant_recipe_components`, `modifier_recipe_components` and the `private.retired_*` functions. AGENTS.md §6 requires a history check before recipe objects are removed, and Brian's own database may hold rows the test project does not. Both tables are empty on the test project.
+- `devices`, `invoice_print_events`, `tax_rates`, `credit_notes`: unused today but tied to open business decisions (receipt printing, VAT) or to history.
+- `rls_auto_enable()`: not created by any migration in this repository, so it is not ours to drop.
+- `AppSpacing` constants that are not referenced yet: design tokens, not logic.
+- AGENTS.md said to keep mock repositories under the `MockXRepository` pattern. Its two sentences on this were changed to say test fakes live in `test/support/`. Flag for Brian.
 
 ### How the database changes were tested without Docker
 
@@ -232,7 +257,7 @@ Export: every table, and the whole report, can be copied as tab-separated text a
 
 Not done in reporting:
 
-- The older views `v_daily_sales`, `v_product_sales_daily`, `v_product_sales`, `v_daily_profit_estimate`, `v_order_cogs` and `v_shift_summary` still use the old definitions. The app no longer reads them; they are removed in the dead-code pass below if nothing else needs them.
+- The older views `v_daily_sales`, `v_product_sales_daily`, `v_product_sales`, `v_daily_profit_estimate`, `v_order_cogs` and `v_shift_summary` used the old definitions. They were dropped in `20261002220000` (see "Dead code removed").
 - "Today" and the other presets use the device's date. On a device set to another time zone they would differ from the café's day.
 - Transaction Traceability is unchanged: last 30 days, 500 rows, posted documents only (`TRACE-01`).
 - No shift (end-of-day) report yet.

@@ -178,33 +178,3 @@ Future<bool> showReasonDialog({
   return confirmed;
 }
 
-Widget dialogField(
-  String label, {
-  String? value,
-  String? hint,
-  int maxLines = 1,
-  TextEditingController? controller,
-}) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 14),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.gray700,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          initialValue: controller == null ? value : null,
-          maxLines: maxLines,
-          decoration: InputDecoration(hintText: hint),
-        ),
-      ],
-    ),
-  );
-}

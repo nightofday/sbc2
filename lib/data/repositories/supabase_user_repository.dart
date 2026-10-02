@@ -93,33 +93,4 @@ class SupabaseUserRepository implements UserRepository {
     );
   }
 
-  @override
-  Future<void> createUser(UserRecord user) {
-    throw UnsupportedError(
-      'Use createEmployee() to create an authenticated employee.',
-    );
-  }
-
-  @override
-  Future<void> updateUser(UserRecord user) async {
-    await updateEmployee(
-      userId: user.id,
-      displayName: user.name,
-      status: user.status,
-      roleId: user.roleId,
-    );
-  }
-
-  @override
-  Future<void> deleteUser(String id) async {
-    final user = await getUserById(id);
-    if (user == null) return;
-
-    await updateEmployee(
-      userId: id,
-      displayName: user.name,
-      status: 'INACTIVE',
-      roleId: user.roleId,
-    );
-  }
 }

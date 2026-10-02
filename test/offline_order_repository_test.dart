@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sbc_management_system/data/offline/key_value_store.dart';
 import 'package:sbc_management_system/data/offline/offline_order_repository.dart';
-import 'package:sbc_management_system/data/repositories/mock_order_repository.dart';
+import 'support/fake_order_repository.dart';
 import 'package:sbc_management_system/domain/repositories/offline_sales_queue.dart';
 import 'package:sbc_management_system/models/offline_sale.dart';
 import 'package:sbc_management_system/models/order_record.dart';
@@ -15,7 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 /// A server that can be unplugged. It keeps one order per request ID, as
 /// the database does.
-class _FakeServer extends MockOrderRepository implements OfflineSaleUploader {
+class _FakeServer extends FakeOrderRepository implements OfflineSaleUploader {
   bool reachable = true;
   String? rejectUploadsWith;
   String? openShiftId = 'shift-1';
@@ -479,7 +479,6 @@ void main() {
 
     // Offline, only this device's sales can be shown.
     expect((await till.getOrders()).single.id, offline.id);
-    expect((await till.getOrderById(offline.id))?.amount, 150);
     expect(
       () => till.refundOrder(offline.id, reason: 'Wrong item'),
       throwsA(isA<OfflineUnavailableException>()),

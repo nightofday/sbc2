@@ -34,28 +34,6 @@ class UserRecord {
     );
   }
 
-  UserRecord copyWith({
-    String? id,
-    String? name,
-    String? username,
-    String? email,
-    String? role,
-    String? roleCode,
-    String? roleId,
-    String? status,
-  }) {
-    return UserRecord(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      username: username ?? this.username,
-      email: email ?? this.email,
-      role: role ?? this.role,
-      roleCode: roleCode ?? this.roleCode,
-      roleId: roleId ?? this.roleId,
-      status: status ?? this.status,
-    );
-  }
-
   static String _statusLabel(String value) {
     final lower = value.toLowerCase();
     return lower.isEmpty ? value : lower[0].toUpperCase() + lower.substring(1);

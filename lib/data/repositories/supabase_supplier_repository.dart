@@ -125,11 +125,4 @@ class SupabaseSupplierRepository implements SupplierRepository {
   }
 
   // Archiving changes the status only; no other field is sent.
-  @override
-  Future<void> deleteSupplier(String id) async {
-    await _client.rpc(
-      'update_supplier',
-      params: {'p_supplier_id': id, 'p_name': null, 'p_is_active': false},
-    );
-  }
 }

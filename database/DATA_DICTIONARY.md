@@ -102,8 +102,6 @@
 | `v_goods_receipt_summary` | Goods receipt header, supplier, receipt reference and posting summary. |
 | `v_goods_receipt_line_details` | Received package quantity, conversion, base quantity and resulting lot balance. |
 | `v_user_management` | Employee profile, role and account status for authorized administrators. |
-| `v_daily_sales` | Daily completed sales totals. |
-| `v_product_sales_daily` | Daily product-level gross sold, refunded and net quantities and sales, using the café's Manila business date. |
 | `v_business_transaction_trace` | Management-only chronological trace across sales, refunds, goods receipts, stock-outs, physical counts, expenses and supplier payments. |
 
 The transaction trace is derived from the operational source tables. It does

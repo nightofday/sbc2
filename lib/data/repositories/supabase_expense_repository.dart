@@ -89,47 +89,6 @@ class SupabaseExpenseRepository implements ExpenseRepository {
   }
 
   @override
-  Future<ExpenseRecord?> getExpenseById(String id) async {
-    final rows = await _client
-        .from('expenses')
-        .select(
-          'id, expense_number, expense_type, expense_date, description, '
-          'amount, status, supplier_id, reference_number, notes, '
-          'expense_categories(name), suppliers(name)',
-        )
-        .eq('id', id)
-        .limit(1);
-
-    if ((rows as List).isEmpty) return null;
-
-    final row = Map<String, dynamic>.from(rows.first as Map);
-    final categoryRaw = row['expense_categories'];
-    final category = categoryRaw is Map
-        ? Map<String, dynamic>.from(categoryRaw)['name']?.toString() ?? 'Other'
-        : 'Other';
-    final supplierRaw = row['suppliers'];
-    final supplierName = supplierRaw is Map
-        ? Map<String, dynamic>.from(supplierRaw)['name']?.toString() ?? ''
-        : '';
-    final expenseDate = DateTime.parse(row['expense_date'].toString());
-
-    return ExpenseRecord(
-      id: row['id']?.toString() ?? '',
-      expenseNumber: (row['expense_number'] as num?)?.toInt() ?? 0,
-      expenseType: row['expense_type']?.toString() ?? 'OPERATING',
-      date: _formatDate(expenseDate),
-      description: row['description']?.toString() ?? '',
-      category: category,
-      amount: ((row['amount'] as num?) ?? 0).toDouble(),
-      expenseDate: expenseDate,
-      supplierId: row['supplier_id']?.toString() ?? '',
-      supplierName: supplierName,
-      referenceNumber: row['reference_number']?.toString() ?? '',
-      notes: row['notes']?.toString() ?? '',
-    );
-  }
-
-  @override
   Future<void> createExpense(
     ExpenseRecord expense, {
     String? clientRequestId,

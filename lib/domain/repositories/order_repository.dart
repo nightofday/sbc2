@@ -6,15 +6,10 @@ import '../../models/pos_modifier.dart';
 import '../../models/pos_payment_method.dart';
 import '../../models/refund_preview.dart';
 import '../../models/shift_cash_snapshot.dart';
+import '../../models/shift_report.dart';
 
 abstract class OrderRepository {
   Future<List<OrderRecord>> getOrders();
-
-  Future<OrderRecord?> getOrderById(String id);
-
-  Future<void> createOrder(OrderRecord order);
-
-  Future<void> updateOrder(OrderRecord order);
 
   Future<void> voidOrder(
     String id, {
@@ -66,6 +61,16 @@ abstract class OrderRepository {
   });
 
   Future<ShiftCashSnapshot> getShiftCashSnapshot(String shiftId);
+
+  /// The end-of-shift report for an open or closed shift.
+  Future<ShiftReport> getShiftReport(String shiftId);
+
+  /// Shifts started in the date range, newest first. Staff who do not
+  /// manage shifts get their own only.
+  Future<List<ShiftSummary>> getShifts({
+    required DateTime from,
+    required DateTime to,
+  });
 
   Future<void> recordShiftCashMovement({
     required String shiftId,

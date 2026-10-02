@@ -17,6 +17,7 @@ import '../../models/pos_payment_method.dart';
 import '../../models/refund_preview.dart';
 import '../../models/request_id.dart';
 import '../../models/shift_cash_snapshot.dart';
+import '../../models/shift_report.dart';
 import 'key_value_store.dart';
 
 /// Who is using the till. The queue is kept per user because the server
@@ -440,6 +441,20 @@ class OfflineOrderRepository extends ChangeNotifier
   }
 
   @override
+  Future<ShiftReport> getShiftReport(String shiftId) async {
+    await syncPending();
+    return _online(() => _remote.getShiftReport(_serverShiftId(shiftId)));
+  }
+
+  @override
+  Future<List<ShiftSummary>> getShifts({
+    required DateTime from,
+    required DateTime to,
+  }) {
+    return _online(() => _remote.getShifts(from: from, to: to));
+  }
+
+  @override
   Future<void> recordShiftCashMovement({
     required String shiftId,
     required String movementType,
@@ -721,13 +736,6 @@ class OfflineOrderRepository extends ChangeNotifier
   }
 
   @override
-  Future<OrderRecord?> getOrderById(String id) async {
-    final local = _localSale(id);
-    if (local != null) return local.toOrderRecord();
-    return _online(() => _remote.getOrderById(id));
-  }
-
-  @override
   Future<OrderRecord?> findOrderByRequestId(String clientRequestId) async {
     final local = _sales
         .where((sale) => sale.requestId == clientRequestId)
@@ -747,12 +755,6 @@ class OfflineOrderRepository extends ChangeNotifier
       'refunded once it has synced and has an order number.',
     );
   }
-
-  @override
-  Future<void> createOrder(OrderRecord order) => _remote.createOrder(order);
-
-  @override
-  Future<void> updateOrder(OrderRecord order) => _remote.updateOrder(order);
 
   @override
   Future<void> voidOrder(

@@ -78,48 +78,6 @@ class InventoryItem {
     );
   }
 
-  InventoryItem copyWith({
-    String? id,
-    String? sku,
-    String? name,
-    String? category,
-    String? categoryId,
-    String? stock,
-    double? currentQuantity,
-    double? usableQuantity,
-    double? expiredQuantity,
-    double? reorderLevel,
-    String? baseUomCode,
-    String? baseUomId,
-    bool? trackExpiry,
-    DateTime? nextExpirationDate,
-    String? status,
-    String? supplier,
-    String? supplierId,
-    String? expiration,
-  }) {
-    return InventoryItem(
-      id: id ?? this.id,
-      sku: sku ?? this.sku,
-      name: name ?? this.name,
-      category: category ?? this.category,
-      categoryId: categoryId ?? this.categoryId,
-      stock: stock ?? this.stock,
-      currentQuantity: currentQuantity ?? this.currentQuantity,
-      usableQuantity: usableQuantity ?? this.usableQuantity,
-      expiredQuantity: expiredQuantity ?? this.expiredQuantity,
-      reorderLevel: reorderLevel ?? this.reorderLevel,
-      baseUomCode: baseUomCode ?? this.baseUomCode,
-      baseUomId: baseUomId ?? this.baseUomId,
-      trackExpiry: trackExpiry ?? this.trackExpiry,
-      nextExpirationDate: nextExpirationDate ?? this.nextExpirationDate,
-      status: status ?? this.status,
-      supplier: supplier ?? this.supplier,
-      supplierId: supplierId ?? this.supplierId,
-      expiration: expiration ?? this.expiration,
-    );
-  }
-
   static String _deriveStatus({
     required double usableQuantity,
     required double expiredQuantity,

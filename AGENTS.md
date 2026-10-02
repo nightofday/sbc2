@@ -51,12 +51,12 @@ Use constructor injection and the existing StatefulWidget/FutureBuilder/ChangeNo
 
 Multi-table writes, posting, payment/stock mutations, and authorization-sensitive calculations belong in transactional database functions. Keep authoritative totals and validation on the server; UI previews should agree with them. Repositories should not orchestrate non-atomic writes for one business transaction.
 
-Extend existing interfaces before adapters/screens. Update all implementers and affected tests. Retain useful mock repositories for isolated tests; never silently fall back to mock success when a live operation fails. Not every module has a mock implementation; add one only if the task requires it.
+Extend existing interfaces before adapters/screens. Update all implementers and affected tests. Test fakes live under `test/support/`, not in `lib/`; never silently fall back to fake success when a live operation fails. Add a fake only when a test needs one.
 
 ## 4. Names and contracts
 
 - Files/folders: `snake_case`; classes/types/widgets: `PascalCase`; methods/variables: `lowerCamelCase`; private Dart members: `_prefix`.
-- Preserve established `XRepository`, `SupabaseXRepository`, `MockXRepository`, `XScreen`, `*Record`, `*Option`, and `*Input` patterns where they fit.
+- Preserve established `XRepository`, `SupabaseXRepository`, `XScreen`, `*Record`, `*Option`, and `*Input` patterns where they fit.
 - Database tables/columns/functions: existing `snake_case`; existing SQL status codes remain uppercase unless a migration deliberately changes their contract. Keep database codes separate from user-facing labels.
 - Relationships use stable IDs, not display names. Distinguish database UUIDs, document numbers, SKUs, and external receipt/reference numbers.
 - Do not repurpose `productId` to mean an order-line ID in new code. If correcting existing ambiguous models, migrate the affected uses together and document the compatibility impact.

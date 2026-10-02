@@ -13,17 +13,4 @@ class OrderItem {
 
   double get lineTotal => unitPrice * quantity;
 
-  OrderItem copyWith({
-    String? productId,
-    String? productName,
-    double? unitPrice,
-    int? quantity,
-  }) {
-    return OrderItem(
-      productId: productId ?? this.productId,
-      productName: productName ?? this.productName,
-      unitPrice: unitPrice ?? this.unitPrice,
-      quantity: quantity ?? this.quantity,
-    );
-  }
 }

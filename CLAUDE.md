@@ -18,7 +18,7 @@ Street Bowl Café Management System: a Flutter + Supabase app for one café's in
 flutter pub get
 flutter analyze
 flutter test                                              # whole suite
-flutter test test/inventory_repository_test.dart          # one file
+flutter test test/inventory_models_test.dart          # one file
 flutter test test/reporting_model_test.dart --plain-name "substring of test name"
 dart format <changed files>                               # format only what you touched
 ```

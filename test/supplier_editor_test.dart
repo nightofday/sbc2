@@ -34,9 +34,6 @@ class _RecordingSupplierRepository implements SupplierRepository {
     lastUpdate = supplier;
     stored = supplier;
   }
-
-  @override
-  Future<void> deleteSupplier(String id) async {}
 }
 
 void main() {
