@@ -178,6 +178,7 @@ Run as Administrator against the hosted test project, in the browser pane at 128
 | Shift report for the open shift | Gross ₱1,420, discounts ₱41, refunds ₱162, net ₱1,217; payments Cash ₱1,167 + Other ₱50 = ₱1,217; expected cash ₱1,187 = 0 + 1,329 − 162 + 20. Checked by hand against the orders |
 | Supplier payment of ₱200, then reversed | Bill left Payables when paid, returned at ₱200 owed when reversed; both entries listed, marked Reversed and Reversal; the trace shows both with the reason |
 | Write-off of 1 Coca-Cola reversed | History shows the original marked Reversed and a +1 Reversal; usable stock 17 → 18 |
+| Order for table T5 held, continued, paid with the ₱200 quick-cash button | Held (1) appeared and the cart cleared; Continue restored the line and table; order `#150` saved with ₱200 received and ₱80 change; the receipt shows date and time and offers Copy Receipt |
 | Audit Log | Lists sales, the voided release, cash movements and the test category with who and when |
 | Business Details, Shifts, Finance, Reports, Traceability, Menu, Discounts, Inventory screens | Load real data without errors at both sizes |
 
