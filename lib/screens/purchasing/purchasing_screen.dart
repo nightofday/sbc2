@@ -946,7 +946,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
     DateTime? expirationDate = initial?.expirationDate;
     String? errorMessage;
 
-    final result = await showDialog<PurchaseLineInput>(
+    final result = await showSettledDialog<PurchaseLineInput>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (_, setDialogState) {

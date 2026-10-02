@@ -1081,7 +1081,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     final instructionsController = TextEditingController();
     String? errorMessage;
 
-    final result = await showDialog<_PosCartLine>(
+    final result = await showSettledDialog<_PosCartLine>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) {
