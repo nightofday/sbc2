@@ -59,6 +59,7 @@ class SupabaseExpenseRepository implements ExpenseRepository {
         .from('expense_categories')
         .select('id, name')
         .eq('is_active', true)
+        .order('sort_order')
         .order('name');
 
     return (rows as List)

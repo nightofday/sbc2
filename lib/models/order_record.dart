@@ -19,6 +19,11 @@ class OrderRecord {
   final String authorizedBy;
   final String invoiceNumber;
 
+  /// Sales value before any discount. Zero when it was not loaded.
+  final double subtotal;
+  final double discountAmount;
+  final String discountName;
+
   const OrderRecord({
     required this.id,
     required this.createdAt,
@@ -37,6 +42,9 @@ class OrderRecord {
     this.lastActionReason = '',
     this.authorizedBy = '',
     this.invoiceNumber = '',
+    this.subtotal = 0,
+    this.discountAmount = 0,
+    this.discountName = '',
   });
 
   String get time {

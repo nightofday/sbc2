@@ -43,6 +43,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
         .from('inventory_categories')
         .select('id, name')
         .eq('is_active', true)
+        .order('sort_order')
         .order('name');
 
     return (rows as List)

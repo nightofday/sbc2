@@ -1453,10 +1453,14 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     const SizedBox(height: 14),
                     TextField(
                       controller: discountValueController,
+                      enabled: selectedDiscount!.allowCustomValue,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
                       decoration: InputDecoration(
+                        helperText: selectedDiscount!.allowCustomValue
+                            ? null
+                            : 'Set by management for this promotion.',
                         labelText:
                             selectedDiscount!.calculationMethod == 'PERCENTAGE'
                             ? 'Discount Percentage *'
@@ -1854,6 +1858,15 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               ),
             ),
             const Divider(height: 28),
+            if (order.discountAmount > 0) ...[
+              _paymentInfoRow('Subtotal', _money(order.subtotal)),
+              _paymentInfoRow(
+                order.discountName.isEmpty
+                    ? 'Discount'
+                    : 'Discount (${order.discountName})',
+                '-${_money(order.discountAmount)}',
+              ),
+            ],
             _paymentInfoRow('Total', _money(order.amount), emphasized: true),
             _paymentInfoRow('Payment', order.paymentMethod),
             _paymentInfoRow('Amount Received', _money(order.amountReceived)),

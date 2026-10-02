@@ -357,6 +357,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               ),
             const Divider(height: 28),
+            if (order.discountAmount > 0) ...[
+              _detailRow('Subtotal', _moneyDouble(order.subtotal)),
+              _detailRow(
+                order.discountName.isEmpty
+                    ? 'Discount'
+                    : 'Discount (${order.discountName})',
+                '-${_moneyDouble(order.discountAmount)}',
+              ),
+            ],
             _detailRow('Total', _moneyDouble(order.amount), emphasized: true),
             if (order.paymentMethod.isNotEmpty) ...[
               _detailRow('Amount Received', _moneyDouble(order.amountReceived)),
@@ -1139,6 +1148,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               ),
             const Divider(height: 28),
+            if (order.discountAmount > 0) ...[
+              _detailRow('Subtotal', _moneyDouble(order.subtotal)),
+              _detailRow(
+                order.discountName.isEmpty
+                    ? 'Discount'
+                    : 'Discount (${order.discountName})',
+                '-${_moneyDouble(order.discountAmount)}',
+              ),
+            ],
             _detailRow('Total', _moneyDouble(order.amount), emphasized: true),
             _detailRow(
               'Payment',

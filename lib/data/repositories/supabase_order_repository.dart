@@ -23,7 +23,9 @@ class SupabaseOrderRepository implements OrderRepository {
         .from('orders')
         .select(
           'id, order_number, created_at, employee_name_snapshot, order_type, '
-          'total_amount, status, customer_name, table_number, delivery_reference, '
+          'total_amount, subtotal, discount_amount, status, customer_name, '
+          'table_number, delivery_reference, '
+          'order_discounts(discount_name_snapshot), '
           'order_items(id, item_name_snapshot, quantity, unit_price), '
           'payments(amount, amount_tendered, change_amount, transaction_type, status, '
           'payment_methods(name, code)), sales_invoices(invoice_number)',
@@ -471,7 +473,9 @@ class SupabaseOrderRepository implements OrderRepository {
         .from('orders')
         .select(
           'id, order_number, created_at, employee_name_snapshot, order_type, '
-          'total_amount, status, customer_name, table_number, delivery_reference, '
+          'total_amount, subtotal, discount_amount, status, customer_name, '
+          'table_number, delivery_reference, '
+          'order_discounts(discount_name_snapshot), '
           'order_items(id, item_name_snapshot, quantity, unit_price), '
           'payments(amount, amount_tendered, change_amount, transaction_type, status, '
           'payment_methods(name, code)), sales_invoices(invoice_number)',
@@ -573,6 +577,12 @@ class SupabaseOrderRepository implements OrderRepository {
       amountReceived: (amountTendered ?? paymentAmount ?? 0).toDouble(),
       changeAmount: ((payment?['change_amount'] as num?) ?? 0).toDouble(),
       invoiceNumber: invoiceNumber,
+      subtotal: ((row['subtotal'] as num?) ?? 0).toDouble(),
+      discountAmount: ((row['discount_amount'] as num?) ?? 0).toDouble(),
+      discountName: ((row['order_discounts'] as List?) ?? const [])
+          .map((raw) => (raw as Map)['discount_name_snapshot']?.toString())
+          .whereType<String>()
+          .join(', '),
     );
   }
 

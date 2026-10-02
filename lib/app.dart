@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/state/business_refresh_controller.dart';
 import 'core/state/inventory_refresh_controller.dart';
 import 'core/theme/app_theme.dart';
+import 'data/repositories/supabase_catalog_repository.dart';
 import 'data/repositories/supabase_dashboard_repository.dart';
 import 'data/repositories/supabase_expense_repository.dart';
 import 'data/repositories/supabase_finance_repository.dart';
@@ -14,6 +15,7 @@ import 'data/repositories/supabase_purchasing_repository.dart';
 import 'data/repositories/supabase_reporting_repository.dart';
 import 'data/repositories/supabase_supplier_repository.dart';
 import 'data/repositories/supabase_user_repository.dart';
+import 'domain/repositories/catalog_repository.dart';
 import 'domain/repositories/dashboard_repository.dart';
 import 'domain/repositories/expense_repository.dart';
 import 'domain/repositories/finance_repository.dart';
@@ -32,6 +34,8 @@ import 'screens/expenses/expenses_screen.dart';
 import 'screens/finance/sales_finance_screen.dart';
 import 'screens/inventory/inventory_count_screen.dart';
 import 'screens/inventory/inventory_screen.dart';
+import 'screens/menu/categories_screen.dart';
+import 'screens/menu/discounts_screen.dart';
 import 'screens/menu/menu_management_screen.dart';
 import 'screens/orders/orders_screen.dart';
 import 'screens/purchasing/purchasing_screen.dart';
@@ -49,6 +53,7 @@ class StreetBowlApp extends StatefulWidget {
 }
 
 class _StreetBowlAppState extends State<StreetBowlApp> {
+  late final CatalogRepository _catalogRepository;
   late final DashboardRepository _dashboardRepository;
   late final OrderRepository _orderRepository;
   late final ReportingRepository _reportingRepository;
@@ -65,6 +70,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
   @override
   void initState() {
     super.initState();
+    _catalogRepository = SupabaseCatalogRepository();
     _dashboardRepository = SupabaseDashboardRepository();
     _orderRepository = SupabaseOrderRepository();
     _reportingRepository = SupabaseReportingRepository();
@@ -173,6 +179,23 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               page: MenuManagementScreen(
                 menuRepository: _menuRepository,
                 refreshListenable: _businessRefreshController,
+                onDataChanged: _businessRefreshController.refresh,
+              ),
+            ),
+            destination(
+              label: 'Categories',
+              icon: Icons.category_outlined,
+              page: CategoriesScreen(
+                catalogRepository: _catalogRepository,
+                // Menu, inventory and expense screens all show categories.
+                onDataChanged: _inventoryRefreshController.refresh,
+              ),
+            ),
+            destination(
+              label: 'Discounts',
+              icon: Icons.local_offer_outlined,
+              page: DiscountsScreen(
+                catalogRepository: _catalogRepository,
                 onDataChanged: _businessRefreshController.refresh,
               ),
             ),
