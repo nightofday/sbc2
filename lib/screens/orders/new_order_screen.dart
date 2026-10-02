@@ -15,6 +15,7 @@ import '../../models/pos_menu_item.dart';
 import '../../models/pos_modifier.dart';
 import '../../models/pos_payment_method.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/order_line.dart';
 import '../../widgets/common/shift_report_view.dart';
 import '../../widgets/common/app_dialog.dart';
@@ -92,16 +93,95 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
   Future<void> _startShift() async {
     if (_startingShift) return;
+
+    final cashRequired = BusinessProfileScope.of(context).requireOpeningCash;
+    final cashController = TextEditingController();
+    String? errorMessage;
+    double? openingCash;
+
+    StateSetter? dialogSetState;
+
+    final confirmed = await showPrototypeDialog<bool>(
+      context: context,
+      title: 'Start Shift',
+      width: 420,
+      content: StatefulBuilder(
+        builder: (_, setDialogState) {
+          dialogSetState = setDialogState;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Count the cash in the drawer before the first sale. The '
+                'shift report compares it with the count at closing.',
+                style: AppTextStyles.body,
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: cashController,
+                autofocus: true,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: cashRequired ? 'Opening Cash *' : 'Opening Cash',
+                  prefixText: '₱',
+                  helperText: cashRequired
+                      ? null
+                      : 'Leave empty if the drawer is not counted.',
+                  errorText: errorMessage,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final text = cashController.text.trim();
+            final amount = text.isEmpty ? null : double.tryParse(text);
+
+            if (text.isNotEmpty && (amount == null || amount < 0)) {
+              dialogSetState?.call(
+                () => errorMessage = 'Enter an amount of zero or more.',
+              );
+              return;
+            }
+            if (cashRequired && amount == null) {
+              dialogSetState?.call(
+                () => errorMessage = 'Enter the cash in the drawer.',
+              );
+              return;
+            }
+
+            openingCash = amount;
+            Navigator.pop(context, true);
+          },
+          child: const Text('Start Shift'),
+        ),
+      ],
+    );
+    cashController.dispose();
+
+    if (confirmed != true || !mounted) return;
     setState(() => _startingShift = true);
 
     try {
       final id = await widget.orderRepository.startShift(
+        openingCash: openingCash,
         clientRequestId: _startShiftRequestId ??= newRequestId(),
       );
       _startShiftRequestId = null;
       if (!mounted) return;
       setState(() => _openShiftId = id);
-      _showMessage('Shift started successfully.');
+      _showMessage('Shift started.');
     } on PostgrestException catch (error) {
       if (mounted) _showError(error.message);
     } catch (error) {
@@ -1839,9 +1919,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
-              child: Text('Street Bowl Café', style: AppTextStyles.h2),
-            ),
+            const Center(child: ReceiptHeader()),
             const SizedBox(height: 4),
             Center(child: Text(order.id, style: AppTextStyles.caption)),
             if (order.status == OfflineSale.waitingStatus) ...[

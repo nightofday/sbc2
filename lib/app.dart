@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,6 +9,11 @@ import 'core/state/inventory_refresh_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'data/offline/key_value_store.dart';
 import 'data/offline/offline_order_repository.dart';
+import 'data/repositories/supabase_business_repository.dart';
+import 'domain/repositories/business_repository.dart';
+import 'models/business_profile.dart';
+import 'screens/users/business_details_screen.dart';
+import 'widgets/common/business_profile_scope.dart';
 import 'data/repositories/supabase_catalog_repository.dart';
 import 'data/repositories/supabase_dashboard_repository.dart';
 import 'data/repositories/supabase_expense_repository.dart';
@@ -61,6 +69,9 @@ class StreetBowlApp extends StatefulWidget {
 }
 
 class _StreetBowlAppState extends State<StreetBowlApp> {
+  late final BusinessRepository _businessRepository;
+  final _businessProfile = ValueNotifier(BusinessProfile.fallback);
+  String? _businessProfileLoadedFor;
   late final CatalogRepository _catalogRepository;
   late final DashboardRepository _dashboardRepository;
   late final OfflineOrderRepository _orderRepository;
@@ -81,6 +92,8 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
   @override
   void initState() {
     super.initState();
+    _businessRepository = SupabaseBusinessRepository();
+    _businessProfile.value = _cachedBusinessProfile();
     _catalogRepository = SupabaseCatalogRepository();
     _dashboardRepository = SupabaseDashboardRepository();
     final serverOrders = SupabaseOrderRepository();
@@ -111,6 +124,47 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
     final unsent = _orderRepository.waitingSales.length;
     if (unsent < _unsentSales) _inventoryRefreshController.refresh();
     _unsentSales = unsent;
+  }
+
+  static const _businessProfileKey = 'offline.business_profile.v1';
+
+  /// The details last loaded on this device, so receipts printed offline
+  /// carry the right name and address.
+  BusinessProfile _cachedBusinessProfile() {
+    final raw = widget.deviceStore.read(_businessProfileKey);
+    if (raw == null) return BusinessProfile.fallback;
+
+    try {
+      return BusinessProfile.fromMap(
+        Map<String, dynamic>.from(jsonDecode(raw) as Map),
+      );
+    } catch (_) {
+      return BusinessProfile.fallback;
+    }
+  }
+
+  void _setBusinessProfile(BusinessProfile profile) {
+    _businessProfile.value = profile;
+    unawaited(
+      widget.deviceStore.write(
+        _businessProfileKey,
+        jsonEncode(profile.toMap()),
+      ),
+    );
+  }
+
+  /// Loads the business details once for each person who signs in.
+  Future<void> _loadBusinessProfile(String userId) async {
+    if (_businessProfileLoadedFor == userId) return;
+    _businessProfileLoadedFor = userId;
+
+    try {
+      _setBusinessProfile(await _businessRepository.getBusinessProfile());
+    } catch (_) {
+      // Offline or unavailable: the cached details stay in use, and the
+      // next sign-in tries again.
+      _businessProfileLoadedFor = null;
+    }
   }
 
   OfflineIdentity? _offlineIdentity() {
@@ -166,6 +220,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
 
   @override
   void dispose() {
+    _businessProfile.dispose();
     _orderRepository.dispose();
     _inventoryRefreshController.dispose();
     _businessRefreshController.dispose();
@@ -179,6 +234,10 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
       title: 'Street Bowl Café Management System',
       theme: AppTheme.light,
       navigatorKey: _navigatorKey,
+      builder: (context, child) => BusinessProfileScope(
+        notifier: _businessProfile,
+        child: child ?? const SizedBox.shrink(),
+      ),
       home: AuthGate(
         profileCache: widget.deviceStore,
         authenticatedBuilder: _buildAuthenticatedApp,
@@ -188,6 +247,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
 
   Widget _buildAuthenticatedApp(AppUserProfile profile) {
     _profile = profile;
+    unawaited(_loadBusinessProfile(profile.id));
     // Each destination names the permission it needs, so a role sees only
     // what it was granted and a role added later sees nothing by default.
     final can = profile.can;
@@ -437,6 +497,15 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
                 canManageRoles: can('roles.manage'),
               ),
             ),
+            if (can('settings.manage'))
+              destination(
+                label: 'Business Details',
+                icon: Icons.storefront_outlined,
+                page: BusinessDetailsScreen(
+                  businessRepository: _businessRepository,
+                  onSaved: _setBusinessProfile,
+                ),
+              ),
             if (can('audit.view'))
               destination(
                 label: 'Audit Log',

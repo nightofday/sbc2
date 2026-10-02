@@ -156,8 +156,11 @@ Method: counted, for each of the 53 public tables and 26 views, the references i
 | 2026-10-02 | Audit Log screen under Administration with date range and search; entries read as plain sentences ("Product size changed: Large · Price: 100.00 → 120.00") | `TRACE-01` | `test/audit_log_test.dart` (4 tests, at 1300 px and 360 px) |
 | 2026-10-02 | Migration `20261002240000_reversals_trace_and_supplier_items.sql`: `void_supplier_bill_payment` (a linked negative payment), `void_lot_disposal` (a linked `REVERSAL` movement), the business report takes reversed write-offs off the losses, the transaction trace keeps voided documents with their reason, a trigger records each supplier's package size and latest cost in `supplier_items` (existing receipts backfilled), `check_stock_consistency()` | S-05 (rest), `TRACE-01`, `INV-01`, F-14, S-09 | pgTAP `21_reversals_trace_and_supplier_items.test.sql`, 27 of 27; all 21 files pass; applied to the hosted test project, where the consistency check returns no rows |
 | 2026-10-02 | App: Reverse action on write-offs in Stock History; Recent Supplier Payments table with Reverse in Finance Overview; voided and reversed rows marked in Transaction Traceability; receiving and release forms fill in the remembered package size and last cost | Same | `test/reversals_and_package_memory_test.dart` (6 tests). The forms themselves were not exercised by a widget test |
+| 2026-10-03 | The app loads the permission codes of the signed-in role and every destination and action checks `profile.can('…')`; `isCashier` is gone (commit "Gate each screen on a named permission") | `SEC-01`: "not a cashier" was treated as "may do everything" | `test/app_user_profile_test.dart` (4 tests): unknown roles and inactive accounts get nothing |
+| 2026-10-03 | Migration `20261002250000_business_settings.sql`: `update_business_profile` and `update_shift_cash_rules`; direct writes to `business_profile` and `system_settings` removed | Receipt header and shift cash rules had no way to be edited (section 4.2) | pgTAP `22_business_settings.test.sql`, 12 of 12; all 22 files pass; applied to the hosted test project |
+| 2026-10-03 | Business Details screen under Administration; receipts, the sidebar and the offline cache use the saved name, address, phone and TIN (`ReceiptHeader`, `BusinessProfileScope`); starting a shift asks for the opening cash and enforces it when the rule is on | Same; and the till had no way to enter opening cash at all, so turning the rule on would have blocked every shift | `test/business_profile_test.dart` (5 tests, at 1300 px and 360 px) |
 
-The first three rows are Flutter-only changes; the rest add twelve database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 76 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
+The first three rows are Flutter-only changes; the rest add thirteen database migrations and the app code that uses them. `flutter analyze`: no issues. `flutter test`: 85 passed. The fixes were observed in debug mode on web; a release build and the Android tablet have not been tested.
 
 ### Offline till status
 
@@ -207,7 +210,6 @@ Decisions taken, to be confirmed:
 Not done:
 
 - The audit log has no export and loads at most 1,000 entries per search.
-- `business_profile` and `system_settings` are audited but still have no screen to edit them (see the settings item).
 - "Manager authorization" on refunds and discounts is still the signed-in user approving their own action (S-08). It is safe only while cashiers do not hold those permissions, which is the case today.
 - Stock availability is still summed from the whole ledger at each sale (S-17). The indexes it needs already exist; a maintained balance is a later change if sales volume makes it slow.
 

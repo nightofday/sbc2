@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../common/business_profile_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -197,13 +198,15 @@ class _SidebarBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final businessName = BusinessProfileScope.of(context).tradeName;
+
     if (compact) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 24),
+      return Padding(
+        padding: const EdgeInsets.only(top: 24),
         child: Center(
           child: Tooltip(
-            message: 'Street Bowl Café Management System',
-            child: CircleAvatar(
+            message: '$businessName Management System',
+            child: const CircleAvatar(
               radius: 20,
               backgroundColor: AppColors.primary,
               child: Icon(Icons.restaurant, size: 20, color: AppColors.white),
@@ -217,13 +220,18 @@ class _SidebarBrand extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 24, 12, 6),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Street Bowl Café', style: AppTextStyles.h3),
-                SizedBox(height: 3),
-                Text('MANAGEMENT SYSTEM', style: AppTextStyles.overline),
+                Text(
+                  businessName,
+                  style: AppTextStyles.h3,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                const Text('MANAGEMENT SYSTEM', style: AppTextStyles.overline),
               ],
             ),
           ),

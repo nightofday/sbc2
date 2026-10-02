@@ -8,6 +8,7 @@ import '../../domain/repositories/order_repository.dart';
 import '../../models/order_record.dart';
 import '../../models/refund_preview.dart';
 import '../../models/request_id.dart';
+import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/order_line.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
@@ -1085,9 +1086,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
-              child: Text('Street Bowl Café', style: AppTextStyles.h2),
-            ),
+            const Center(child: ReceiptHeader()),
             const SizedBox(height: 4),
             Center(child: Text(order.id, style: AppTextStyles.caption)),
             if (order.invoiceNumber.isNotEmpty) ...[
