@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/reporting.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -247,7 +248,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         .map(
                           (order) => [
                             Text(order.id, style: AppTextStyles.bodyMedium),
-                            Text(order.time, style: AppTextStyles.body),
+                            Text(
+                              order.timeLabelAt(DateTime.now()),
+                              style: AppTextStyles.body,
+                            ),
                             Text(order.employee, style: AppTextStyles.body),
                             Text(order.type, style: AppTextStyles.body),
                             Text(
@@ -282,9 +286,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  static String _money(double value) {
-    return '₱${value.toStringAsFixed(2)}';
-  }
+  static String _money(double value) => formatReportMoney(value);
 }
 
 class _DashboardData {

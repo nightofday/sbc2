@@ -343,12 +343,22 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                   },
                 ),
                 const SizedBox(height: 26),
-                const Text('Recent Supplier Payments', style: AppTextStyles.h3),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Recent Supplier Payments',
+                    style: AppTextStyles.h3,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(
-                  'A payment entered by mistake can be reversed. Both entries '
-                  'stay on record and the bill goes back to what was owed.',
-                  style: AppTextStyles.caption,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'A payment entered by mistake can be reversed. Both '
+                    'entries stay on record and the bill goes back to what '
+                    'was owed.',
+                    style: AppTextStyles.caption,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 FutureBuilder<List<SupplierPaymentRecord>>(
@@ -672,7 +682,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
     );
   }
 
-  String _money(double value) => '₱${value.toStringAsFixed(2)}';
+  String _money(double value) => formatReportMoney(value);
 
   String _date(DateTime date) {
     const months = [

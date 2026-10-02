@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/reporting.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -624,9 +625,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     if (voided && mounted) _notifyDataChanged();
   }
 
-  String _money(double value) {
-    return '₱${value.toStringAsFixed(2)}';
-  }
+  String _money(double value) => formatReportMoney(value);
 
   String _formatDate(DateTime date) {
     const months = [

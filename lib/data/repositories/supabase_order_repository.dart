@@ -32,6 +32,7 @@ class SupabaseOrderRepository implements OrderRepository, OfflineSaleUploader {
           'order_items(id, item_name_snapshot, variant_name_snapshot, quantity, '
           'unit_price, modifier_total_per_unit, special_instructions, '
           'order_item_modifiers(modifier_name_snapshot, quantity)), '
+          'refunds(total_amount, status), '
           'payments(amount, amount_tendered, change_amount, transaction_type, status, '
           'payment_methods(name, code)), sales_invoices(invoice_number)',
         )
@@ -524,6 +525,7 @@ class SupabaseOrderRepository implements OrderRepository, OfflineSaleUploader {
           'order_items(id, item_name_snapshot, variant_name_snapshot, quantity, '
           'unit_price, modifier_total_per_unit, special_instructions, '
           'order_item_modifiers(modifier_name_snapshot, quantity)), '
+          'refunds(total_amount, status), '
           'payments(amount, amount_tendered, change_amount, transaction_type, status, '
           'payment_methods(name, code)), sales_invoices(invoice_number)',
         );
@@ -585,9 +587,7 @@ class SupabaseOrderRepository implements OrderRepository, OfflineSaleUploader {
 
       return OrderItem(
         productId: item['id']?.toString() ?? '',
-        productName: variantName.isEmpty || variantName == itemName
-            ? itemName
-            : '$itemName ($variantName)',
+        productName: orderLineName(itemName, variantName),
         unitPrice:
             ((item['unit_price'] as num?) ?? 0).toDouble() +
             ((item['modifier_total_per_unit'] as num?) ?? 0).toDouble(),
@@ -648,6 +648,14 @@ class SupabaseOrderRepository implements OrderRepository, OfflineSaleUploader {
           .map((raw) => (raw as Map)['discount_name_snapshot']?.toString())
           .whereType<String>()
           .join(', '),
+      refundedAmount: ((row['refunds'] as List?) ?? const [])
+          .map((raw) => Map<String, dynamic>.from(raw as Map))
+          .where((refund) => refund['status'] == 'COMPLETED')
+          .fold<double>(
+            0,
+            (sum, refund) =>
+                sum + ((refund['total_amount'] as num?) ?? 0).toDouble(),
+          ),
     );
   }
 

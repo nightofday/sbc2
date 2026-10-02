@@ -21,6 +21,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('on a tablet the table stacks instead of scrolling sideways', (
+    tester,
+  ) async {
+    _setViewport(tester, const Size(700, 700));
+    await tester.pumpWidget(_wideTable());
+
+    final button = tester.getRect(find.widgetWithText(OutlinedButton, 'Void'));
+    expect(button.right, lessThanOrEqualTo(700));
+    expect(find.text('Status'), findsOneWidget);
+    // Values sit two across rather than one per line.
+    expect(
+      tester.getTopLeft(find.text('Released to service counter')).dx,
+      greaterThan(tester.getTopLeft(find.text('10/2 9:18 PM')).dx + 200),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the same table stays a table on a wide screen', (tester) async {
     _setViewport(tester, const Size(1200, 700));
     await tester.pumpWidget(_wideTable());

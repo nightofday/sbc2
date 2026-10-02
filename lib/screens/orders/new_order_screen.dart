@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/reporting.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -1629,6 +1630,32 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     });
                   },
                 ),
+                if (selectedMethod.isCash) ...[
+                  const SizedBox(height: 10),
+                  // The notes a customer is likely to hand over.
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final amount in quickCashAmounts(discountedTotal))
+                          OutlinedButton(
+                            onPressed: () => setDialogState(() {
+                              amountController.text = amount.toStringAsFixed(2);
+                              amountEdited = true;
+                              errorMessage = null;
+                            }),
+                            child: Text(
+                              amount == discountedTotal
+                                  ? 'Exact'
+                                  : _money(amount),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
                 if (selectedMethod.requiresReference) ...[
                   const SizedBox(height: 14),
                   TextField(
@@ -1921,7 +1948,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           children: [
             const Center(child: ReceiptHeader()),
             const SizedBox(height: 4),
-            Center(child: Text(order.id, style: AppTextStyles.caption)),
+            Center(
+              child: Text(
+                '${order.id} · ${order.dateTimeLabel}',
+                style: AppTextStyles.caption,
+              ),
+            ),
             if (order.status == OfflineSale.waitingStatus) ...[
               const SizedBox(height: 10),
               Container(
@@ -2070,10 +2102,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     return '$sign${_money(value)}';
   }
 
-  String _money(double value) {
-    final whole = value == value.roundToDouble();
-    return whole ? '₱${value.toInt()}' : '₱${value.toStringAsFixed(2)}';
-  }
+  String _money(double value) => formatReportMoney(value);
 
   String _quantity(double value) {
     return value == value.roundToDouble()

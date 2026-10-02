@@ -340,10 +340,7 @@ class _TransactionTraceabilityScreenState
     }
   }
 
-  String _money(double value) {
-    final absolute = value.abs().toStringAsFixed(2);
-    return value < 0 ? '-₱$absolute' : '₱$absolute';
-  }
+  String _money(double value) => formatReportMoney(value);
 
   String _dateTime(DateTime value) {
     const months = [

@@ -24,6 +24,9 @@ class OrderRecord {
   final double discountAmount;
   final String discountName;
 
+  /// What has been given back to the customer on this order so far.
+  final double refundedAmount;
+
   const OrderRecord({
     required this.id,
     required this.createdAt,
@@ -45,7 +48,27 @@ class OrderRecord {
     this.subtotal = 0,
     this.discountAmount = 0,
     this.discountName = '',
+    this.refundedAmount = 0,
   });
+
+  /// Date and time as printed on a receipt, such as "Oct 3, 2026 9:05 AM".
+  String get dateTimeLabel {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', //
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[createdAt.month - 1]} ${createdAt.day}, '
+        '${createdAt.year} $time';
+  }
+
+  /// The time alone for today's orders, with the date for older ones.
+  String timeLabelAt(DateTime now) {
+    final sameDay =
+        createdAt.year == now.year &&
+        createdAt.month == now.month &&
+        createdAt.day == now.day;
+    return sameDay ? time : dateTimeLabel;
+  }
 
   String get time {
     int hour = createdAt.hour;
@@ -103,6 +126,10 @@ class OrderRecord {
       lastActionReason: lastActionReason ?? this.lastActionReason,
       authorizedBy: authorizedBy ?? this.authorizedBy,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      subtotal: subtotal,
+      discountAmount: discountAmount,
+      discountName: discountName,
+      refundedAmount: refundedAmount,
     );
   }
 }

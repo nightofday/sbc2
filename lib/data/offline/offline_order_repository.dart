@@ -668,10 +668,7 @@ class OfflineOrderRepository extends ChangeNotifier
 
       final name = product == null
           ? 'Item'
-          : product.variantName.trim().isEmpty ||
-                product.variantName == product.name
-          ? product.name
-          : '${product.name} (${product.variantName})';
+          : orderLineName(product.name, product.variantName);
 
       lines.add(
         OrderItem(

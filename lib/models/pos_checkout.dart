@@ -116,3 +116,20 @@ class CheckoutAttempt {
     _fingerprint = null;
   }
 }
+
+/// The amounts offered as one-tap choices when a customer pays [total] in
+/// cash: the exact amount, then the next round figures and notes above it.
+List<double> quickCashAmounts(double total) {
+  if (total <= 0) return const [];
+
+  const steps = [50.0, 100.0, 500.0, 1000.0];
+  final amounts = <double>{total};
+
+  for (final step in steps) {
+    final rounded = (total / step).ceil() * step;
+    if (rounded > total) amounts.add(rounded);
+    if (amounts.length == 5) break;
+  }
+
+  return amounts.toList()..sort();
+}

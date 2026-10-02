@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/reporting.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -141,7 +142,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       'Amount',
                       'Status',
                     ],
-                    flexes: const [1, 2, 2, 1, 1, 1, 1],
+                    flexes: const [2, 3, 3, 2, 2, 2, 3],
                     rows: orders
                         .map(
                           (order) => [
@@ -356,6 +357,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
             if (order.paymentMethod.isNotEmpty) ...[
               _detailRow('Amount Received', _moneyDouble(order.amountReceived)),
               _detailRow('Change', _moneyDouble(order.changeAmount)),
+            ],
+            if (order.refundedAmount > 0) ...[
+              _detailRow('Refunded', _moneyDouble(-order.refundedAmount)),
+              _detailRow(
+                'Kept After Refunds',
+                _moneyDouble(order.amount - order.refundedAmount),
+                emphasized: true,
+              ),
             ],
             if (order.lastActionReason.isNotEmpty) ...[
               const Divider(height: 28),
@@ -1088,7 +1097,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
           children: [
             const Center(child: ReceiptHeader()),
             const SizedBox(height: 4),
-            Center(child: Text(order.id, style: AppTextStyles.caption)),
+            Center(
+              child: Text(
+                '${order.id} · ${order.dateTimeLabel}',
+                style: AppTextStyles.caption,
+              ),
+            ),
             if (order.invoiceNumber.isNotEmpty) ...[
               const SizedBox(height: 3),
               Center(
@@ -1135,6 +1149,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
               _detailRow('Amount Received', _moneyDouble(order.amountReceived)),
               _detailRow('Change', _moneyDouble(order.changeAmount)),
             ],
+            if (order.refundedAmount > 0)
+              _detailRow('Refunded', _moneyDouble(-order.refundedAmount)),
             const SizedBox(height: 12),
             Center(child: StatusBadge(order.status)),
           ],
@@ -1168,9 +1184,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
-  String _moneyDouble(double value) {
-    return '₱${value.toStringAsFixed(2)}';
-  }
+  String _moneyDouble(double value) => formatReportMoney(value);
 
   String _refundQty(double value) {
     return value == value.roundToDouble()

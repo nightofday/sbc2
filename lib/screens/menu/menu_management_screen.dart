@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/reporting.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -1311,9 +1312,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     }
   }
 
-  static String _money(double value) {
-    return '₱${value.toStringAsFixed(2)}';
-  }
+  static String _money(double value) => formatReportMoney(value);
 
   static String _qty(double value) {
     if (value == value.roundToDouble()) {

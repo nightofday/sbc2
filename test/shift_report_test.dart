@@ -144,8 +144,8 @@ void main() {
       expect(find.text('#12 · Ana'), findsOneWidget);
       expect(find.text('₱10.00 short'), findsOneWidget);
 
-      await tester.ensureVisible(find.text('View Report'));
-      await tester.tap(find.text('View Report'));
+      await tester.ensureVisible(find.text('Report'));
+      await tester.tap(find.text('Report'));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);

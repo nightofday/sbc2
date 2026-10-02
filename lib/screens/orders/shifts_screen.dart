@@ -210,7 +210,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         'Status',
         '',
       ],
-      flexes: const [3, 3, 3, 1, 2, 2, 2, 2, 2],
+      flexes: const [3, 3, 3, 2, 2, 2, 2, 2, 2],
       rows: [
         for (final shift in shifts)
           [
@@ -235,7 +235,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                   context: context,
                   report: widget.orderRepository.getShiftReport(shift.id),
                 ),
-                child: const Text('View Report'),
+                child: const Text('Report'),
               ),
             ),
           ],

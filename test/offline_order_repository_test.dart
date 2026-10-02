@@ -254,7 +254,7 @@ void main() {
       expect(order.amount, 170);
       expect(order.employee, 'Ana');
       expect(order.paymentMethod, 'Cash');
-      expect(order.items.single.productName, 'Rice Bowl (Regular) + Egg');
+      expect(order.items.single.productName, 'Rice Bowl + Egg');
       expect(order.items.single.unitPrice, 170);
       expect(till.isOffline, isTrue);
       expect(till.waitingSales.single.soldAt, clock);

@@ -23,3 +23,15 @@ class OrderItem {
 
   double get lineTotal => unitPrice * quantity;
 }
+
+/// How a sold line is named: the product, with its size in brackets unless
+/// the size is the product's ordinary one.
+String orderLineName(String itemName, String variantName) {
+  final variant = variantName.trim();
+  const ordinary = {'', 'regular', 'default', 'standard'};
+
+  if (ordinary.contains(variant.toLowerCase()) || variant == itemName.trim()) {
+    return itemName;
+  }
+  return '$itemName ($variant)';
+}
