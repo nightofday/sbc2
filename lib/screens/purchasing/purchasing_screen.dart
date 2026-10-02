@@ -355,7 +355,55 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
           ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+        if (receipt.status == 'POSTED')
+          OutlinedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _voidReceipt(receipt);
+            },
+            child: const Text('Void Receipt'),
+          ),
+      ],
     );
+  }
+
+  Future<void> _voidReceipt(GoodsReceiptSummary receipt) async {
+    final requestId = newRequestId();
+
+    final voided = await showReasonDialog(
+      context: context,
+      title: 'Void Goods Receipt GR-${receipt.number}',
+      message:
+          'This removes the stock this receipt added and voids its supplier '
+          'bill. The receipt stays on record as cancelled. It is only '
+          'possible while none of that stock has been used and the bill is '
+          'unpaid.',
+      confirmLabel: 'Void Receipt',
+      onConfirm: (reason) async {
+        try {
+          await widget.purchasingRepository.voidGoodsReceipt(
+            goodsReceiptId: receipt.id,
+            reason: reason,
+            clientRequestId: requestId,
+          );
+          return null;
+        } on PostgrestException catch (error) {
+          return error.message;
+        } catch (error) {
+          return error.toString();
+        }
+      },
+    );
+
+    if (!voided || !mounted) return;
+    widget.onInventoryChanged?.call();
+    _refresh();
+    _showMessage('Goods receipt GR-${receipt.number} voided.');
   }
 
   Widget _receiptDetail(String label, String value) {

@@ -172,13 +172,10 @@ class SupabaseExpenseRepository implements ExpenseRepository {
   }
 
   @override
-  Future<void> deleteExpense(String id) async {
+  Future<void> deleteExpense(String id, {required String reason}) async {
     await _client.rpc(
       'void_expense',
-      params: {
-        'p_expense_id': id,
-        'p_reason': 'Voided from Flutter expense management',
-      },
+      params: {'p_expense_id': id, 'p_reason': reason.trim()},
     );
   }
 

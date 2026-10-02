@@ -172,6 +172,22 @@ class SupabasePurchasingRepository implements PurchasingRepository {
   }
 
   @override
+  Future<void> voidGoodsReceipt({
+    required String goodsReceiptId,
+    required String reason,
+    String? clientRequestId,
+  }) async {
+    await _client.rpc(
+      'void_goods_receipt',
+      params: {
+        'p_goods_receipt_id': goodsReceiptId,
+        'p_reason': reason.trim(),
+        'p_client_request_id': clientRequestId,
+      },
+    );
+  }
+
+  @override
   Future<void> receiveStock({
     required String supplierId,
     required List<PurchaseLineInput> items,

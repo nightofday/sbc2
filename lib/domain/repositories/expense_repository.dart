@@ -13,5 +13,6 @@ abstract class ExpenseRepository {
 
   Future<void> updateExpense(ExpenseRecord expense);
 
-  Future<void> deleteExpense(String id);
+  /// Voids the expense. It stays on record with the reason.
+  Future<void> deleteExpense(String id, {required String reason});
 }

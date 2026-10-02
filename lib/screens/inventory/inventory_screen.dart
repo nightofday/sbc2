@@ -204,8 +204,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 'Items',
                 'Recorded By',
                 'Status',
+                'Action',
               ],
-              flexes: const [2, 2, 3, 2, 1, 2, 1],
+              flexes: const [2, 2, 3, 2, 1, 2, 1, 2],
               rows: releases
                   .map(
                     (release) => [
@@ -232,6 +233,17 @@ class _InventoryScreenState extends State<InventoryScreen> {
                         style: AppTextStyles.body,
                       ),
                       StatusBadge(release.status),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child:
+                            release.status == 'POSTED' &&
+                                widget.canManageInventory
+                            ? OutlinedButton(
+                                onPressed: () => _voidStockOut(release),
+                                child: const Text('Void'),
+                              )
+                            : const Text('—', style: AppTextStyles.body),
+                      ),
                     ],
                   )
                   .toList(),
@@ -959,6 +971,37 @@ class _InventoryScreenState extends State<InventoryScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _voidStockOut(StockOutSummary release) async {
+    final requestId = newRequestId();
+
+    final voided = await showReasonDialog(
+      context: context,
+      title: 'Void Release SO-${release.number}',
+      message:
+          'This returns every quantity on this release to the stock it came '
+          'from. The release stays on record as voided.',
+      confirmLabel: 'Void Release',
+      onConfirm: (reason) async {
+        try {
+          await widget.inventoryRepository.voidStockOut(
+            stockOutId: release.id,
+            reason: reason,
+            clientRequestId: requestId,
+          );
+          return null;
+        } on PostgrestException catch (error) {
+          return error.message;
+        } catch (error) {
+          return error.toString();
+        }
+      },
+    );
+
+    if (!voided || !mounted) return;
+    _refresh();
+    _showMessage('Supply release SO-${release.number} voided.');
   }
 
   Future<void> _showItemDetails(InventoryItem item) async {

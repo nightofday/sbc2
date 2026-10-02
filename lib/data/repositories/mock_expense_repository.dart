@@ -42,7 +42,7 @@ class MockExpenseRepository implements ExpenseRepository {
   }
 
   @override
-  Future<void> deleteExpense(String id) async {
+  Future<void> deleteExpense(String id, {required String reason}) async {
     _expenses.removeWhere((expense) => expense.id == id);
   }
 }

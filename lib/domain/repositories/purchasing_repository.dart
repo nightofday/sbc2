@@ -28,6 +28,13 @@ abstract class PurchasingRepository {
 
   Future<void> approvePurchaseOrder(String purchaseOrderId);
 
+  /// Reverses a posted receipt's stock and voids its unpaid supplier bill.
+  Future<void> voidGoodsReceipt({
+    required String goodsReceiptId,
+    required String reason,
+    String? clientRequestId,
+  });
+
   Future<void> receiveStock({
     required String supplierId,
     required List<PurchaseLineInput> items,

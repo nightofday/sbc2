@@ -122,8 +122,9 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                 'With Variance',
                 'Counted By',
                 'Status',
+                'Action',
               ],
-              flexes: const [2, 2, 1, 2, 2, 1],
+              flexes: const [2, 2, 1, 2, 2, 1, 2],
               rows: counts
                   .map(
                     (count) => [
@@ -145,6 +146,15 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                         style: AppTextStyles.body,
                       ),
                       StatusBadge(count.status),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: count.status == 'POSTED'
+                            ? OutlinedButton(
+                                onPressed: () => _voidCount(count),
+                                child: const Text('Void'),
+                              )
+                            : const Text('—', style: AppTextStyles.body),
+                      ),
                     ],
                   )
                   .toList(),
@@ -153,6 +163,38 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _voidCount(StockCountSummary count) async {
+    final requestId = newRequestId();
+
+    final voided = await showReasonDialog(
+      context: context,
+      title: 'Void Count IC-${count.number}',
+      message:
+          'This reverses the stock differences this count posted. The count '
+          'stays on record as cancelled. It is only possible while any stock '
+          'the count added has not been used.',
+      confirmLabel: 'Void Count',
+      onConfirm: (reason) async {
+        try {
+          await widget.inventoryRepository.voidStockCount(
+            stockCountId: count.id,
+            reason: reason,
+            clientRequestId: requestId,
+          );
+          return null;
+        } on PostgrestException catch (error) {
+          return error.message;
+        } catch (error) {
+          return error.toString();
+        }
+      },
+    );
+
+    if (!voided || !mounted) return;
+    _refresh();
+    _showMessage('Inventory count IC-${count.number} voided.');
   }
 
   Future<void> _showCountDialog() async {

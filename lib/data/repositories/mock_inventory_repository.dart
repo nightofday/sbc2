@@ -61,6 +61,20 @@ class MockInventoryRepository implements InventoryRepository {
   }) async {}
 
   @override
+  Future<void> voidStockOut({
+    required String stockOutId,
+    required String reason,
+    String? clientRequestId,
+  }) async {}
+
+  @override
+  Future<void> voidStockCount({
+    required String stockCountId,
+    required String reason,
+    String? clientRequestId,
+  }) async {}
+
+  @override
   Future<void> createAndPostStockCount({
     required List<StockCountLineInput> items,
     String notes = '',

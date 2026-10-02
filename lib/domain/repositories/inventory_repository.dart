@@ -32,6 +32,20 @@ abstract class InventoryRepository {
     String? clientRequestId,
   });
 
+  /// Reverses a posted release and marks it voided.
+  Future<void> voidStockOut({
+    required String stockOutId,
+    required String reason,
+    String? clientRequestId,
+  });
+
+  /// Reverses a posted count's variances and marks it cancelled.
+  Future<void> voidStockCount({
+    required String stockCountId,
+    required String reason,
+    String? clientRequestId,
+  });
+
   Future<void> createAndPostStockCount({
     required List<StockCountLineInput> items,
     String notes = '',

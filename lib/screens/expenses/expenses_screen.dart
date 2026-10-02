@@ -597,46 +597,30 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Future<void> _confirmVoidExpense(ExpenseRecord expense) async {
-    await showPrototypeDialog(
+    final voided = await showReasonDialog(
       context: context,
       title: 'Void Expense',
-      width: 480,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'This keeps the expense record for audit history but removes it '
-            'from active expense totals.',
-            style: AppTextStyles.body,
-          ),
-          const SizedBox(height: 14),
-          Text(expense.description, style: AppTextStyles.bodyMedium),
-          Text(_money(expense.amount.toDouble()), style: AppTextStyles.h3),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            try {
-              await widget.expenseRepository.deleteExpense(expense.id);
-              if (!mounted) return;
-              Navigator.pop(context);
-              _notifyDataChanged();
-            } on PostgrestException catch (error) {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(error.message)));
-            }
-          },
-          child: const Text('Void Expense'),
-        ),
-      ],
+      message:
+          'This keeps the expense on record with your reason, but removes '
+          '${expense.description} (${_money(expense.amount.toDouble())}) '
+          'from expense totals.',
+      confirmLabel: 'Void Expense',
+      onConfirm: (reason) async {
+        try {
+          await widget.expenseRepository.deleteExpense(
+            expense.id,
+            reason: reason,
+          );
+          return null;
+        } on PostgrestException catch (error) {
+          return error.message;
+        } catch (error) {
+          return error.toString();
+        }
+      },
     );
+
+    if (voided && mounted) _notifyDataChanged();
   }
 
   String _money(double value) {

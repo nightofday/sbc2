@@ -186,6 +186,38 @@ class SupabaseInventoryRepository implements InventoryRepository {
   }
 
   @override
+  Future<void> voidStockOut({
+    required String stockOutId,
+    required String reason,
+    String? clientRequestId,
+  }) async {
+    await _client.rpc(
+      'void_stock_out',
+      params: {
+        'p_stock_out_id': stockOutId,
+        'p_reason': reason.trim(),
+        'p_client_request_id': clientRequestId,
+      },
+    );
+  }
+
+  @override
+  Future<void> voidStockCount({
+    required String stockCountId,
+    required String reason,
+    String? clientRequestId,
+  }) async {
+    await _client.rpc(
+      'void_stock_count',
+      params: {
+        'p_stock_count_id': stockCountId,
+        'p_reason': reason.trim(),
+        'p_client_request_id': clientRequestId,
+      },
+    );
+  }
+
+  @override
   Future<void> createAndPostStockCount({
     required List<StockCountLineInput> items,
     String notes = '',

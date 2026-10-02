@@ -86,6 +86,98 @@ Future<T?> showPrototypeDialog<T>({
   );
 }
 
+/// Asks for a required reason, then runs [onConfirm] with it.
+///
+/// [onConfirm] returns null on success, or the message to show. On failure
+/// the dialog stays open so the typed reason is kept. Returns true once
+/// [onConfirm] has succeeded.
+Future<bool> showReasonDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+  required String confirmLabel,
+  required Future<String?> Function(String reason) onConfirm,
+  String reasonLabel = 'Reason *',
+}) async {
+  final controller = TextEditingController();
+  String? errorMessage;
+  var busy = false;
+  var confirmed = false;
+  StateSetter? setDialogState;
+
+  await showPrototypeDialog<void>(
+    context: context,
+    title: title,
+    width: 480,
+    content: StatefulBuilder(
+      builder: (_, setState) {
+        setDialogState = setState;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message, style: AppTextStyles.body),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              maxLines: 2,
+              decoration: InputDecoration(labelText: reasonLabel),
+            ),
+            if (errorMessage != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                errorMessage!,
+                style: AppTextStyles.caption.copyWith(color: AppColors.error),
+              ),
+            ],
+          ],
+        );
+      },
+    ),
+    actions: [
+      Builder(
+        builder: (dialogContext) => TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Cancel'),
+        ),
+      ),
+      Builder(
+        builder: (dialogContext) => ElevatedButton(
+          onPressed: () async {
+            if (busy) return;
+
+            final reason = controller.text.trim();
+            if (reason.isEmpty) {
+              setDialogState?.call(() {
+                errorMessage = 'Enter a reason.';
+              });
+              return;
+            }
+
+            busy = true;
+            final failure = await onConfirm(reason);
+            busy = false;
+
+            if (failure != null) {
+              setDialogState?.call(() {
+                errorMessage = failure;
+              });
+              return;
+            }
+
+            confirmed = true;
+            if (dialogContext.mounted) Navigator.pop(dialogContext);
+          },
+          child: Text(confirmLabel),
+        ),
+      ),
+    ],
+  );
+
+  controller.dispose();
+  return confirmed;
+}
+
 Widget dialogField(
   String label, {
   String? value,
