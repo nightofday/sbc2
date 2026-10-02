@@ -180,7 +180,7 @@ Three sign-ins exist on the hosted test project, one per role, all `ACTIVE`:
 | Cashier | cashier@demo.com | User Management through `create-employee`, 3 October 2026 |
 | Manager | manager@demo.com | User Management through `create-employee`, 3 October 2026 |
 
-The passwords are kept outside git in `TEST_ACCOUNTS.local.md` in the repository folder on Charlie's machine (ignored by `*.local.md`). They are test-project accounts only and share one password, so change them before the project holds real data.
+The passwords are in [TEST_ACCOUNTS.md](TEST_ACCOUNTS.md), committed on purpose so Brian can sign in to the test project in each role at handover (Charlie's decision, 3 October 2026). They work only on the test project and share one password; they must not be reused on a project with real data.
 
 ### Live check on 3 October 2026
 

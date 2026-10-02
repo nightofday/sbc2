@@ -31,7 +31,7 @@ flutter run -d chrome \
   --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
 ```
 
-Both values are read with `String.fromEnvironment` in `lib/main.dart`, so they are compile-time: there is no `.env` file, and omitting either one boots a "Supabase configuration is missing" screen instead of the app. Only the project URL and publishable key ever go to Flutter. Login needs an existing Auth user with a `profiles` row; seed scripts do not create accounts. The first administrator is set up once in the SQL editor with `select public.bootstrap_first_admin('email');`. Test sign-ins for the hosted test project (one per role) are in the git-ignored `TEST_ACCOUNTS.local.md` when present; never commit passwords.
+Both values are read with `String.fromEnvironment` in `lib/main.dart`, so they are compile-time: there is no `.env` file, and omitting either one boots a "Supabase configuration is missing" screen instead of the app. Only the project URL and publishable key ever go to Flutter. Login needs an existing Auth user with a `profiles` row; seed scripts do not create accounts. The first administrator is set up once in the SQL editor with `select public.bootstrap_first_admin('email');`. Test sign-ins for the hosted test project, one per role, are in [TEST_ACCOUNTS.md](TEST_ACCOUNTS.md). They are for that test project only; never put credentials for a project with real data in the repository.
 
 Database tests (pgTAP, need a Docker-compatible runtime):
 
