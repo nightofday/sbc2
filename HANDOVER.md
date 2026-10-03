@@ -10,7 +10,7 @@ You asked me to make the app usable for the café. This is what changed, how to 
 | --- | --- |
 | Repository | `nightofday/sbc2`, branch `charlie` (I have no write access to `bbriones559657/sbc2`) |
 | Based on | your `main`, commit `59db8c8` |
-| Size | 49 commits, 160 files, about 25,700 lines added and 2,300 removed |
+| Size | 52 commits, 166 files, about 26,500 lines added and 2,300 removed |
 | Merged anywhere? | No. Nothing was pushed or merged to `main` on either repository |
 | Database | 13 new migrations, applied **only** to a separate hosted test project (`ybjyandkpgegrtthokgs`). Your projects were not touched |
 
@@ -32,7 +32,7 @@ The documentation names `brian/inventory-workflow-navigation` as the base branch
    - **Shifts:** open the shift report; end a shift and it opens automatically.
    - **Purchasing:** purchase order → approve → receive. Then **Finance Overview → Recent Supplier Payments**: pay a bill and reverse the payment.
    - **Inventory History:** reverse a write-off.
-   - **Reports:** any date range, Copy Whole Report for Sheets.
+   - **Reports:** any date range; Download Whole Report (CSV) saves a file that opens in Excel or Google Sheets. Transaction Traceability and the Audit Log have the same button.
    - **Administration → Audit Log:** every price, role and settings change, with before and after values.
    - Sign in as the cashier to see what that role can and cannot reach.
 
@@ -57,7 +57,8 @@ The test project contains test data from this work (names starting with `TEST`, 
 | --- | --- |
 | Offline till | The till keeps selling when the connection drops. Sales are stored on the device with their request ID and sent later, oldest first, and are never recorded twice. A shift can be opened offline; the till reopens offline for someone who has signed in on that device before. A banner shows the offline state and any sale the server refused |
 | Corrections | Void with reason for expenses, goods receipts, supply releases and stock counts. Reversal of supplier payments (a linked negative payment) and of stock write-offs (a linked `REVERSAL` movement). Voided documents stay visible in Transaction Traceability with their reason |
-| Reports | One `get_business_report(from, to)` behind Reports, Finance and the Dashboard, with written sales definitions. Any date range; copy to a spreadsheet |
+| Reports | One `get_business_report(from, to)` behind Reports, Finance and the Dashboard, with written sales definitions. Any date range |
+| Export | CSV export of the whole report, each report section, Transaction Traceability and the Audit Log. In the browser it downloads the file; on Android and iOS it opens the share sheet (save, email, Google Drive). Copy-for-spreadsheet buttons remain, and every copy button now says when copying fails |
 | Shifts | Opening cash at shift start, a shift (Z) report, and a Shifts screen with expected cash, counted cash and the difference |
 | Audit log | Changes to prices, menu, options, discounts, suppliers, stock items, staff accounts and settings are recorded with before and after values. A screen reads them |
 | Menu | Category management, promotional discount management (fixed or adjustable, limits, validity dates), modifier management (shared groups, reordering) |
@@ -89,14 +90,22 @@ The test project contains test data from this work (names starting with `TEST`, 
 
 I kept your retired recipe tables. AGENTS.md asks for a history check before removing them, and only you can do that.
 
+## New dependencies
+
+| Package | Why | Note |
+| --- | --- | --- |
+| `shared_preferences` | Stores the offline sales queue and the till's cached data on the device | Was already installed as a dependency of `supabase_flutter`; now listed directly |
+| `web` | Saves export files in the browser | Same: already installed, now listed directly |
+| `share_plus` | Opens the share sheet for export files on Android and iOS | New. Charlie approved it on 3 October 2026 |
+
 ## How it was tested
 
-- **Flutter:** `flutter analyze` is clean and 96 tests pass. They include a simulated lost connection at checkout, an offline sale replayed to a fake server, and layouts at 360, 800 and 1280 px.
+- **Flutter:** `flutter analyze` is clean and 102 tests pass. They include a simulated lost connection at checkout, an offline sale replayed to a fake server, a report shared as a CSV file, and layouts at 360, 800 and 1280 px.
 - **Database:** 22 pgTAP files with 439 assertions, all passing. Docker is not installed on Charlie's machine, so each file ran against the hosted test project inside a transaction that was rolled back. The method is in READINESS_LOG "How the database changes were tested without Docker".
 - **In the app:** Charlie and I clicked through every form as an administrator, on the test project. Charlie checked the cashier and manager roles.
 
 **Not tested:**
-- An Android device or an Android build (no Android SDK here).
+- An Android device or an Android build (no Android SDK here). That includes the share sheet for exports and whether `share_plus` builds with your Android settings.
 - A real loss of network.
 - The GitHub CI workflows, which have never run on this branch.
 
@@ -123,7 +132,6 @@ I kept your retired recipe tables. AGENTS.md asks for a history check before rem
 - Split payments.
 - PIN sign-in.
 - Receipt printing.
-- Report file export.
 - A maintained stock balance and per-device invoice numbers.
 - Fixing pgTAP files `02` and `03`, which assume an empty database.
 
