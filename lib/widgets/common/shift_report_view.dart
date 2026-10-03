@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import '../../core/export/copy_text.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -134,10 +134,16 @@ class ShiftReportView extends StatelessWidget {
         const SizedBox(height: 18),
         OutlinedButton.icon(
           onPressed: () async {
-            await Clipboard.setData(ClipboardData(text: report.toText()));
+            final copied = await copyText(report.toText());
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Shift report copied.')),
+              SnackBar(
+                content: Text(
+                  copied
+                      ? 'Shift report copied.'
+                      : 'Copying did not work on this device. Try again.',
+                ),
+              ),
             );
           },
           icon: const Icon(Icons.copy_outlined, size: 17),

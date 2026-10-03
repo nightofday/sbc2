@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/export/copy_text.dart';
+import '../../core/export/file_download.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -128,6 +130,74 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
     });
   }
 
+  List<AuditEntry> _visibleEntries = const [];
+
+  Future<void> _export() async {
+    final entries = _visibleEntries;
+    if (entries.isEmpty) {
+      _showMessage('There is nothing to export for these dates and search.');
+      return;
+    }
+
+    String two(int number) => number.toString().padLeft(2, '0');
+    String when(DateTime date) =>
+        '${date.year}-${two(date.month)}-${two(date.day)} '
+        '${two(date.hour)}:${two(date.minute)}';
+
+    final header = ['Date & Time', 'Who', 'What', 'Record', 'Details'];
+    final rows = [
+      for (final entry in entries)
+        [
+          when(entry.createdAt),
+          entry.actorName,
+          entry.title,
+          entry.label,
+          entry.changes
+              .map(
+                (change) => change.before.isEmpty
+                    ? '${change.field}: ${change.after}'
+                    : '${change.field}: ${change.before} -> ${change.after}',
+              )
+              .join('; '),
+        ],
+    ];
+
+    if (canDownloadFiles) {
+      final csv = [
+        header.map(csvField).join(','),
+        for (final row in rows)
+          row.map((cell) => csvField(safeCell(cell))).join(','),
+      ].join('\r\n');
+      downloadTextFile(
+        fileName: reportFileName('audit-log', _from, _to),
+        contents: csv,
+      );
+      _showMessage(
+        'Saved to your downloads. It opens in Excel or Google Sheets.',
+      );
+      return;
+    }
+
+    final copied = await copyText(
+      [
+        header.join('\t'),
+        for (final row in rows) row.map(safeCell).join('\t'),
+      ].join('\n'),
+    );
+    _showMessage(
+      copied
+          ? 'Copied. Paste it into Google Sheets or Excel.'
+          : 'Copying did not work on this device. Try again.',
+    );
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _onSearchChanged(String value) {
     _search = value;
     // Waits for a pause in typing before asking the server.
@@ -144,10 +214,24 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
     return AppPage(
       title: 'Audit Log',
       subtitle: _rangeLabel,
-      action: OutlinedButton.icon(
-        onPressed: _refresh,
-        icon: const Icon(Icons.refresh, size: 17),
-        label: const Text('Refresh'),
+      action: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            onPressed: _export,
+            icon: Icon(
+              canDownloadFiles ? Icons.download_outlined : Icons.copy_outlined,
+              size: 17,
+            ),
+            label: Text(canDownloadFiles ? 'Download CSV' : 'Copy for Sheets'),
+          ),
+          OutlinedButton.icon(
+            onPressed: _refresh,
+            icon: const Icon(Icons.refresh, size: 17),
+            label: const Text('Refresh'),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,6 +286,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                 }
 
                 final entries = snapshot.data!;
+                _visibleEntries = entries;
                 if (entries.isEmpty) {
                   return const Center(
                     child: Text(

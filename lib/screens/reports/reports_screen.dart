@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import '../../core/export/copy_text.dart';
+import '../../core/export/file_download.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -131,17 +132,35 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Future<void> _copy(String text, String what) async {
-    await Clipboard.setData(ClipboardData(text: text));
+    final copied = await copyText(text);
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$what copied. Paste it into Google Sheets or Excel: each value '
-          'goes into its own cell.',
-        ),
-      ),
+    _showMessage(
+      copied
+          ? '$what copied. Paste it into Google Sheets or Excel: each value '
+                'goes into its own cell.'
+          : canDownloadFiles
+          ? 'The browser did not allow copying. Use Download CSV instead.'
+          : 'Copying did not work on this device. Try again.',
     );
+  }
+
+  void _download(String fileTitle, String csv) {
+    final saved = downloadTextFile(
+      fileName: reportFileName(fileTitle, _from, _to),
+      contents: csv,
+    );
+    _showMessage(
+      saved
+          ? 'Saved to your downloads. It opens in Excel or Google Sheets.'
+          : 'This device cannot save files yet. Use Copy for Sheets.',
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   String get _rangeLabel => _from == _to
@@ -291,13 +310,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ElevatedButton.icon(
-              onPressed: () => _copy(report.toTsv(), 'The whole report was'),
-              icon: const Icon(Icons.copy_all_outlined, size: 18),
-              label: const Text('Copy Whole Report for Sheets'),
-            ),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              if (canDownloadFiles)
+                ElevatedButton.icon(
+                  onPressed: () => _download('report', report.toCsv()),
+                  icon: const Icon(Icons.download_outlined, size: 18),
+                  label: const Text('Download Whole Report (CSV)'),
+                ),
+              OutlinedButton.icon(
+                onPressed: () => _copy(report.toTsv(), 'The whole report was'),
+                icon: const Icon(Icons.copy_all_outlined, size: 18),
+                label: const Text('Copy Whole Report for Sheets'),
+              ),
+            ],
           ),
           for (final section in report.sections) ...[
             const SizedBox(height: 26),
@@ -332,6 +360,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(section.title, style: AppTextStyles.h3),
+            if (section.rows.isNotEmpty && canDownloadFiles)
+              OutlinedButton.icon(
+                onPressed: () => _download(section.title, section.toCsv()),
+                icon: const Icon(Icons.download_outlined, size: 16),
+                label: const Text('Download CSV'),
+              ),
             if (section.rows.isNotEmpty)
               OutlinedButton.icon(
                 onPressed: () => _copy(section.toTsv(), '${section.title} was'),

@@ -91,6 +91,17 @@ class ReportSection {
     return lines.join('\n');
   }
 
+  /// Comma-separated values, for saving as a file that Excel and Google
+  /// Sheets open directly.
+  String toCsv() {
+    final lines = <String>[
+      columns.map((column) => csvField(_safeText(column.label))).join(','),
+      for (final row in rows)
+        columns.map((column) => csvField(exportValue(row, column))).join(','),
+    ];
+    return lines.join('\r\n');
+  }
+
   static double _number(Object value) {
     if (value is num) return value.toDouble();
     return double.tryParse(value.toString()) ?? 0;
@@ -103,6 +114,28 @@ class ReportSection {
     if (single.isNotEmpty && '=+-@'.contains(single[0])) return "'$single";
     return single;
   }
+}
+
+/// Keeps a value in one cell and stops text that starts like a formula from
+/// being run by the spreadsheet.
+String safeCell(String value) => ReportSection._safeText(value);
+
+/// One CSV cell: quoted when it holds a comma, quote or line break.
+String csvField(String value) {
+  if (!value.contains(RegExp(r'[",\r\n]'))) return value;
+  return '"${value.replaceAll('"', '""')}"';
+}
+
+/// A file name for an export, such as `sales-by-day_2026-10-01_2026-10-07.csv`.
+String reportFileName(String title, DateTime from, DateTime to) {
+  String day(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
+  final slug = title
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'^-|-$'), '');
+  return '${slug}_${day(from)}_${day(to)}.csv';
 }
 
 String formatReportMoney(double value) {
@@ -442,6 +475,25 @@ class BusinessReport {
   }
 
   /// Every table, one after another, for pasting into a spreadsheet.
+  /// The whole report as one CSV file: the summary, then each section under
+  /// its title, separated by a blank line.
+  String toCsv() {
+    return [
+      [
+        csvField('Street Bowl Café report'),
+        csvField('${formatReportDate(from)} to ${formatReportDate(to)}'),
+      ].join(','),
+      '',
+      'Summary',
+      summary.toSection().toCsv(),
+      for (final section in sections) ...[
+        '',
+        csvField(section.title),
+        section.toCsv(),
+      ],
+    ].join('\r\n');
+  }
+
   String toTsv() {
     return [
       'Street Bowl Café report\t${formatReportDate(from)} to '

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/export/copy_text.dart';
+import '../../core/export/file_download.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -64,15 +66,112 @@ class _TransactionTraceabilityScreenState
     setState(_reload);
   }
 
+  /// What is on screen, with the filters applied, is what gets exported.
+  List<TransactionTraceRecord> _visibleRecords = const [];
+
+  Future<void> _export() async {
+    final records = _visibleRecords;
+    if (records.isEmpty) {
+      _showMessage('There is nothing to export for these filters.');
+      return;
+    }
+
+    String two(int number) => number.toString().padLeft(2, '0');
+    String when(DateTime date) =>
+        '${date.year}-${two(date.month)}-${two(date.day)} '
+        '${two(date.hour)}:${two(date.minute)}';
+
+    final header = [
+      'Date & Time',
+      'Type',
+      'Document',
+      'External Reference',
+      'Details',
+      'Supplier / Customer',
+      'Amount',
+      'Recorded By',
+      'Status',
+      'Void Reason',
+    ];
+    final rows = [
+      for (final record in records)
+        [
+          when(record.occurredAt),
+          _eventLabel(record.eventType),
+          record.documentNumber,
+          record.externalReference,
+          record.description,
+          record.partyName,
+          record.amount?.toStringAsFixed(2) ?? '',
+          record.actorName,
+          record.status,
+          record.voidReason,
+        ],
+    ];
+
+    if (canDownloadFiles) {
+      final today = DateTime.now();
+      final csv = [
+        header.map(csvField).join(','),
+        for (final row in rows)
+          row.map((cell) => csvField(safeCell(cell))).join(','),
+      ].join('\r\n');
+      downloadTextFile(
+        fileName: reportFileName(
+          'transactions-last-$_days-days',
+          today.subtract(Duration(days: _days - 1)),
+          today,
+        ),
+        contents: csv,
+      );
+      _showMessage(
+        'Saved to your downloads. It opens in Excel or Google Sheets.',
+      );
+      return;
+    }
+
+    final tsv = [
+      header.join('\t'),
+      for (final row in rows) row.map(safeCell).join('\t'),
+    ].join('\n');
+    final copied = await copyText(tsv);
+    _showMessage(
+      copied
+          ? 'Copied. Paste it into Google Sheets or Excel.'
+          : 'Copying did not work on this device. Try again.',
+    );
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppPage(
       title: 'Transaction Traceability',
       subtitle: 'Follow each document back to its receipt/reference and employee (up to 500 recent records).',
-      action: OutlinedButton.icon(
-        onPressed: _refresh,
-        icon: const Icon(Icons.refresh, size: 18),
-        label: const Text('Refresh'),
+      action: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            onPressed: _export,
+            icon: Icon(
+              canDownloadFiles ? Icons.download_outlined : Icons.copy_outlined,
+              size: 18,
+            ),
+            label: Text(canDownloadFiles ? 'Download CSV' : 'Copy for Sheets'),
+          ),
+          OutlinedButton.icon(
+            onPressed: _refresh,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Refresh'),
+          ),
+        ],
       ),
       child: FutureBuilder<List<TransactionTraceRecord>>(
         future: _traceFuture,
@@ -93,6 +192,7 @@ class _TransactionTraceabilityScreenState
           final records = _applyFilters(
             snapshot.data ?? const <TransactionTraceRecord>[],
           );
+          _visibleRecords = records;
 
           return Column(
             children: [

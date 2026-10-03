@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../core/export/copy_text.dart';
 
 import '../../models/order_record.dart';
 import '../../models/receipt_text.dart';
@@ -17,10 +18,17 @@ class CopyReceiptButton extends StatelessWidget {
     return TextButton.icon(
       onPressed: () async {
         final text = receiptText(order, BusinessProfileScope.of(context));
-        await Clipboard.setData(ClipboardData(text: text));
+        final copied = await copyText(text);
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Receipt copied.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              copied
+                  ? 'Receipt copied.'
+                  : 'Copying did not work on this device. Try again.',
+            ),
+          ),
+        );
       },
       icon: const Icon(Icons.copy_outlined, size: 17),
       label: const Text('Copy Receipt'),

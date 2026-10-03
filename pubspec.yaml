@@ -38,6 +38,9 @@ dependencies:
   # Device storage for the offline sales queue and cached till data.
   # Already resolved as a dependency of supabase_flutter.
   shared_preferences: ^2.5.5
+  # Browser APIs for saving report files. Already resolved as a dependency
+  # of supabase_flutter.
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
