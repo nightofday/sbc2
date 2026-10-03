@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sbc_management_system/core/export/file_download.dart';
+import 'package:sbc_management_system/core/export/export_file.dart';
 import 'package:sbc_management_system/models/reporting.dart';
 
 void main() {
@@ -53,8 +53,8 @@ void main() {
     );
   });
 
-  test('outside the browser the app copies instead of saving a file', () {
-    expect(canDownloadFiles, isFalse);
-    expect(downloadTextFile(fileName: 'a.csv', contents: 'a'), isFalse);
+  test('outside the browser an export goes to the share sheet', () {
+    expect(exportSavesToDownloads, isFalse);
+    expect(exportCsvLabel, 'Share CSV');
   });
 }

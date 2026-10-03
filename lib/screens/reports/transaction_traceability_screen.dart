@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/export/copy_text.dart';
-import '../../core/export/file_download.dart';
+import '../../core/export/export_file.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -109,36 +108,25 @@ class _TransactionTraceabilityScreenState
         ],
     ];
 
-    if (canDownloadFiles) {
-      final today = DateTime.now();
-      final csv = [
-        header.map(csvField).join(','),
-        for (final row in rows)
-          row.map((cell) => csvField(safeCell(cell))).join(','),
-      ].join('\r\n');
-      downloadTextFile(
-        fileName: reportFileName(
-          'transactions-last-$_days-days',
-          today.subtract(Duration(days: _days - 1)),
-          today,
-        ),
-        contents: csv,
-      );
-      _showMessage(
-        'Saved to your downloads. It opens in Excel or Google Sheets.',
-      );
-      return;
-    }
-
-    final tsv = [
-      header.join('\t'),
-      for (final row in rows) row.map(safeCell).join('\t'),
-    ].join('\n');
-    final copied = await copyText(tsv);
+    final today = DateTime.now();
+    final csv = [
+      header.map(csvField).join(','),
+      for (final row in rows)
+        row.map((cell) => csvField(safeCell(cell))).join(','),
+    ].join('\r\n');
+    final exported = await exportTextFile(
+      fileName: reportFileName(
+        'transactions-last-$_days-days',
+        today.subtract(Duration(days: _days - 1)),
+        today,
+      ),
+      contents: csv,
+    );
+    if (exported && !exportSavesToDownloads) return;
     _showMessage(
-      copied
-          ? 'Copied. Paste it into Google Sheets or Excel.'
-          : 'Copying did not work on this device. Try again.',
+      exported
+          ? 'Saved to your downloads. It opens in Excel or Google Sheets.'
+          : 'The file could not be exported. Try again.',
     );
   }
 
@@ -161,10 +149,12 @@ class _TransactionTraceabilityScreenState
           OutlinedButton.icon(
             onPressed: _export,
             icon: Icon(
-              canDownloadFiles ? Icons.download_outlined : Icons.copy_outlined,
+              exportSavesToDownloads
+                  ? Icons.download_outlined
+                  : Icons.share_outlined,
               size: 18,
             ),
-            label: Text(canDownloadFiles ? 'Download CSV' : 'Copy for Sheets'),
+            label: Text(exportCsvLabel),
           ),
           OutlinedButton.icon(
             onPressed: _refresh,

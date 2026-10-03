@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../core/export/copy_text.dart';
-import '../../core/export/file_download.dart';
+import '../../core/export/export_file.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -162,32 +161,20 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
         ],
     ];
 
-    if (canDownloadFiles) {
-      final csv = [
-        header.map(csvField).join(','),
-        for (final row in rows)
-          row.map((cell) => csvField(safeCell(cell))).join(','),
-      ].join('\r\n');
-      downloadTextFile(
-        fileName: reportFileName('audit-log', _from, _to),
-        contents: csv,
-      );
-      _showMessage(
-        'Saved to your downloads. It opens in Excel or Google Sheets.',
-      );
-      return;
-    }
-
-    final copied = await copyText(
-      [
-        header.join('\t'),
-        for (final row in rows) row.map(safeCell).join('\t'),
-      ].join('\n'),
+    final csv = [
+      header.map(csvField).join(','),
+      for (final row in rows)
+        row.map((cell) => csvField(safeCell(cell))).join(','),
+    ].join('\r\n');
+    final exported = await exportTextFile(
+      fileName: reportFileName('audit-log', _from, _to),
+      contents: csv,
     );
+    if (exported && !exportSavesToDownloads) return;
     _showMessage(
-      copied
-          ? 'Copied. Paste it into Google Sheets or Excel.'
-          : 'Copying did not work on this device. Try again.',
+      exported
+          ? 'Saved to your downloads. It opens in Excel or Google Sheets.'
+          : 'The file could not be exported. Try again.',
     );
   }
 
@@ -221,10 +208,12 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
           OutlinedButton.icon(
             onPressed: _export,
             icon: Icon(
-              canDownloadFiles ? Icons.download_outlined : Icons.copy_outlined,
+              exportSavesToDownloads
+                  ? Icons.download_outlined
+                  : Icons.share_outlined,
               size: 17,
             ),
-            label: Text(canDownloadFiles ? 'Download CSV' : 'Copy for Sheets'),
+            label: Text(exportCsvLabel),
           ),
           OutlinedButton.icon(
             onPressed: _refresh,

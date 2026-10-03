@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/export/copy_text.dart';
-import '../../core/export/file_download.dart';
+import '../../core/export/export_file.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -139,23 +139,28 @@ class _ReportsScreenState extends State<ReportsScreen> {
       copied
           ? '$what copied. Paste it into Google Sheets or Excel: each value '
                 'goes into its own cell.'
-          : canDownloadFiles
-          ? 'The browser did not allow copying. Use Download CSV instead.'
-          : 'Copying did not work on this device. Try again.',
+          : 'Copying did not work here. Use $exportCsvLabel instead.',
     );
   }
 
-  void _download(String fileTitle, String csv) {
-    final saved = downloadTextFile(
+  Future<void> _export(String fileTitle, String csv) async {
+    final exported = await exportTextFile(
       fileName: reportFileName(fileTitle, _from, _to),
       contents: csv,
     );
+    if (!mounted) return;
+
+    // On a tablet or phone the share sheet speaks for itself.
+    if (exported && !exportSavesToDownloads) return;
     _showMessage(
-      saved
+      exported
           ? 'Saved to your downloads. It opens in Excel or Google Sheets.'
-          : 'This device cannot save files yet. Use Copy for Sheets.',
+          : 'The file could not be exported. Use Copy for Sheets instead.',
     );
   }
+
+  IconData get _exportIcon =>
+      exportSavesToDownloads ? Icons.download_outlined : Icons.share_outlined;
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
@@ -314,12 +319,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
             spacing: 12,
             runSpacing: 8,
             children: [
-              if (canDownloadFiles)
-                ElevatedButton.icon(
-                  onPressed: () => _download('report', report.toCsv()),
-                  icon: const Icon(Icons.download_outlined, size: 18),
-                  label: const Text('Download Whole Report (CSV)'),
+              ElevatedButton.icon(
+                onPressed: () => _export('report', report.toCsv()),
+                icon: Icon(_exportIcon, size: 18),
+                label: Text(
+                  exportSavesToDownloads
+                      ? 'Download Whole Report (CSV)'
+                      : 'Share Whole Report (CSV)',
                 ),
+              ),
               OutlinedButton.icon(
                 onPressed: () => _copy(report.toTsv(), 'The whole report was'),
                 icon: const Icon(Icons.copy_all_outlined, size: 18),
@@ -360,11 +368,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(section.title, style: AppTextStyles.h3),
-            if (section.rows.isNotEmpty && canDownloadFiles)
+            if (section.rows.isNotEmpty)
               OutlinedButton.icon(
-                onPressed: () => _download(section.title, section.toCsv()),
-                icon: const Icon(Icons.download_outlined, size: 16),
-                label: const Text('Download CSV'),
+                onPressed: () => _export(section.title, section.toCsv()),
+                icon: Icon(_exportIcon, size: 16),
+                label: Text(exportCsvLabel),
               ),
             if (section.rows.isNotEmpty)
               OutlinedButton.icon(

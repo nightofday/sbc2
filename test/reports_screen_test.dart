@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sbc_management_system/domain/repositories/reporting_repository.dart';
@@ -125,5 +128,61 @@ void main() {
 
     expect(find.text('Gross Sales'), findsWidgets);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('on a tablet the report is shared as a CSV file', (tester) async {
+    tester.view.physicalSize = const Size(1400, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    Map<Object?, Object?>? shared;
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('dev.fluttercommunity.plus/share'),
+      (call) async {
+        shared = call.arguments as Map<Object?, Object?>;
+        return 'dev.fluttercommunity.plus/share/success';
+      },
+    );
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('dev.fluttercommunity.plus/share'),
+        null,
+      );
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ReportsScreen(reportingRepository: _FakeReportingRepository()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Share Whole Report (CSV)'));
+    // The file is written with real disk access, which the test clock does
+    // not drive, so the tap runs on the real clock.
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Share Whole Report (CSV)'));
+      for (var i = 0; i < 100 && shared == null; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    });
+    await tester.pumpAndSettle();
+
+    expect(shared, isNotNull);
+    final paths = (shared!['paths'] as List).cast<String>();
+    expect(paths.single, endsWith('.csv'));
+    expect(paths.single, contains('report_'));
+    expect((shared!['mimeTypes'] as List).single, 'text/csv');
+
+    final bytes = File(paths.single).readAsBytesSync();
+    // UTF-8 byte-order mark, so Excel reads ₱ correctly.
+    expect(bytes.take(3), [0xEF, 0xBB, 0xBF]);
+    final contents = File(paths.single).readAsStringSync();
+    expect(contents, contains('Street Bowl Café report'));
+    expect(contents, contains('Gross Sales'));
   });
 }
