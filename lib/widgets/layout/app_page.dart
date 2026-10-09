@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'app_header_scope.dart';
 import 'header_brand_motif.dart';
 
 class AppPage extends StatelessWidget {
@@ -22,6 +23,7 @@ class AppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveSubtitle = subtitle ?? _todayLabel();
+    final trailing = AppHeaderScope.trailingOf(context);
 
     return ColoredBox(
       color: AppColors.gray100,
@@ -56,7 +58,13 @@ class AppPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (compact && action != null) ...[
-                        titleBlock,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: titleBlock),
+                            ?trailing,
+                          ],
+                        ),
                         const SizedBox(height: AppSpacing.md),
                         if (constraints.maxWidth < 420)
                           SizedBox(width: double.infinity, child: action!)
@@ -71,6 +79,10 @@ class AppPage extends StatelessWidget {
                           children: [
                             Expanded(child: titleBlock),
                             ?action,
+                            if (trailing != null) ...[
+                              const SizedBox(width: AppSpacing.sm),
+                              trailing,
+                            ],
                           ],
                         ),
                       const SizedBox(height: AppSpacing.lg),

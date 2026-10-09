@@ -17,10 +17,6 @@ class AppSidebar extends StatefulWidget {
   final Future<void> Function() onSignOut;
   final VoidCallback? onClose;
 
-  /// Shown above the account, such as the stock alerts button. Told whether
-  /// the sidebar is compact.
-  final Widget Function(bool compact)? footerBuilder;
-
   const AppSidebar({
     super.key,
     required this.profile,
@@ -30,7 +26,6 @@ class AppSidebar extends StatefulWidget {
     required this.onItemSelected,
     required this.onSignOut,
     this.onClose,
-    this.footerBuilder,
   });
 
   @override
@@ -88,14 +83,6 @@ class _AppSidebarState extends State<AppSidebar> {
                 ? _buildCompactNavigation()
                 : _buildGroupedNavigation(),
           ),
-          if (widget.footerBuilder case final footer?)
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.compact ? 0 : AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              child: Center(child: footer(widget.compact)),
-            ),
           _SidebarAccount(
             profile: widget.profile,
             compact: widget.compact,

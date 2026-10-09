@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/app_navigation_item.dart';
 import '../../models/app_user_profile.dart';
+import 'app_header_scope.dart';
 import 'app_sidebar.dart';
 import '../../core/theme/app_spacing.dart';
 
@@ -21,8 +22,9 @@ class AppShell extends StatefulWidget {
   /// Lets other widgets ask the shell to show a destination.
   final AppNavigationController? navigationController;
 
-  /// App-wide notices with a button, such as stock alerts: shown in the
-  /// sidebar and, on a phone, in the top bar. Told whether space is tight.
+  /// App-wide notices with a button, such as the stock alerts bell: shown
+  /// at the top right of every page's header, and in the top bar on a
+  /// phone.
   final Widget Function(bool compact)? noticesBuilder;
 
   const AppShell({
@@ -98,9 +100,13 @@ class _AppShellState extends State<AppShell> {
                 compact: compactNavigation,
                 onItemSelected: _selectDestination,
                 onSignOut: widget.onSignOut,
-                footerBuilder: widget.noticesBuilder,
               ),
-              Expanded(child: _buildPages()),
+              Expanded(
+                child: AppHeaderScope(
+                  trailing: widget.noticesBuilder?.call(true),
+                  child: _buildPages(),
+                ),
+              ),
             ],
           ),
         );

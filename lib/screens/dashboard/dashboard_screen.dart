@@ -124,16 +124,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     horizontal: AppSpacing.xl,
                     vertical: AppSpacing.lg,
                   ),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: AppRadius.all,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: .12),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
@@ -142,7 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "TODAY'S NET SALES",
+                            'Net sales today',
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.white,
                               fontWeight: FontWeight.w700,
@@ -193,7 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.md),
                 SummaryCardGrid(
                   children: [
                     SummaryCard(
@@ -206,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: 'Refunds',
                       value: _money(summary.refunds),
                       subtitle: 'Completed refunds today',
-                      accentColor: AppColors.orange,
+                      accentColor: AppColors.info,
                     ),
                     SummaryCard(
                       label: summary.businessScope ? 'Expenses' : 'Your sales',
@@ -216,7 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       subtitle: summary.businessScope
                           ? 'Posted expenses today'
                           : 'Your completed sales today',
-                      accentColor: AppColors.black,
+                      accentColor: AppColors.warning,
                     ),
                     if (summary.businessScope)
                       SummaryCard(

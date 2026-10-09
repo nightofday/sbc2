@@ -87,14 +87,14 @@ class SummaryCardGrid extends StatelessWidget {
       builder: (context, constraints) {
         final int columns = constraints.maxWidth < 560
             ? 1
-            : constraints.maxWidth < 1050
+            : constraints.maxWidth < 900
             ? 2
             : children.isEmpty
             ? 1
             : children.length > 4
             ? 4
             : children.length;
-        const gap = 18.0;
+        const gap = AppSpacing.md;
         final itemWidth =
             (constraints.maxWidth - (gap * (columns - 1))) / columns;
 

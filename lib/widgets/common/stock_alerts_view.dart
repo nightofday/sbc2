@@ -102,7 +102,18 @@ class StockAlertsButton extends StatelessWidget {
               button: true,
               label: label,
               excludeSemantics: true,
-              child: IconButton(onPressed: open, icon: bell),
+              child: IconButton(
+                onPressed: open,
+                icon: bell,
+                constraints: const BoxConstraints.tightFor(
+                  width: 48,
+                  height: 48,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.white,
+                  side: const BorderSide(color: AppColors.gray300),
+                ),
+              ),
             ),
           );
         }
