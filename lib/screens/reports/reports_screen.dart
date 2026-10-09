@@ -1,12 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/export/copy_text.dart';
 import '../../core/export/export_file.dart';
+import '../../core/export/report_workbook.dart';
+import '../../core/export/xlsx.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/reporting_repository.dart';
 import '../../models/reporting.dart';
+import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/common/summary_card.dart';
@@ -139,14 +143,21 @@ class _ReportsScreenState extends State<ReportsScreen> {
       copied
           ? '$what copied. Paste it into Google Sheets or Excel: each value '
                 'goes into its own cell.'
-          : 'Copying did not work here. Use $exportCsvLabel instead.',
+          : 'Copying did not work here. Use $exportExcelLabel instead.',
     );
   }
 
-  Future<void> _export(String fileTitle, String csv) async {
-    final exported = await exportTextFile(
-      fileName: reportFileName(fileTitle, _from, _to),
-      contents: csv,
+  /// Saves or shares a formatted Excel workbook built by [build], which is
+  /// given the business name and the time of the export.
+  Future<void> _exportExcel(
+    String fileTitle,
+    Uint8List Function(String businessName, DateTime exportedAt) build,
+  ) async {
+    final businessName = BusinessProfileScope.of(context).tradeName;
+    final exported = await exportBytesFile(
+      fileName: reportFileName(fileTitle, _from, _to, extension: 'xlsx'),
+      bytes: build(businessName, DateTime.now()),
+      mimeType: XlsxWorkbook.mimeType,
     );
     if (!mounted) return;
 
@@ -320,12 +331,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
             runSpacing: 8,
             children: [
               ElevatedButton.icon(
-                onPressed: () => _export('report', report.toCsv()),
+                onPressed: () => _exportExcel(
+                  'report',
+                  (businessName, exportedAt) => businessReportWorkbook(
+                    report,
+                    exportedAt: exportedAt,
+                    businessName: businessName,
+                  ),
+                ),
                 icon: Icon(_exportIcon, size: 18),
                 label: Text(
                   exportSavesToDownloads
-                      ? 'Download Whole Report (CSV)'
-                      : 'Share Whole Report (CSV)',
+                      ? 'Download Whole Report (Excel)'
+                      : 'Share Whole Report (Excel)',
                 ),
               ),
               OutlinedButton.icon(
@@ -370,9 +388,18 @@ class _ReportsScreenState extends State<ReportsScreen> {
             Text(section.title, style: AppTextStyles.h3),
             if (section.rows.isNotEmpty)
               OutlinedButton.icon(
-                onPressed: () => _export(section.title, section.toCsv()),
+                onPressed: () => _exportExcel(
+                  section.title,
+                  (businessName, exportedAt) => reportSectionWorkbook(
+                    section,
+                    from: _from,
+                    to: _to,
+                    exportedAt: exportedAt,
+                    businessName: businessName,
+                  ),
+                ),
                 icon: Icon(_exportIcon, size: 16),
-                label: Text(exportCsvLabel),
+                label: Text(exportExcelLabel),
               ),
             if (section.rows.isNotEmpty)
               OutlinedButton.icon(

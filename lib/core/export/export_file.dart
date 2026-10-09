@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'export_file_share.dart'
     if (dart.library.js_interop) 'export_file_web.dart'
     as platform;
@@ -11,6 +14,10 @@ bool get exportSavesToDownloads => platform.exportSavesToDownloads;
 String get exportCsvLabel =>
     exportSavesToDownloads ? 'Download CSV' : 'Share CSV';
 
+/// The label for an Excel export button on this platform.
+String get exportExcelLabel =>
+    exportSavesToDownloads ? 'Download Excel' : 'Share Excel';
+
 /// Exports [contents] as a file called [fileName]. Returns false when the
 /// file could not be saved or the share sheet could not be opened.
 Future<bool> exportTextFile({
@@ -18,9 +25,24 @@ Future<bool> exportTextFile({
   required String contents,
   String mimeType = 'text/csv',
 }) {
-  return platform.exportTextFile(
+  // The byte-order mark makes Excel read the file as UTF-8, so ₱ and é
+  // survive.
+  return exportBytesFile(
     fileName: fileName,
-    contents: contents,
+    bytes: Uint8List.fromList(utf8.encode('\uFEFF$contents')),
+    mimeType: mimeType,
+  );
+}
+
+/// Exports [bytes], such as an Excel workbook, as a file called [fileName].
+Future<bool> exportBytesFile({
+  required String fileName,
+  required Uint8List bytes,
+  required String mimeType,
+}) {
+  return platform.exportBytesFile(
+    fileName: fileName,
+    bytes: bytes,
     mimeType: mimeType,
   );
 }

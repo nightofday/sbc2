@@ -1,14 +1,14 @@
-import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:share_plus/share_plus.dart';
 
 bool get exportSavesToDownloads => false;
 
-Future<bool> exportTextFile({
+Future<bool> exportBytesFile({
   required String fileName,
-  required String contents,
+  required Uint8List bytes,
   required String mimeType,
 }) async {
   try {
@@ -16,9 +16,7 @@ Future<bool> exportTextFile({
     // the person saves or sends is called what the export is.
     final folder = await Directory.systemTemp.createTemp('export');
     final file = File('${folder.path}/$fileName');
-    // The byte-order mark makes Excel read the file as UTF-8, so ₱ and é
-    // survive.
-    await file.writeAsBytes(utf8.encode('﻿$contents'));
+    await file.writeAsBytes(bytes);
 
     final result = await SharePlus.instance.share(
       ShareParams(

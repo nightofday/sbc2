@@ -127,7 +127,12 @@ String csvField(String value) {
 }
 
 /// A file name for an export, such as `sales-by-day_2026-10-01_2026-10-07.csv`.
-String reportFileName(String title, DateTime from, DateTime to) {
+String reportFileName(
+  String title,
+  DateTime from,
+  DateTime to, {
+  String extension = 'csv',
+}) {
   String day(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-'
       '${date.day.toString().padLeft(2, '0')}';
@@ -135,7 +140,7 @@ String reportFileName(String title, DateTime from, DateTime to) {
       .toLowerCase()
       .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
       .replaceAll(RegExp(r'^-|-$'), '');
-  return '${slug}_${day(from)}_${day(to)}.csv';
+  return '${slug}_${day(from)}_${day(to)}.$extension';
 }
 
 String formatReportMoney(double value) {

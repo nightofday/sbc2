@@ -1,20 +1,24 @@
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:web/web.dart' as web;
 
 bool get exportSavesToDownloads => true;
 
-Future<bool> exportTextFile({
+Future<bool> exportBytesFile({
   required String fileName,
-  required String contents,
+  required Uint8List bytes,
   required String mimeType,
 }) async {
   try {
-    // The byte-order mark makes Excel read the file as UTF-8, so ₱ and é
-    // survive.
     final blob = web.Blob(
-      ['﻿$contents'.toJS].toJS,
-      web.BlobPropertyBag(type: '$mimeType;charset=utf-8'),
+      [bytes.toJS].toJS,
+      // Text is UTF-8 with a byte-order mark; say so to the browser.
+      web.BlobPropertyBag(
+        type: mimeType.startsWith('text/')
+            ? '$mimeType;charset=utf-8'
+            : mimeType,
+      ),
     );
     final url = web.URL.createObjectURL(blob);
     final anchor = web.HTMLAnchorElement()

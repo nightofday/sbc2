@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sbc_management_system/core/export/xlsx.dart';
 import 'package:sbc_management_system/domain/repositories/reporting_repository.dart';
 import 'package:sbc_management_system/models/audit_entry.dart';
 import 'package:sbc_management_system/models/reporting.dart';
@@ -130,7 +133,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('on a tablet the report is shared as a CSV file', (tester) async {
+  testWidgets('on a tablet the report is shared as an Excel file', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1400, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -161,11 +166,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.text('Share Whole Report (CSV)'));
+    await tester.ensureVisible(find.text('Share Whole Report (Excel)'));
     // The file is written with real disk access, which the test clock does
     // not drive, so the tap runs on the real clock.
     await tester.runAsync(() async {
-      await tester.tap(find.text('Share Whole Report (CSV)'));
+      await tester.tap(find.text('Share Whole Report (Excel)'));
       for (var i = 0; i < 100 && shared == null; i++) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
@@ -174,15 +179,16 @@ void main() {
 
     expect(shared, isNotNull);
     final paths = (shared!['paths'] as List).cast<String>();
-    expect(paths.single, endsWith('.csv'));
+    expect(paths.single, endsWith('.xlsx'));
     expect(paths.single, contains('report_'));
-    expect((shared!['mimeTypes'] as List).single, 'text/csv');
+    expect((shared!['mimeTypes'] as List).single, XlsxWorkbook.mimeType);
 
     final bytes = File(paths.single).readAsBytesSync();
-    // UTF-8 byte-order mark, so Excel reads ₱ correctly.
-    expect(bytes.take(3), [0xEF, 0xBB, 0xBF]);
-    final contents = File(paths.single).readAsStringSync();
-    expect(contents, contains('Street Bowl Café report'));
+    // A zip archive, which is what an .xlsx workbook is.
+    expect(bytes.take(2), [0x50, 0x4B]);
+    // Parts are stored uncompressed, so their text can be found directly.
+    final contents = utf8.decode(bytes, allowMalformed: true);
+    expect(contents, contains('<sheet name="Summary"'));
     expect(contents, contains('Gross Sales'));
   });
 }
