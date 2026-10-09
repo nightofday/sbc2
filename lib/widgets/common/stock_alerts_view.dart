@@ -106,8 +106,8 @@ class StockAlertsButton extends StatelessWidget {
                 onPressed: open,
                 icon: bell,
                 constraints: const BoxConstraints.tightFor(
-                  width: 48,
-                  height: 48,
+                  width: 44,
+                  height: 44,
                 ),
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.white,
