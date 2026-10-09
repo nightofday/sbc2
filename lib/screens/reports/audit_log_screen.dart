@@ -14,6 +14,7 @@ import '../../models/shift_report.dart';
 import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_spacing.dart';
 
 enum _Period { today, last7, last30, custom }
 
@@ -211,8 +212,8 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
       title: 'Audit Log',
       subtitle: _rangeLabel,
       action: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
         children: [
           OutlinedButton.icon(
             onPressed: _export,
@@ -235,8 +236,8 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               for (final period in _Period.values)
                 ChoiceChip(
@@ -246,7 +247,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           TextField(
             onChanged: _onSearchChanged,
             decoration: const InputDecoration(
@@ -254,7 +255,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
               hintText: 'Search a name, a product, a price or an action...',
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: FutureBuilder<List<AuditEntry>>(
               future: _entriesFuture,
@@ -273,7 +274,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                           '${errorText(snapshot.error)}',
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
                           child: const Text('Try Again'),
@@ -296,7 +297,8 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
 
                 return ListView.separated(
                   itemCount: entries.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, index) => _entry(entries[index]),
                 );
               },
@@ -311,7 +313,10 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
     final changes = entry.changes;
 
     return SectionCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -321,16 +326,16 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                 : '${entry.title}: ${entry.label}',
             style: AppTextStyles.bodyMedium,
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             '${entry.actorName} · ${formatShiftTime(entry.createdAt)}',
             style: AppTextStyles.caption.copyWith(color: AppColors.gray500),
           ),
           if (changes.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             for (final change in changes)
               Padding(
-                padding: const EdgeInsets.only(top: 2),
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   change.before.isEmpty
                       ? '${change.field}: ${change.after}'

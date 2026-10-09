@@ -82,7 +82,7 @@ class _AppSidebarState extends State<AppSidebar> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _SidebarBrand(compact: widget.compact, onClose: widget.onClose),
-          SizedBox(height: widget.compact ? 20 : 14),
+          SizedBox(height: widget.compact ? AppSpacing.lg : AppSpacing.md),
           Expanded(
             child: widget.compact
                 ? _buildCompactNavigation()
@@ -91,8 +91,8 @@ class _AppSidebarState extends State<AppSidebar> {
           if (widget.footerBuilder case final footer?)
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: widget.compact ? 0 : 10,
-                vertical: 6,
+                horizontal: widget.compact ? 0 : AppSpacing.sm,
+                vertical: AppSpacing.xs,
               ),
               child: Center(child: footer(widget.compact)),
             ),
@@ -108,7 +108,7 @@ class _AppSidebarState extends State<AppSidebar> {
 
   Widget _buildCompactNavigation() {
     return ListView(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       children: [
         for (
           int groupIndex = 0;
@@ -117,7 +117,10 @@ class _AppSidebarState extends State<AppSidebar> {
         ) ...[
           if (groupIndex > 0)
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
               child: Divider(height: 1),
             ),
           for (final item in widget.groups[groupIndex].items)
@@ -135,7 +138,7 @@ class _AppSidebarState extends State<AppSidebar> {
 
   Widget _buildGroupedNavigation() {
     return ListView(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       children: [for (final group in widget.groups) _buildGroup(group)],
     );
   }
@@ -143,7 +146,7 @@ class _AppSidebarState extends State<AppSidebar> {
   Widget _buildGroup(AppNavigationGroup group) {
     if (!group.collapsible) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -164,7 +167,7 @@ class _AppSidebarState extends State<AppSidebar> {
     final selected = group.containsDestination(widget.selectedIndex);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Column(
         children: [
           _SidebarGroupHeader(
@@ -216,7 +219,7 @@ class _SidebarBrand extends StatelessWidget {
 
     if (compact) {
       return Padding(
-        padding: const EdgeInsets.only(top: 24),
+        padding: const EdgeInsets.only(top: AppSpacing.lg),
         child: Center(
           child: Tooltip(
             message: '$businessName Management System',
@@ -231,7 +234,12 @@ class _SidebarBrand extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 24, 12, 6),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.xs,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -244,7 +252,7 @@ class _SidebarBrand extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: AppSpacing.xs),
                 const Text('MANAGEMENT SYSTEM', style: AppTextStyles.overline),
               ],
             ),
@@ -269,7 +277,12 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 8, 18, 4),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.xs,
+      ),
       child: Text(
         label,
         style: AppTextStyles.caption.copyWith(
@@ -302,7 +315,10 @@ class _SidebarGroupHeader extends StatelessWidget {
     final color = selected ? AppColors.primary : AppColors.gray700;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -312,9 +328,9 @@ class _SidebarGroupHeader extends StatelessWidget {
             height: 42,
             child: Row(
               children: [
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Icon(icon, size: 18, color: color),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     label,
@@ -336,7 +352,7 @@ class _SidebarGroupHeader extends StatelessWidget {
                     color: color,
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
               ],
             ),
           ),
@@ -367,10 +383,10 @@ class _SidebarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = Padding(
       padding: EdgeInsets.fromLTRB(
-        compact ? 8 : 14 + indent,
-        3,
-        compact ? 8 : 14,
-        3,
+        compact ? AppSpacing.sm : AppSpacing.md + indent,
+        AppSpacing.xs,
+        compact ? AppSpacing.sm : AppSpacing.md,
+        AppSpacing.xs,
       ),
       child: Material(
         color: Colors.transparent,
@@ -395,14 +411,14 @@ class _SidebarItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: compact ? 10 : 9),
+                SizedBox(width: compact ? AppSpacing.sm : AppSpacing.sm),
                 Icon(
                   icon,
                   size: 18,
                   color: selected ? AppColors.primary : AppColors.gray700,
                 ),
                 if (!compact) ...[
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       label,
@@ -445,7 +461,7 @@ class _SidebarAccount extends StatelessWidget {
       return Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Tooltip(
               message: profile.displayName,
               child: const CircleAvatar(
@@ -460,7 +476,7 @@ class _SidebarAccount extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 18),
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: IconButton(
               tooltip: 'Sign out',
               onPressed: () => onSignOut(),
@@ -475,7 +491,12 @@ class _SidebarAccount extends StatelessWidget {
       children: [
         const Divider(height: 1),
         Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.sm,
+          ),
           child: Row(
             children: [
               const CircleAvatar(
@@ -487,7 +508,7 @@ class _SidebarAccount extends StatelessWidget {
                   color: AppColors.primary,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -513,7 +534,12 @@ class _SidebarAccount extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            0,
+            AppSpacing.md,
+            AppSpacing.md,
+          ),
           child: SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(

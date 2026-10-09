@@ -14,6 +14,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class PurchasingScreen extends StatefulWidget {
   final PurchasingRepository purchasingRepository;
@@ -65,7 +66,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: 8,
+            spacing: AppSpacing.sm,
             children: [
               ChoiceChip(
                 label: const Text('Purchase Orders'),
@@ -79,7 +80,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: _tab == 0 ? _buildPurchaseOrders() : _buildGoodsReceipts(),
           ),
@@ -139,7 +140,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       child: StatusBadge(_statusLabel(order.status)),
                     ),
                     Wrap(
-                      spacing: 6,
+                      spacing: AppSpacing.xs,
                       children: [
                         if (order.status == 'DRAFT')
                           TextButton(
@@ -269,8 +270,8 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Wrap(
-                spacing: 24,
-                runSpacing: 10,
+                spacing: AppSpacing.lg,
+                runSpacing: AppSpacing.sm,
                 children: [
                   _receiptDetail('Supplier', receipt.supplierName),
                   _receiptDetail(
@@ -299,17 +300,17 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                   _receiptDetail('Total', _money(receipt.total)),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               const Text('Received Items', style: AppTextStyles.h3),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.sm),
               if (lines.isEmpty)
                 _emptyLines()
               else
                 for (final line in lines) ...[
                   Container(
                     width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
+                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: AppColors.gray100,
                       borderRadius: AppRadius.all,
@@ -332,7 +333,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           '${_qty(line.purchaseQuantity)} ${line.purchaseUomCode} '
                           '× ${_money(line.unitCost)} each',
@@ -420,7 +421,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
             label,
             style: AppTextStyles.caption.copyWith(color: AppColors.gray500),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(value, style: AppTextStyles.bodyMedium),
         ],
       ),
@@ -488,7 +489,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     setDialogState(() => supplierId = value);
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: OutlinedButton.icon(
@@ -514,7 +515,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
                     const Expanded(
@@ -538,7 +539,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 _buildLineList(
                   lines: lines,
                   inventory: inventory,
@@ -546,14 +547,14 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     setDialogState(() => lines.removeAt(index));
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: notesController,
                   maxLines: 3,
                   decoration: const InputDecoration(labelText: 'Notes'),
                 ),
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(
@@ -562,7 +563,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                   ),
                 ],
                 if (isSaving) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   const LinearProgressIndicator(),
                 ],
               ],
@@ -716,7 +717,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           setDialogState(() => supplierId = value);
                         },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: invoiceController,
                   decoration: const InputDecoration(
@@ -724,7 +725,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     hintText: 'Required external reference',
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final invoiceDateButton = OutlinedButton.icon(
@@ -779,7 +780,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           invoiceDateButton,
-                          const SizedBox(height: 10),
+                          const SizedBox(height: AppSpacing.sm),
                           dueDateButton,
                         ],
                       );
@@ -788,13 +789,13 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     return Row(
                       children: [
                         Expanded(child: invoiceDateButton),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(child: dueDateButton),
                       ],
                     );
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
                     const Expanded(
@@ -818,7 +819,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 if (lines.isEmpty)
                   _emptyLines()
                 else
@@ -844,7 +845,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           ? null
                           : () => setDialogState(() => lines.removeAt(index)),
                     ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Create Supplier Bill'),
@@ -867,7 +868,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                   ),
                 ),
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(
@@ -876,7 +877,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                   ),
                 ],
                 if (isSaving) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   const LinearProgressIndicator(),
                 ],
               ],
@@ -1085,7 +1086,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                               });
                             },
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: purchaseUomId,
@@ -1135,7 +1136,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                               });
                             },
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     if (needsPackageConversion && !lockedToPurchaseOrder)
                       TextField(
                         controller: conversionController,
@@ -1168,7 +1169,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: quantityController,
                       keyboardType: const TextInputType.numberWithOptions(
@@ -1180,7 +1181,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                             : 'Quantity Ordered *',
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: costController,
                       keyboardType: const TextInputType.numberWithOptions(
@@ -1192,7 +1193,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       ),
                     ),
                     if (receiptMode && item.trackExpiry) ...[
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.md),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: OutlinedButton.icon(
@@ -1220,7 +1221,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       ),
                     ],
                     if (receiptMode) ...[
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.md),
                       TextField(
                         controller: lotController,
                         decoration: const InputDecoration(
@@ -1229,7 +1230,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       ),
                     ],
                     if (errorMessage != null) ...[
-                      const SizedBox(height: 10),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         errorMessage!,
                         style: AppTextStyles.caption.copyWith(
@@ -1318,8 +1319,8 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
       children: [
         for (int index = 0; index < lines.length; index++)
           Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.gray100,
               borderRadius: AppRadius.all,
@@ -1363,7 +1364,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       details,
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
                       Align(alignment: Alignment.centerRight, child: actions),
                     ],
                   );
@@ -1397,8 +1398,8 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
     );
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.gray100,
         borderRadius: AppRadius.all,
@@ -1445,7 +1446,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 details,
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.xs),
                 Align(alignment: Alignment.centerRight, child: actions),
               ],
             );
@@ -1465,7 +1466,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
   Widget _emptyLines() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.gray100,
         borderRadius: AppRadius.all,

@@ -10,6 +10,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/shift_report_view.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_spacing.dart';
 
 enum _Period { today, last7, last30, custom }
 
@@ -138,8 +139,8 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               for (final period in _Period.values)
                 ChoiceChip(
@@ -149,7 +150,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: FutureBuilder<List<ShiftSummary>>(
               future: _shiftsFuture,
@@ -168,7 +169,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                           '${errorText(snapshot.error)}',
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
                           child: const Text('Try Again'),

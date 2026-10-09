@@ -15,6 +15,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/common/summary_card.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_spacing.dart';
 
 class SalesFinanceScreen extends StatefulWidget {
   final ReportingRepository reportingRepository;
@@ -167,13 +168,13 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: AppSpacing.lg),
                 ResponsiveSplit(
                   primary: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Sales Summary', style: AppTextStyles.h3),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
                       if (dailyRows.isEmpty)
                         const SectionCard(
                           child: Text('No completed sales in this period.'),
@@ -215,15 +216,15 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                           'Financial Summary',
                           style: AppTextStyles.h3,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppSpacing.lg),
                         _FinanceRow('Gross Sales', _money(finance.grossSales)),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: AppSpacing.md),
                         _FinanceRow('Discounts', _money(finance.discounts)),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: AppSpacing.md),
                         _FinanceRow('Refunds', _money(finance.refunds)),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: AppSpacing.md),
                         _FinanceRow('Net Sales', _money(finance.netSales)),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: AppSpacing.md),
                         _FinanceRow('Expenses', _money(finance.expenses)),
                         const Divider(height: 32),
                         _FinanceRow(
@@ -231,9 +232,9 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                           _money(finance.netSalesLessExpenses),
                           emphasis: true,
                         ),
-                        const SizedBox(height: 22),
+                        const SizedBox(height: AppSpacing.lg),
                         _FinanceRow('Completed Orders', '${finance.orders}'),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: AppSpacing.md),
                         _FinanceRow(
                           'Average Order',
                           _money(finance.averageOrder),
@@ -242,7 +243,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: AppSpacing.lg),
                 Row(
                   children: [
                     const Expanded(
@@ -255,14 +256,14 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 FutureBuilder<List<SupplierBalanceRecord>>(
                   future: _balancesFuture,
                   builder: (context, balancesSnapshot) {
                     if (balancesSnapshot.connectionState ==
                         ConnectionState.waiting) {
                       return const Padding(
-                        padding: EdgeInsets.all(24),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: CircularProgressIndicator(),
                       );
                     }
@@ -343,7 +344,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: AppSpacing.lg),
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -351,7 +352,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                     style: AppTextStyles.h3,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -361,14 +362,14 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                     style: AppTextStyles.caption,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 FutureBuilder<List<SupplierPaymentRecord>>(
                   future: _paymentsFuture,
                   builder: (context, paymentsSnapshot) {
                     if (paymentsSnapshot.connectionState ==
                         ConnectionState.waiting) {
                       return const Padding(
-                        padding: EdgeInsets.all(24),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: CircularProgressIndicator(),
                       );
                     }
@@ -535,7 +536,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
             children: [
               _dialogRow('Supplier', bill.supplierName),
               _dialogRow('Balance', _money(bill.balance)),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: selectedMethod.id,
@@ -560,7 +561,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: amountController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -572,7 +573,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                 ),
               ),
               if (selectedMethod.requiresReference) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: referenceController,
                   decoration: InputDecoration(
@@ -580,14 +581,14 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                   ),
                 ),
               ],
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: notesController,
                 maxLines: 2,
                 decoration: const InputDecoration(labelText: 'Notes'),
               ),
               if (errorMessage != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -662,7 +663,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
 
   Widget _dialogRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Expanded(
@@ -671,7 +672,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
               style: AppTextStyles.body.copyWith(color: AppColors.gray700),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSpacing.md),
           Flexible(
             child: Text(
               value,
@@ -721,7 +722,7 @@ class _FinanceRow extends StatelessWidget {
           label,
           style: AppTextStyles.body.copyWith(color: AppColors.gray700),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: AppSpacing.md),
         Flexible(
           child: Text(
             value,

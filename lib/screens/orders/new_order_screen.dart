@@ -125,7 +125,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 'shift report compares it with the count at closing.',
                 style: AppTextStyles.body,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: cashController,
                 autofocus: true,
@@ -240,7 +240,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: AppColors.gray100,
                       borderRadius: AppRadius.all,
@@ -277,7 +277,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: cashController,
                     keyboardType: const TextInputType.numberWithOptions(
@@ -293,10 +293,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     ),
                   ),
                   if (variance != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: variance.abs() < 0.01
                             ? const Color(0xFFEAF7EE)
@@ -310,7 +310,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: notesController,
                     maxLines: 3,
@@ -320,7 +320,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     ),
                   ),
                   if (errorMessage != null) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       errorMessage!,
                       style: AppTextStyles.caption.copyWith(
@@ -450,7 +450,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: AppColors.gray100,
                       borderRadius: AppRadius.all,
@@ -486,7 +486,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: movementType,
@@ -516,7 +516,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       });
                     },
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: amountController,
                     keyboardType: const TextInputType.numberWithOptions(
@@ -527,14 +527,14 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       prefixText: '₱',
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: reasonController,
                     maxLines: 2,
                     decoration: const InputDecoration(labelText: 'Reason *'),
                   ),
                   if (errorMessage != null) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       errorMessage!,
                       style: AppTextStyles.caption.copyWith(
@@ -631,7 +631,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           SafeArea(
             child: Padding(
               padding: EdgeInsets.all(
-                MediaQuery.sizeOf(context).width < 600 ? 16 : AppSpacing.page,
+                MediaQuery.sizeOf(context).width < 600
+                    ? AppSpacing.md
+                    : AppSpacing.page,
               ),
               child: FutureBuilder<List<PosMenuItem>>(
                 future: _menuFuture,
@@ -649,7 +651,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                                 onPressed: () => Navigator.maybePop(context),
                                 icon: const Icon(Icons.arrow_back),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.sm),
                               const Text('New Order', style: AppTextStyles.h1),
                             ],
                           );
@@ -659,7 +661,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 title,
-                                const SizedBox(height: 10),
+                                const SizedBox(height: AppSpacing.sm),
                                 _buildShiftStatus(),
                               ],
                             );
@@ -674,7 +676,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                           );
                         },
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: AppSpacing.md),
                       if (snapshot.connectionState == ConnectionState.waiting)
                         const Expanded(
                           child: Center(child: CircularProgressIndicator()),
@@ -711,12 +713,15 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
     if (_openShiftId != null) {
       return Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFEAF7EE),
               borderRadius: AppRadius.all,
@@ -770,7 +775,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 Expanded(
                   child: TabBarView(
                     children: [
@@ -788,7 +793,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(flex: 3, child: _buildProductsPanel(menu)),
-            const SizedBox(width: 20),
+            const SizedBox(width: AppSpacing.lg),
             SizedBox(width: 410, child: _buildCurrentOrderPanel()),
           ],
         );
@@ -809,11 +814,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 color: AppColors.primary,
                 size: 40,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               const Text('Unable to load POS data', style: AppTextStyles.h3),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(errorText(error), textAlign: TextAlign.center),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               OutlinedButton(
                 onPressed: () {
                   setState(_reloadPosData);
@@ -854,7 +859,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Products', style: AppTextStyles.h3),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         TextField(
           controller: _searchController,
           onChanged: (value) => setState(() => _searchQuery = value),
@@ -863,13 +868,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             hintText: 'Search products...',
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         SizedBox(
           height: 38,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: categories.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
             itemBuilder: (_, index) {
               final category = categories[index];
               return ChoiceChip(
@@ -882,7 +887,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             },
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         Expanded(
           child: products.isEmpty
               ? const Center(child: Text('No products found.'))
@@ -901,7 +906,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     if (columns == 1) {
                       return ListView.separated(
                         itemCount: products.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppSpacing.sm),
                         itemBuilder: (_, index) =>
                             _buildProductRow(products[index]),
                       );
@@ -953,7 +959,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       inCart: inCart,
       onAdd: () => _addProduct(product),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         child: Row(
           children: [
             Expanded(
@@ -977,7 +986,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               _money(product.price),
               style: AppTextStyles.bodyMedium.copyWith(
@@ -987,7 +996,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               ),
             ),
             if (inCart > 0) ...[
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               _CartQuantityBadge(inCart),
             ],
           ],
@@ -1010,13 +1019,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           ? Positioned(top: 12, right: 12, child: _CartQuantityBadge(inCart))
           : null,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               // Leaves room for the quantity badge in the corner.
-              padding: const EdgeInsets.only(right: 40),
+              padding: const EdgeInsets.only(right: AppSpacing.xxl),
               child: Text(
                 product.category.toUpperCase(),
                 style: AppTextStyles.overline.copyWith(
@@ -1026,9 +1035,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Padding(
-              padding: const EdgeInsets.only(right: 40),
+              padding: const EdgeInsets.only(right: AppSpacing.xxl),
               child: Text(
                 product.name,
                 style: AppTextStyles.h3,
@@ -1056,7 +1065,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         : AppColors.primary,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 if (product.tracksInventory)
                   Expanded(
                     child: Text(
@@ -1095,7 +1104,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Current Order', style: AppTextStyles.h2),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
             isExpanded: true,
             initialValue: _orderType,
@@ -1109,9 +1118,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               if (value != null) setState(() => _orderType = value);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           _buildOrderIdentityFields(),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.md),
           const Divider(),
           Expanded(
             child: _cart.isEmpty
@@ -1131,7 +1140,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           ),
           const Divider(),
           _summaryRow('Items', '$itemCount'),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -1153,7 +1162,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             style: AppTextStyles.caption,
           ),
           if (_heldStore != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Expanded(
@@ -1164,7 +1173,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     label: const Text('Hold'),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: OutlinedButton.icon(
                     style: _panelButtonStyle,
@@ -1178,7 +1187,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               ],
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,
             height: 60,
@@ -1286,11 +1295,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 'order is paid.',
                 style: AppTextStyles.caption,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               for (final order in orders)
                 Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.gray200),
                     borderRadius: AppRadius.all,
@@ -1345,7 +1354,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         },
                         icon: const Icon(Icons.delete_outline),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       FilledButton(
                         onPressed: () => Navigator.pop(dialogContext, order),
                         child: const Text('Continue'),
@@ -1433,7 +1442,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             controller: _tableNumberController,
             decoration: const InputDecoration(labelText: 'Table Number *'),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: _customerNameController,
             decoration: const InputDecoration(
@@ -1454,7 +1463,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               labelText: 'Customer / Recipient Name *',
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: _deliveryReferenceController,
             decoration: const InputDecoration(
@@ -1626,7 +1635,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         ],
                       ),
                       Text(_groupRule(group), style: AppTextStyles.caption),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppSpacing.xs),
                       for (final option in group.options)
                         CheckboxListTile(
                           dense: true,
@@ -1672,7 +1681,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       ),
                     ),
                     if (errorMessage != null) ...[
-                      const SizedBox(height: 10),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         errorMessage!,
                         style: AppTextStyles.caption.copyWith(
@@ -1891,7 +1900,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   emphasized: true,
                 ),
                 if (discounts.isNotEmpty) ...[
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: selectedDiscount?.id ?? '',
@@ -1932,7 +1941,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     },
                   ),
                   if (selectedDiscount != null) ...[
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: discountValueController,
                       enabled: selectedDiscount!.allowCustomValue,
@@ -1968,7 +1977,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         });
                       },
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: discountNotesController,
                       maxLines: 2,
@@ -1979,7 +1988,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     ),
                   ],
                 ],
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: selectedMethod.id,
@@ -2007,7 +2016,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: amountController,
                   enabled: selectedMethod.isCash,
@@ -2026,13 +2035,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   },
                 ),
                 if (selectedMethod.isCash) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   // The notes a customer is likely to hand over.
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
                       children: [
                         for (final amount in quickCashAmounts(discountedTotal))
                           OutlinedButton(
@@ -2052,7 +2061,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   ),
                 ],
                 if (selectedMethod.requiresReference) ...[
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: referenceController,
                     decoration: InputDecoration(
@@ -2060,10 +2069,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 _paymentInfoRow('Change', _money(change)),
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(
@@ -2342,7 +2351,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Center(child: ReceiptHeader()),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Center(
               child: Text(
                 '${order.id} · ${order.dateTimeLabel}',
@@ -2350,10 +2359,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               ),
             ),
             if (order.status == OfflineSale.waitingStatus) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.sm),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
                   color: AppColors.yellow.withValues(alpha: .18),
                   borderRadius: AppRadius.all,
@@ -2367,7 +2376,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               ),
             ],
             if (order.invoiceNumber.isNotEmpty) ...[
-              const SizedBox(height: 3),
+              const SizedBox(height: AppSpacing.xs),
               Center(
                 child: Text(
                   'Invoice ${order.invoiceNumber}',
@@ -2375,7 +2384,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 ),
               ),
             ],
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.md),
             _paymentInfoRow('Customer / Table', order.customerOrTable),
             _paymentInfoRow('Order Type', order.type),
             _paymentInfoRow('Handled by', order.employee),
@@ -2462,7 +2471,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     bool emphasized = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Expanded(
@@ -2471,7 +2480,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               style: emphasized ? AppTextStyles.bodyMedium : AppTextStyles.body,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           Text(
             value,
             style: emphasized ? AppTextStyles.h3 : AppTextStyles.bodyMedium,
@@ -2612,7 +2621,7 @@ class _CartQuantityBadge extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minWidth: 30),
       height: 30,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       alignment: Alignment.center,
       decoration: const BoxDecoration(
         color: AppColors.primary,

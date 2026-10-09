@@ -19,6 +19,7 @@ import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import 'new_order_screen.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class OrdersScreen extends StatefulWidget {
   final OrderRepository orderRepository;
@@ -105,7 +106,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       child: Column(
         children: [
           _buildFilters(),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: FutureBuilder<List<OrderRecord>>(
               future: _ordersFuture,
@@ -323,7 +324,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.md),
             _detailRow('Customer / Table', _orderReference(order)),
             _detailRow('Order Type', order.type),
             if (order.invoiceNumber.isNotEmpty)
@@ -339,7 +340,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
             const Divider(height: 28),
             const Text('Items', style: AppTextStyles.h3),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             if (order.items.isEmpty)
               Text(
                 'No detailed item data available for this sample order.',
@@ -374,7 +375,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             if (order.lastActionReason.isNotEmpty) ...[
               const Divider(height: 28),
               Text('${order.status} Information', style: AppTextStyles.h3),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               _detailRow('Reason', order.lastActionReason),
               if (order.authorizedBy.isNotEmpty)
                 _detailRow('Authorized by', order.authorizedBy),
@@ -462,7 +463,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
           if (isClosed)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                AppSpacing.xs,
+              ),
               child: Text(
                 'This order is already ${order.status.toLowerCase()}. No additional refund or void action is available.',
                 style: AppTextStyles.caption.copyWith(color: AppColors.gray500),
@@ -548,7 +554,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: AppColors.primarySoft,
                       borderRadius: AppRadius.all,
@@ -559,13 +565,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       style: AppTextStyles.body,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   const Text('Select Items', style: AppTextStyles.h3),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   for (final item in preview.items)
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: AppColors.gray100,
                         borderRadius: AppRadius.all,
@@ -615,13 +621,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ],
                       ),
                     ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.xs),
                   _detailRow(
                     'Selected Refund',
                     _moneyDouble(selectedTotal()),
                     emphasized: true,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: reasonController,
                     maxLines: 2,
@@ -633,7 +639,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     },
                   ),
                   if (preview.requiresReference) ...[
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: referenceController,
                       decoration: InputDecoration(
@@ -643,7 +649,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                   ],
                   if (errorMessage != null) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       errorMessage!,
                       style: AppTextStyles.caption.copyWith(
@@ -800,7 +806,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: AppColors.gray100,
                   borderRadius: AppRadius.all,
@@ -813,11 +819,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   style: AppTextStyles.body,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               for (final item in candidates)
                 Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: AppRadius.all,
@@ -833,7 +839,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               item.itemName,
                               style: AppTextStyles.bodyMedium,
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: AppSpacing.xs),
                             Text(
                               item.variantName.isEmpty
                                   ? '${_refundQty(item.refundedQuantity)} refunded'
@@ -848,7 +854,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       if (item.restockApproved)
                         const StatusBadge('Restocked')
                       else if (!item.eligibleForRestock)
@@ -866,7 +872,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               if (pending.isEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
                   child: Text(
                     'There are no finished goods waiting for restock approval.',
                     style: AppTextStyles.caption.copyWith(
@@ -907,7 +913,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 _detailRow('Variant', item.variantName),
               _detailRow('Quantity', _refundQty(item.refundedQuantity)),
               _detailRow('Inventory Item', item.inventoryItemName),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: notesController,
                 maxLines: 3,
@@ -917,7 +923,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               ),
               if (errorMessage != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -996,7 +1002,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
                   borderRadius: AppRadius.all,
@@ -1007,7 +1013,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   style: AppTextStyles.body,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: reasonController,
                 maxLines: 3,
@@ -1020,7 +1026,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               ),
               if (errorMessage != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -1101,7 +1107,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Center(child: ReceiptHeader()),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Center(
               child: Text(
                 '${order.id} · ${order.dateTimeLabel}',
@@ -1109,7 +1115,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
             ),
             if (order.invoiceNumber.isNotEmpty) ...[
-              const SizedBox(height: 3),
+              const SizedBox(height: AppSpacing.xs),
               Center(
                 child: Text(
                   'Invoice ${order.invoiceNumber}',
@@ -1117,7 +1123,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               ),
             ],
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.md),
             _detailRow('Date & Time', _formatFullDateTime(order.createdAt)),
             _detailRow('Customer / Table', _orderReference(order)),
             _detailRow('Order Type', order.type),
@@ -1156,9 +1162,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ],
             if (order.refundedAmount > 0)
               _detailRow('Refunded', _moneyDouble(-order.refundedAmount)),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Center(child: StatusBadge(order.status)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Center(child: CopyReceiptButton(order: order)),
           ],
         ),
@@ -1168,7 +1174,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Widget _detailRow(String label, String value, {bool emphasized = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1178,7 +1184,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               style: emphasized ? AppTextStyles.bodyMedium : AppTextStyles.body,
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: AppSpacing.lg),
           Flexible(
             child: Text(
               value,

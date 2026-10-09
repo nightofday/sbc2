@@ -10,6 +10,7 @@ import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// Lets management maintain menu, inventory and expense categories.
 class CategoriesScreen extends StatefulWidget {
@@ -162,14 +163,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 autofocus: true,
                 decoration: const InputDecoration(labelText: 'Category Name *'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: descriptionController,
                 maxLines: 2,
                 decoration: const InputDecoration(labelText: 'Description'),
               ),
               if (errorMessage != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -256,8 +257,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               for (final domain in CategoryDomain.values)
                 ChoiceChip(
@@ -270,7 +271,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: FutureBuilder<List<CategoryRecord>>(
               future: _categoriesFuture,
@@ -290,7 +291,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           '${errorText(error)}',
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
                           child: const Text('Try Again'),
@@ -311,7 +312,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           'No ${_domain.label.toLowerCase()} categories yet.',
                           style: AppTextStyles.h3,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         ElevatedButton.icon(
                           onPressed: _showEditor,
                           icon: const Icon(Icons.add, size: 18),
@@ -324,7 +325,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                 return ListView.separated(
                   itemCount: categories.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, index) =>
                       _categoryCard(categories, index),
                 );
@@ -343,7 +345,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         : 'Used by ${category.usageCount} ${_domain.usageNoun}';
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: AppRadius.all,
@@ -357,24 +359,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               Expanded(
                 child: Text(category.name, style: AppTextStyles.bodyMedium),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Align(
                 alignment: Alignment.centerLeft,
                 child: StatusBadge(category.isActive ? 'Active' : 'Archived'),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             category.description.isEmpty
                 ? usage
                 : '${category.description} • $usage',
             style: AppTextStyles.caption,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               OutlinedButton(
                 onPressed: _busy || index == 0

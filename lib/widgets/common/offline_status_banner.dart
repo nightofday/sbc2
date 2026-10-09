@@ -6,6 +6,7 @@ import '../../domain/repositories/offline_sales_queue.dart';
 import '../../models/offline_sale.dart';
 import 'app_dialog.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// A strip above the page that says when the till is working offline, how
 /// many sales are still on this device, and lets a refused sale be resolved.
@@ -89,11 +90,14 @@ class OfflineStatusBanner extends StatelessWidget {
     return Material(
       color: background,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
         child: Row(
           children: [
             Icon(icon, size: 18, color: color),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 message,
@@ -103,7 +107,10 @@ class OfflineStatusBanner extends StatelessWidget {
                 ),
               ),
             ),
-            if (action != null) ...[const SizedBox(width: 8), action],
+            if (action != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              action,
+            ],
           ],
         ),
       ),
@@ -139,7 +146,7 @@ class OfflineStatusBanner extends StatelessWidget {
                   'another way.',
                   style: AppTextStyles.body,
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 for (final sale in sales) _rejectedSale(context, sale),
               ],
             ),
@@ -153,8 +160,8 @@ class OfflineStatusBanner extends StatelessWidget {
     final record = sale.toOrderRecord();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.gray200),
         borderRadius: AppRadius.all,
@@ -167,21 +174,21 @@ class OfflineStatusBanner extends StatelessWidget {
             '₱${sale.total.toStringAsFixed(2)}',
             style: AppTextStyles.bodyMedium,
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             sale.lines
                 .map((line) => '${line.quantity} × ${line.productName}')
                 .join(', '),
             style: AppTextStyles.caption,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             sale.rejection,
             style: AppTextStyles.caption.copyWith(color: AppColors.primary),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Wrap(
-            spacing: 8,
+            spacing: AppSpacing.sm,
             children: [
               OutlinedButton(
                 onPressed: () => _confirmRemove(context, sale),

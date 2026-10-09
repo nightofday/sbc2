@@ -14,6 +14,7 @@ import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class ExpensesScreen extends StatefulWidget {
   final ExpenseRepository expenseRepository;
@@ -166,7 +167,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 if (_suppliers.isEmpty) ...[
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: AppColors.orange.withValues(alpha: .10),
                       borderRadius: AppRadius.all,
@@ -177,7 +178,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       style: AppTextStyles.body,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                 ],
                 Builder(
                   builder: (context) {
@@ -218,14 +219,14 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: AppSpacing.md),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
                         if (_filteredExpenses.isEmpty)
                           const Padding(
-                            padding: EdgeInsets.all(32),
+                            padding: EdgeInsets.all(AppSpacing.xl),
                             child: Text('No expenses found.'),
                           )
                         else
@@ -313,7 +314,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                                 )
                                 .toList(),
                           ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: AppSpacing.md),
                         Align(
                           alignment: Alignment.centerRight,
                           child: SizedBox(
@@ -414,7 +415,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     label: Text('Date: ${_formatDate(selectedDate)}'),
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: descriptionController,
                   decoration: const InputDecoration(
@@ -422,7 +423,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     hintText: 'Example: milk and sugar for daily operations',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: amountController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -433,7 +434,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     prefixText: '₱',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: selectedCategory,
@@ -451,7 +452,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     setDialogState(() => selectedCategory = value);
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   initialValue: selectedSupplierId,
                   isExpanded: true,
@@ -471,7 +472,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     setDialogState(() => selectedSupplierId = value);
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: referenceController,
                   decoration: const InputDecoration(
@@ -479,13 +480,13 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     hintText: 'Official receipt, invoice, or grocery reference',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: notesController,
                   maxLines: 2,
                   decoration: const InputDecoration(labelText: 'Notes'),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -497,7 +498,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   ),
                 ),
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(

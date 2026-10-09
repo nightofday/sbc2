@@ -116,11 +116,11 @@ class StockAlertsButton extends StatelessWidget {
             borderRadius: AppRadius.all,
             child: Container(
               height: 44,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(
                 children: [
                   bell,
-                  const SizedBox(width: 14),
+                  const SizedBox(width: AppSpacing.md),
                   const Expanded(
                     child: Text(
                       'Stock alerts',
@@ -189,9 +189,9 @@ class StockAlertsBanner extends StatelessWidget {
         );
 
         return Container(
-          margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+          margin: const EdgeInsets.only(bottom: AppSpacing.md),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
+            horizontal: AppSpacing.md,
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
@@ -227,7 +227,7 @@ class StockAlertsBanner extends StatelessWidget {
                   icon,
                   const SizedBox(width: AppSpacing.md),
                   Expanded(child: message),
-                  const SizedBox(width: AppSpacing.lg),
+                  const SizedBox(width: AppSpacing.md),
                   review,
                 ],
               );
@@ -253,7 +253,7 @@ class _CountBadge extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minWidth: 20),
       height: 20,
-      padding: const EdgeInsets.symmetric(horizontal: 5),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: AppColors.primary,
@@ -394,7 +394,7 @@ class _AlertGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

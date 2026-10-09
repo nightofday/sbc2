@@ -10,6 +10,7 @@ import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// Lets management define the promotional discounts offered at the till.
 class DiscountsScreen extends StatefulWidget {
@@ -119,7 +120,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Discount Name *'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               if (existing == null)
                 DropdownButtonFormField<String>(
                   initialValue: method,
@@ -145,7 +146,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                   '(cannot be changed once created)',
                   style: AppTextStyles.caption,
                 ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: valueController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -158,7 +159,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                       : 'For example 20 for ₱20 off.',
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpacing.xs),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Value can be changed at the till'),
@@ -169,7 +170,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                 onChanged: (value) => setDialogState(() => allowCustom = value),
               ),
               if (allowCustom) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.xs),
                 TextField(
                   controller: maxController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -183,10 +184,10 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                   ),
                 ),
               ],
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   OutlinedButton(
@@ -215,14 +216,14 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                     ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: notesController,
                 maxLines: 2,
                 decoration: const InputDecoration(labelText: 'Notes'),
               ),
               if (existing != null) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.xs),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Active'),
@@ -234,7 +235,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                 ),
               ],
               if (errorMessage != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -369,7 +370,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                     '${errorText(error)}',
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   OutlinedButton(
                     onPressed: _refresh,
                     child: const Text('Try Again'),
@@ -387,7 +388,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text('No discounts yet.', style: AppTextStyles.h3),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   ElevatedButton.icon(
                     onPressed: _showEditor,
                     icon: const Icon(Icons.add, size: 18),
@@ -400,7 +401,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
 
           return ListView.separated(
             itemCount: discounts.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
             itemBuilder: (context, index) => _discountCard(discounts[index]),
           );
         },
@@ -416,7 +417,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
         : 'Inactive';
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: AppRadius.all,
@@ -430,14 +431,14 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
               Expanded(
                 child: Text(discount.name, style: AppTextStyles.bodyMedium),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Align(
                 alignment: Alignment.centerLeft,
                 child: StatusBadge(status),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             discount.isStatutory
                 ? 'Not offered at the till until the café\'s tax rules for '
@@ -446,7 +447,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
             style: AppTextStyles.caption,
           ),
           if (!discount.isStatutory) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             OutlinedButton(
               onPressed: () => _showEditor(existing: discount),
               child: const Text('Edit'),

@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../models/app_navigation_item.dart';
 import '../../models/app_user_profile.dart';
 import 'app_sidebar.dart';
+import '../../core/theme/app_spacing.dart';
 
 class AppShell extends StatefulWidget {
   final AppUserProfile profile;
@@ -129,7 +130,7 @@ class _AppShellState extends State<AppShell> {
         actions: [
           if (widget.noticesBuilder case final notices?)
             Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
               child: notices(true),
             ),
         ],

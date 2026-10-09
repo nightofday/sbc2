@@ -14,6 +14,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class InventoryCountScreen extends StatefulWidget {
   final InventoryRepository inventoryRepository;
@@ -100,9 +101,9 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                     size: 42,
                     color: AppColors.gray500,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   const Text('No physical counts yet', style: AppTextStyles.h3),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Start a count when management verifies actual stock.',
                     textAlign: TextAlign.center,
@@ -251,7 +252,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                       color: AppColors.gray700,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: notesController,
                     maxLines: 2,
@@ -260,7 +261,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                       hintText: 'Example: End-of-month physical count',
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: AppSpacing.md),
                   Row(
                     children: [
                       const Expanded(
@@ -292,7 +293,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   for (int index = 0; index < lines.length; index++) ...[
                     _buildCountLine(
                       line: lines[index],
@@ -310,10 +311,10 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                               });
                             },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                   ],
                   if (errorMessage != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       errorMessage!,
                       style: AppTextStyles.caption.copyWith(
@@ -322,7 +323,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                     ),
                   ],
                   if (isSaving) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     const LinearProgressIndicator(),
                   ],
                 ],
@@ -469,7 +470,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
           );
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.gray100,
         borderRadius: AppRadius.all,
@@ -489,7 +490,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                         ?removeButton,
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     countField,
                   ],
                 );
@@ -498,17 +499,17 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(flex: 3, child: itemField),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(flex: 2, child: countField),
                   if (removeButton != null) ...[
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AppSpacing.xs),
                     removeButton,
                   ],
                 ],
               );
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           LayoutBuilder(
             builder: (context, constraints) {
               final systemText = Text(
@@ -530,7 +531,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     systemText,
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     varianceText,
                   ],
                 );
@@ -544,7 +545,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
             },
           ),
           if (variance > 0) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             LayoutBuilder(
               builder: (context, constraints) {
                 final unitCostField = TextField(
@@ -581,7 +582,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       unitCostField,
-                      const SizedBox(height: 10),
+                      const SizedBox(height: AppSpacing.sm),
                       expiryButton,
                     ],
                   );
@@ -591,7 +592,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                   children: [
                     Expanded(child: unitCostField),
                     if (item.trackExpiry) ...[
-                      const SizedBox(width: 10),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(child: expiryButton),
                     ],
                   ],
@@ -599,7 +600,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
               },
             ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: line.notesController,
             decoration: const InputDecoration(

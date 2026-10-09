@@ -10,6 +10,7 @@ import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_spacing.dart';
 
 class SuppliersScreen extends StatefulWidget {
   final SupplierRepository supplierRepository;
@@ -66,7 +67,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
               hintText: 'Search supplier...',
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: FutureBuilder<List<SupplierRecord>>(
               future: _suppliersFuture,
@@ -160,7 +161,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
             alignment: Alignment.centerLeft,
             child: StatusBadge(latest.status),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _row('Contact Person', _orDash(latest.contactPerson)),
           _row('Phone', _orDash(latest.phone)),
           _row('Email', _orDash(latest.email)),
@@ -233,29 +234,29 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Supplier Name *'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: contactPersonController,
                 decoration: const InputDecoration(labelText: 'Contact Person'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(labelText: 'Phone'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: addressController,
                 decoration: const InputDecoration(labelText: 'Address'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: termsController,
                 keyboardType: TextInputType.number,
@@ -265,14 +266,14 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                       'Days allowed to pay a bill. 0 = pay on delivery.',
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: notesController,
                 maxLines: 2,
                 decoration: const InputDecoration(labelText: 'Notes'),
               ),
               if (existing != null) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.xs),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Active Supplier'),
@@ -281,7 +282,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                 ),
               ],
               if (errorMessage != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -368,7 +369,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
 
   Widget _row(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Expanded(
@@ -377,7 +378,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
               style: AppTextStyles.body.copyWith(color: AppColors.gray700),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           Flexible(
             child: Text(
               value,

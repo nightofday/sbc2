@@ -11,7 +11,7 @@ class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(AppSpacing.lg),
+    this.padding = const EdgeInsets.all(AppSpacing.md),
   });
 
   @override

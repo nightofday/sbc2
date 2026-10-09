@@ -17,6 +17,7 @@ import '../../widgets/common/section_card.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 enum InventoryView { overview, release, disposal, adjustment, history }
 
@@ -154,7 +155,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           return Column(
             children: [
               _buildFilters(categories),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: snapshot.connectionState == ConnectionState.waiting
                     ? const Center(child: CircularProgressIndicator())
@@ -314,7 +315,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   'affected batch. Expired quantities remain on hand until '
                   'this disposal is posted.',
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 DataTableCard(
                   headers: const [
                     'Item',
@@ -389,7 +390,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   'recording error. Disposal and normal supply releases must '
                   'use their dedicated workflows.',
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 DataTableCard(
                   headers: const [
                     'Item',
@@ -457,7 +458,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               return Column(
                 children: [
                   _buildHistoryFilters(items),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   Expanded(
                     child: filtered.isEmpty
                         ? _buildEmptyState(
@@ -681,7 +682,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.info_outline, color: AppColors.info, size: 20),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
@@ -703,9 +704,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: AppColors.gray500, size: 40),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(title, style: AppTextStyles.h3),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             message,
             textAlign: TextAlign.center,
@@ -841,7 +842,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: SingleChildScrollView(child: table)),
-              const SizedBox(width: 18),
+              const SizedBox(width: AppSpacing.md),
               SizedBox(
                 width: 330,
                 child: SingleChildScrollView(child: activity),
@@ -852,7 +853,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
         return SingleChildScrollView(
           child: Column(
-            children: [table, const SizedBox(height: 18), activity],
+            children: [
+              table,
+              const SizedBox(height: AppSpacing.md),
+              activity,
+            ],
           ),
         );
       },
@@ -872,12 +877,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Recent Activity', style: AppTextStyles.h3),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 'Latest inventory ledger entries',
                 style: AppTextStyles.caption.copyWith(color: AppColors.gray500),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               if (snapshot.connectionState == ConnectionState.waiting)
                 const Center(child: CircularProgressIndicator())
               else if (snapshot.hasError)
@@ -926,7 +931,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             color: positive ? AppColors.success : AppColors.primary,
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -954,7 +959,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             ],
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Text(
           _signedQuantity(movement.quantityDelta, item?.baseUomCode ?? ''),
           style: AppTextStyles.bodyMedium.copyWith(
@@ -993,15 +998,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.error_outline, color: AppColors.primary, size: 40),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             const Text('Unable to load inventory', style: AppTextStyles.h3),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               errorText(error),
               textAlign: TextAlign.center,
               style: AppTextStyles.body.copyWith(color: AppColors.gray700),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             OutlinedButton(onPressed: _refresh, child: const Text('Retry')),
           ],
         ),
@@ -1100,12 +1105,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   child: StatusBadge(latest.status),
                 ),
                 if (latest.sku.isNotEmpty) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(latest.sku, style: AppTextStyles.caption),
                 ],
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             _detailRow('Category', latest.category),
             _detailRow('Usable Stock', latest.usableStock),
             _detailRow('Expired Stock', latest.expiredStock),
@@ -1121,7 +1126,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             _detailRow('Next Usable Expiration', latest.expiration),
             const Divider(height: 28),
             const Text('Recent Stock Movements', style: AppTextStyles.h3),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             if (movements.isEmpty)
               Text(
                 'No stock movements recorded yet.',
@@ -1130,7 +1135,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             else
               for (final movement in movements)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Row(
                     children: [
                       Expanded(
@@ -1162,7 +1167,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               : AppColors.primary,
                         ),
                       ),
-                      const SizedBox(width: 18),
+                      const SizedBox(width: AppSpacing.md),
                       SizedBox(
                         width: 120,
                         child: Text(
@@ -1375,7 +1380,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ? '—'
                     : _formatDate(lot.expirationDate!),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: movementType,
@@ -1393,7 +1398,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   setDialogState(() => movementType = value);
                 },
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: quantityController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -1403,7 +1408,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   labelText: 'Quantity (${lot.unitCode})',
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: reasonController,
                 maxLines: 2,
@@ -1413,7 +1418,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 ),
               ),
               if (errorMessage != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -1511,7 +1516,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               children: [
                 _detailRow('Current Usable', item.usableStock),
                 _detailRow('Current On Hand', item.stock),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: movementType,
@@ -1537,7 +1542,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: quantityController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -1550,7 +1555,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                 ),
                 if (isIncrease) ...[
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: unitCostController,
                     keyboardType: const TextInputType.numberWithOptions(
@@ -1562,7 +1567,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                   ),
                   if (item.trackExpiry) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: OutlinedButton.icon(
@@ -1588,7 +1593,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                   ],
                 ],
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: reasonController,
                   maxLines: 2,
@@ -1598,7 +1603,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                 ),
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(
@@ -1607,7 +1612,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                 ],
                 if (isSaving) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   const LinearProgressIndicator(),
                 ],
               ],
@@ -1767,7 +1772,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       color: AppColors.gray700,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
                     initialValue: selectedPurpose,
                     isExpanded: true,
@@ -1791,7 +1796,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     },
                   ),
                   if (selectedPurpose == 'Other') ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: otherPurposeController,
                       decoration: const InputDecoration(
@@ -1804,7 +1809,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       }),
                     ),
                   ],
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: referenceController,
                     decoration: const InputDecoration(
@@ -1812,7 +1817,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       hintText: 'Optional request, log, or handover reference',
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: AppSpacing.md),
                   Row(
                     children: [
                       const Expanded(
@@ -1833,7 +1838,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   for (int index = 0; index < lines.length; index++) ...[
                     _buildStockOutLine(
                       line: lines[index],
@@ -1852,7 +1857,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               });
                             },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                   ],
                   TextField(
                     controller: notesController,
@@ -1862,7 +1867,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                   ),
                   if (errorMessage != null) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       errorMessage!,
                       style: AppTextStyles.caption.copyWith(
@@ -1871,7 +1876,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                   ],
                   if (isSaving) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     const LinearProgressIndicator(),
                   ],
                 ],
@@ -2021,7 +2026,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     final baseDeduction = issueQuantity * basePerUnit;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.gray100,
         borderRadius: AppRadius.all,
@@ -2060,7 +2065,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 ),
               ),
               if (onRemove != null) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 IconButton(
                   tooltip: 'Remove supply',
                   onPressed: onRemove,
@@ -2069,7 +2074,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               ],
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           LayoutBuilder(
             builder: (context, constraints) {
               final unit = DropdownButtonFormField<String>(
@@ -2148,10 +2153,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 return Column(
                   children: [
                     unit,
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     quantity,
                     if (conversion != null) ...[
-                      const SizedBox(height: 10),
+                      const SizedBox(height: AppSpacing.sm),
                       conversion,
                     ],
                   ],
@@ -2162,17 +2167,17 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(child: unit),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(child: quantity),
                   if (conversion != null) ...[
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(child: conversion),
                   ],
                 ],
               );
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -2181,7 +2186,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               style: AppTextStyles.caption.copyWith(color: AppColors.gray700),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: line.notesController,
             decoration: const InputDecoration(
@@ -2237,7 +2242,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     hintText: 'e.g. Fresh Milk',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: skuController,
                   decoration: const InputDecoration(
@@ -2245,7 +2250,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     hintText: 'Optional internal code',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: categoryId,
@@ -2263,7 +2268,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     setDialogState(() => categoryId = value);
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: unitId,
@@ -2281,7 +2286,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     setDialogState(() => unitId = value);
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: reorderController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -2291,7 +2296,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     labelText: 'Low Stock / Reorder Level',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: initialStockController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -2299,7 +2304,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                   decoration: const InputDecoration(labelText: 'Initial Stock'),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: unitCostController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -2310,7 +2315,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     prefixText: '₱',
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Track Expiration'),
@@ -2353,7 +2358,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                   ),
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(
@@ -2449,7 +2454,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Widget _detailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Expanded(
@@ -2458,7 +2463,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               style: AppTextStyles.body.copyWith(color: AppColors.gray700),
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: AppSpacing.lg),
           Flexible(
             child: Text(
               value,

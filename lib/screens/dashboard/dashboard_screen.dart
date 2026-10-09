@@ -14,6 +14,7 @@ import '../../widgets/common/summary_card.dart';
 import '../../widgets/layout/app_page.dart';
 import '../orders/new_order_screen.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class DashboardScreen extends StatefulWidget {
   final OrderRepository orderRepository;
@@ -120,8 +121,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   width: double.infinity,
                   constraints: const BoxConstraints(minHeight: 116),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 20,
+                    horizontal: AppSpacing.xl,
+                    vertical: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
@@ -147,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: AppSpacing.xs),
                           SizedBox(
                             width: double.infinity,
                             child: FittedBox(
@@ -177,7 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             sales,
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
                             contextLabel,
                           ],
                         );
@@ -192,7 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
                 SummaryCardGrid(
                   children: [
                     SummaryCard(
@@ -226,12 +227,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: AppSpacing.lg),
                 const Text('Recent Orders', style: AppTextStyles.h3),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 if (recentOrders.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Text(
                       'No orders recorded yet.',
                       style: AppTextStyles.body.copyWith(

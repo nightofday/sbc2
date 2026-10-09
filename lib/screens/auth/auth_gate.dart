@@ -13,6 +13,7 @@ import '../../data/offline/offline_order_repository.dart'
 import '../../models/app_user_profile.dart';
 import 'login_screen.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class AuthGate extends StatefulWidget {
   final Widget Function(AppUserProfile profile) authenticatedBuilder;
@@ -220,11 +221,13 @@ class _AccountStateScreen extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Container(
               width: 460,
               padding: EdgeInsets.all(
-                MediaQuery.sizeOf(context).width < 400 ? 20 : 28,
+                MediaQuery.sizeOf(context).width < 400
+                    ? AppSpacing.lg
+                    : AppSpacing.xl,
               ),
               decoration: BoxDecoration(
                 color: AppColors.white,
@@ -239,13 +242,13 @@ class _AccountStateScreen extends StatelessWidget {
                     size: 42,
                     color: AppColors.primary,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   Text(
                     title,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.h2,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     message,
                     textAlign: TextAlign.center,
@@ -253,11 +256,11 @@ class _AccountStateScreen extends StatelessWidget {
                       color: AppColors.gray700,
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: AppSpacing.lg),
                   Wrap(
                     alignment: WrapAlignment.center,
-                    spacing: 10,
-                    runSpacing: 10,
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
                     children: [
                       OutlinedButton(
                         onPressed: onSignOut,

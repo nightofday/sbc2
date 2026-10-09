@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'section_card.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// A table that is always fully on screen. When its columns fit it is a
 /// table; when they do not, each row becomes a block of labelled values.
@@ -60,16 +61,17 @@ class DataTableCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: horizontalPadding,
-              vertical: 12,
+              vertical: AppSpacing.md,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (rows[rowIndex].isNotEmpty) rows[rowIndex].first,
-                if (rows[rowIndex].length > 1) const SizedBox(height: 6),
+                if (rows[rowIndex].length > 1)
+                  const SizedBox(height: AppSpacing.xs),
                 Wrap(
                   spacing: gap,
-                  runSpacing: 8,
+                  runSpacing: AppSpacing.sm,
                   children: [
                     for (int i = 1; i < rows[rowIndex].length; i++)
                       SizedBox(
@@ -110,7 +112,7 @@ class DataTableCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 104, child: labelText),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(child: value),
         ],
       );
@@ -118,7 +120,11 @@ class DataTableCard extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [labelText, const SizedBox(height: 2), value],
+      children: [
+        labelText,
+        const SizedBox(height: AppSpacing.xs),
+        value,
+      ],
     );
   }
 
@@ -138,8 +144,8 @@ class DataTableCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.md,
                 ),
                 child: Row(
                   children: [
@@ -147,7 +153,7 @@ class DataTableCard extends StatelessWidget {
                       Expanded(
                         flex: columnFlexes[i],
                         child: Padding(
-                          padding: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.only(right: AppSpacing.sm),
                           child: Text(
                             headers[i],
                             style: AppTextStyles.caption.copyWith(
@@ -163,8 +169,8 @@ class DataTableCard extends StatelessWidget {
               for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.md,
                   ),
                   child: Row(
                     children: [
@@ -172,7 +178,9 @@ class DataTableCard extends StatelessWidget {
                         Expanded(
                           flex: columnFlexes[i],
                           child: Padding(
-                            padding: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.only(
+                              right: AppSpacing.sm,
+                            ),
                             child: rows[rowIndex][i],
                           ),
                         ),

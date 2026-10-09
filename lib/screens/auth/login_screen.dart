@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -62,11 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Container(
               width: 430,
               padding: EdgeInsets.all(
-                MediaQuery.sizeOf(context).width < 400 ? 20 : 32,
+                MediaQuery.sizeOf(context).width < 400
+                    ? AppSpacing.lg
+                    : AppSpacing.xl,
               ),
               decoration: BoxDecoration(
                 color: AppColors.white,
@@ -79,21 +82,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Text('Street Bowl Café', style: AppTextStyles.h1),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     const Text(
                       'MANAGEMENT SYSTEM',
                       style: AppTextStyles.overline,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.xl),
                     const Text('Sign in', style: AppTextStyles.h2),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Use the employee account provided by management.',
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.gray700,
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -109,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -140,9 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     if (_error != null) ...[
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.md),
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
                           color: AppColors.primarySoft,
                           borderRadius: AppRadius.all,
@@ -155,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 22),
+                    const SizedBox(height: AppSpacing.lg),
                     SizedBox(
                       height: 46,
                       child: FilledButton(

@@ -8,6 +8,7 @@ import '../../domain/repositories/business_repository.dart';
 import '../../models/business_profile.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// Where management sets what receipts say about the business and whether
 /// shifts must count their cash.
@@ -161,7 +162,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                     'Unable to load the business details.\n$_loadError',
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   OutlinedButton(
                     onPressed: _load,
                     child: const Text('Try Again'),
@@ -180,13 +181,13 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('On Receipts', style: AppTextStyles.h3),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             'Shown at the top of every receipt. Leave a '
                             'field empty to leave it off.',
                             style: AppTextStyles.caption,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
                           _field(_tradeName, 'Business Name *'),
                           _field(
                             _registeredName,
@@ -214,13 +215,13 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     SectionCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Shift Cash', style: AppTextStyles.h3),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.sm),
                           // The card paints its own background, so the
                           // switches need a surface of their own to draw
                           // their touch feedback on.
@@ -261,7 +262,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                       ),
                     ),
                     if (_saveError != null) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
                       Text(
                         _saveError!,
                         style: AppTextStyles.body.copyWith(
@@ -269,12 +270,12 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     ElevatedButton(
                       onPressed: _saving ? null : _save,
                       child: Text(_saving ? 'Saving…' : 'Save Changes'),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),
@@ -289,7 +290,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
     TextInputType? keyboardType,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
@@ -310,7 +311,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: first),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSpacing.md),
             Expanded(child: second),
           ],
         );

@@ -11,6 +11,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_spacing.dart';
 
 class UsersScreen extends StatefulWidget {
   final UserRepository userRepository;
@@ -132,7 +133,7 @@ class _UsersScreenState extends State<UsersScreen> {
                   );
                 },
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: users.isEmpty
                     ? const Center(child: Text('No users found.'))
@@ -206,7 +207,7 @@ class _UsersScreenState extends State<UsersScreen> {
             alignment: Alignment.centerLeft,
             child: StatusBadge(latest.status),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _row('Email', latest.email),
           _row('Role', latest.role),
           _row('Access Status', latest.status),
@@ -256,13 +257,13 @@ class _UsersScreenState extends State<UsersScreen> {
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Display Name *'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email *'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: passwordController,
                 obscureText: true,
@@ -271,7 +272,7 @@ class _UsersScreenState extends State<UsersScreen> {
                   helperText: 'Minimum 8 characters.',
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: roleCode,
@@ -290,7 +291,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 },
               ),
               if (errorMessage != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -381,7 +382,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Display Name *'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               TextFormField(
                 initialValue: user.email,
                 enabled: false,
@@ -391,7 +392,7 @@ class _UsersScreenState extends State<UsersScreen> {
                       'Email changes are handled through Supabase Auth.',
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: roleId.isEmpty ? null : roleId,
@@ -411,7 +412,7 @@ class _UsersScreenState extends State<UsersScreen> {
                       }
                     : null,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: status,
@@ -431,7 +432,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 },
               ),
               if (!widget.canManageRoles) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -443,7 +444,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 ),
               ],
               if (errorMessage != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -501,7 +502,7 @@ class _UsersScreenState extends State<UsersScreen> {
 
   Widget _row(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Expanded(
@@ -510,7 +511,7 @@ class _UsersScreenState extends State<UsersScreen> {
               style: AppTextStyles.body.copyWith(color: AppColors.gray700),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           Flexible(
             child: Text(
               value.isEmpty ? '—' : value,

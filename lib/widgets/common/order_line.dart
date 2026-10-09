@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/order_item.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// One line of a receipt or an order: quantity and name, the options and
 /// note chosen for it underneath, and the line total on the right.
@@ -20,7 +21,7 @@ class OrderLine extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,7 +43,7 @@ class OrderLine extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Text(total, style: AppTextStyles.bodyMedium),
         ],
       ),

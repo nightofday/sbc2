@@ -15,6 +15,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/common/summary_card.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_spacing.dart';
 
 enum _Period { today, yesterday, last7, last30, thisMonth, custom }
 
@@ -197,8 +198,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               for (final period in _Period.values)
                 ChoiceChip(
@@ -208,7 +209,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: FutureBuilder<BusinessReport>(
               future: _reportFuture,
@@ -228,7 +229,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           '${errorText(error)}',
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
                           child: const Text('Try Again'),
@@ -299,19 +300,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           SectionCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Money In and Out', style: AppTextStyles.h3),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   'These are separate figures. They are not added together '
                   'and none of them is profit.',
                   style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 _moneyRow(
                   'Net sales less expenses',
                   summary.netSalesLessExpenses,
@@ -325,10 +326,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Wrap(
-            spacing: 12,
-            runSpacing: 8,
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.sm,
             children: [
               ElevatedButton.icon(
                 onPressed: () => _exportExcel(
@@ -354,10 +355,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ],
           ),
           for (final section in report.sections) ...[
-            const SizedBox(height: 26),
+            const SizedBox(height: AppSpacing.lg),
             _buildSection(section),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
@@ -365,11 +366,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Widget _moneyRow(String label, double value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Expanded(child: Text(label, style: AppTextStyles.body)),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Text(formatReportMoney(value), style: AppTextStyles.bodyMedium),
         ],
       ),
@@ -381,8 +382,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Wrap(
-          spacing: 12,
-          runSpacing: 8,
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(section.title, style: AppTextStyles.h3),
@@ -410,10 +411,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ],
         ),
         if (section.note.isNotEmpty) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(section.note, style: AppTextStyles.caption),
         ],
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSpacing.sm),
         if (section.rows.isEmpty)
           SectionCard(
             child: Text(

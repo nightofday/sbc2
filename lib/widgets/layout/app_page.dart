@@ -33,7 +33,7 @@ class AppPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: AppTextStyles.h1),
-              const SizedBox(height: 2),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 effectiveSubtitle,
                 style: AppTextStyles.caption.copyWith(color: AppColors.gray500),
@@ -57,7 +57,7 @@ class AppPage extends StatelessWidget {
                     children: [
                       if (compact && action != null) ...[
                         titleBlock,
-                        const SizedBox(height: 14),
+                        const SizedBox(height: AppSpacing.md),
                         if (constraints.maxWidth < 420)
                           SizedBox(width: double.infinity, child: action!)
                         else
@@ -73,7 +73,7 @@ class AppPage extends StatelessWidget {
                             ?action,
                           ],
                         ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.lg),
                       Expanded(child: child),
                     ],
                   ),

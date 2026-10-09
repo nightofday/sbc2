@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// Shows a dialog whose future completes only after the closing transition
 /// has finished and the route is gone.
@@ -57,7 +58,7 @@ Future<T?> showPrototypeDialog<T>({
       return Dialog(
         insetPadding: EdgeInsets.symmetric(
           horizontal: horizontalInset,
-          vertical: 24,
+          vertical: AppSpacing.lg,
         ),
         child: SizedBox(
           width: contentWidth + contentHorizontalPadding * 2,
@@ -68,7 +69,7 @@ Future<T?> showPrototypeDialog<T>({
               Padding(
                 padding: EdgeInsets.fromLTRB(
                   contentHorizontalPadding,
-                  24,
+                  AppSpacing.lg,
                   contentHorizontalPadding,
                   0,
                 ),
@@ -83,9 +84,9 @@ Future<T?> showPrototypeDialog<T>({
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     contentHorizontalPadding,
-                    18,
+                    AppSpacing.md,
                     contentHorizontalPadding,
-                    8,
+                    AppSpacing.sm,
                   ),
                   child: content,
                 ),
@@ -93,16 +94,16 @@ Future<T?> showPrototypeDialog<T>({
               Padding(
                 padding: EdgeInsets.fromLTRB(
                   contentHorizontalPadding,
-                  8,
+                  AppSpacing.sm,
                   contentHorizontalPadding,
-                  20,
+                  AppSpacing.lg,
                 ),
                 child: OverflowBar(
                   alignment: MainAxisAlignment.end,
                   overflowAlignment: OverflowBarAlignment.end,
                   overflowDirection: VerticalDirection.down,
-                  spacing: 8,
-                  overflowSpacing: 8,
+                  spacing: AppSpacing.sm,
+                  overflowSpacing: AppSpacing.sm,
                   children: actions.isEmpty
                       ? [
                           TextButton(
@@ -152,14 +153,14 @@ Future<bool> showReasonDialog({
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(message, style: AppTextStyles.body),
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.md),
             TextField(
               controller: controller,
               maxLines: 2,
               decoration: InputDecoration(labelText: reasonLabel),
             ),
             if (errorMessage != null) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 errorMessage!,
                 style: AppTextStyles.caption.copyWith(color: AppColors.error),

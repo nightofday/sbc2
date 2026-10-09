@@ -13,6 +13,7 @@ import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class MenuManagementScreen extends StatefulWidget {
   final MenuRepository menuRepository;
@@ -167,7 +168,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   );
                 },
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: variants.isEmpty
                     ? const Center(child: Text('No menu variants found.'))
@@ -252,8 +253,8 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                                       ],
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 7,
+                                          horizontal: AppSpacing.sm,
+                                          vertical: AppSpacing.sm,
                                         ),
                                         decoration: BoxDecoration(
                                           borderRadius: AppRadius.all,
@@ -388,7 +389,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     labelText: 'Product Name *',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: categoryId,
@@ -408,7 +409,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                           setDialogState(() => categoryId = value);
                         },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
                     Expanded(
@@ -420,7 +421,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: TextField(
                         controller: skuController,
@@ -429,7 +430,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: priceController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -440,7 +441,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     prefixText: '₱',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: inventoryMode,
@@ -466,7 +467,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   },
                 ),
                 if (inventoryMode == 'FINISHED_GOOD') ...[
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: finishedInventoryId.isEmpty
@@ -491,7 +492,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     },
                   ),
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -504,7 +505,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   ),
                 ),
                 if (isEditing) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Variant Active'),
@@ -517,7 +518,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   ),
                 ],
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(
@@ -681,13 +682,13 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         _modifierGroupRule(group),
                         style: AppTextStyles.caption,
                       ),
                       if (group.productCount > 1) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           'Shared with ${group.productCount - 1} other '
                           '${group.productCount == 2 ? 'product' : 'products'}. '
@@ -698,7 +699,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       if (group.modifiers.isEmpty)
                         Text(
                           group.isRequired
@@ -721,10 +722,10 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                             position,
                             onAction: then,
                           ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
                         children: [
                           OutlinedButton(
                             onPressed: () =>
@@ -806,10 +807,10 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
@@ -958,7 +959,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       OutlinedButton(
                         onPressed: () {
                           chosenId = group.groupId;
@@ -1029,7 +1030,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   hintText: 'e.g. Milk Choice, Add-ons',
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
                   Expanded(
@@ -1041,7 +1042,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: TextField(
                       controller: maxController,
@@ -1054,7 +1055,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Required'),
@@ -1077,7 +1078,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   onChanged: (value) => setDialogState(() => active = value),
                 ),
               if (errorMessage != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   errorMessage!,
                   style: AppTextStyles.caption.copyWith(color: AppColors.error),
@@ -1192,7 +1193,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     labelText: 'Modifier Name *',
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: priceController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -1210,7 +1211,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     value: active,
                     onChanged: (value) => setDialogState(() => active = value),
                   ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -1222,7 +1223,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   ),
                 ),
                 if (errorMessage != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     errorMessage!,
                     style: AppTextStyles.caption.copyWith(

@@ -14,6 +14,7 @@ import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/app_page.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 
 class TransactionTraceabilityScreen extends StatefulWidget {
   final ReportingRepository reportingRepository;
@@ -157,8 +158,8 @@ class _TransactionTraceabilityScreenState
       title: 'Transaction Traceability',
       subtitle: 'Follow each document back to its receipt/reference and employee (up to 500 recent records).',
       action: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
         children: [
           OutlinedButton.icon(
             onPressed: _export,
@@ -201,7 +202,7 @@ class _TransactionTraceabilityScreenState
           return Column(
             children: [
               _buildFilters(),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: records.isEmpty
                     ? const SectionCard(
@@ -269,7 +270,7 @@ class _TransactionTraceabilityScreenState
                                           record.status == 'REVERSAL')
                                         Padding(
                                           padding: const EdgeInsets.only(
-                                            top: 4,
+                                            top: AppSpacing.xs,
                                           ),
                                           child: StatusBadge(
                                             record.status == 'REVERSAL'
@@ -482,7 +483,10 @@ class _EventTypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .10),
         borderRadius: AppRadius.all,

@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../models/reporting.dart';
 import '../../models/shift_report.dart';
 import 'app_dialog.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// Shows the end-of-shift report in a dialog, loading it first.
 Future<void> showShiftReportDialog({
@@ -22,7 +23,7 @@ Future<void> showShiftReportDialog({
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
-            padding: EdgeInsets.all(24),
+            padding: EdgeInsets.all(AppSpacing.lg),
             child: Center(child: CircularProgressIndicator()),
           );
         }
@@ -59,7 +60,7 @@ class ShiftReportView extends StatelessWidget {
           'Shift #${report.number} · ${report.employeeName}',
           style: AppTextStyles.h3,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           report.isOpen
               ? 'Opened ${formatShiftTime(report.startedAt)} · still open'
@@ -131,7 +132,7 @@ class ShiftReportView extends StatelessWidget {
           _heading('Closing notes'),
           Text(report.closingNotes, style: AppTextStyles.body),
         ],
-        const SizedBox(height: 18),
+        const SizedBox(height: AppSpacing.md),
         OutlinedButton.icon(
           onPressed: () async {
             final copied = await copyText(report.toText());
@@ -155,7 +156,7 @@ class ShiftReportView extends StatelessWidget {
 
   Widget _heading(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Text(
         text.toUpperCase(),
         style: AppTextStyles.caption.copyWith(
@@ -181,12 +182,12 @@ class ShiftReportView extends StatelessWidget {
         .copyWith(color: color);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: Text(label, style: style)),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Text(value, style: style),
         ],
       ),
