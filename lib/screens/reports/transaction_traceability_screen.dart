@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../core/export/export_file.dart';
+import '../../core/export/xlsx.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/reporting_repository.dart';
 import '../../models/reporting.dart';
+import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
@@ -76,52 +78,63 @@ class _TransactionTraceabilityScreenState
       return;
     }
 
-    String two(int number) => number.toString().padLeft(2, '0');
-    String when(DateTime date) =>
-        '${date.year}-${two(date.month)}-${two(date.day)} '
-        '${two(date.hour)}:${two(date.minute)}';
-
-    final header = [
-      'Date & Time',
-      'Type',
-      'Document',
-      'External Reference',
-      'Details',
-      'Supplier / Customer',
-      'Amount',
-      'Recorded By',
-      'Status',
-      'Void Reason',
-    ];
-    final rows = [
-      for (final record in records)
-        [
-          when(record.occurredAt),
-          _eventLabel(record.eventType),
-          record.documentNumber,
-          record.externalReference,
-          record.description,
-          record.partyName,
-          record.amount?.toStringAsFixed(2) ?? '',
-          record.actorName,
-          record.status,
-          record.voidReason,
-        ],
-    ];
-
     final today = DateTime.now();
-    final csv = [
-      header.map(csvField).join(','),
-      for (final row in rows)
-        row.map((cell) => csvField(safeCell(cell))).join(','),
-    ].join('\r\n');
-    final exported = await exportTextFile(
+    final search = _search.trim();
+    final workbook = XlsxWorkbook([
+      XlsxSheet(
+        name: 'Transactions',
+        title:
+            '${BusinessProfileScope.of(context).tradeName} — '
+            'Transaction Traceability',
+        subtitles: [
+          'Last $_days days, up to 500 recent records · exported '
+              '${formatReportDateTime(today)}',
+          [
+            'Type: ${_eventType == 'ALL' ? 'All' : _eventLabel(_eventType)}',
+            if (search.isNotEmpty) 'Search: "$search"',
+          ].join(' · '),
+          // Different kinds of event, so the amounts are not added up.
+          'Purchases, payments, sales and refunds are separate events; the '
+              'Amount column has no total.',
+        ],
+        columns: const [
+          XlsxColumn('Date & Time', XlsxKind.dateTime),
+          XlsxColumn('Type', XlsxKind.text),
+          XlsxColumn('Document', XlsxKind.text),
+          XlsxColumn('External Reference', XlsxKind.text),
+          XlsxColumn('Details', XlsxKind.text),
+          XlsxColumn('Supplier / Customer', XlsxKind.text),
+          XlsxColumn('Amount', XlsxKind.money),
+          XlsxColumn('Recorded By', XlsxKind.text),
+          XlsxColumn('Status', XlsxKind.text),
+          XlsxColumn('Void Reason', XlsxKind.text),
+        ],
+        rows: [
+          for (final record in records)
+            [
+              record.occurredAt,
+              _eventLabel(record.eventType),
+              record.documentNumber,
+              record.externalReference,
+              record.description,
+              record.partyName,
+              record.amount,
+              record.actorName,
+              record.status,
+              record.voidReason,
+            ],
+        ],
+      ),
+    ]);
+    final exported = await exportBytesFile(
       fileName: reportFileName(
         'transactions-last-$_days-days',
         today.subtract(Duration(days: _days - 1)),
         today,
+        extension: 'xlsx',
       ),
-      contents: csv,
+      bytes: workbook.encode(),
+      mimeType: XlsxWorkbook.mimeType,
     );
     if (exported && !exportSavesToDownloads) return;
     _showMessage(
@@ -155,7 +168,7 @@ class _TransactionTraceabilityScreenState
                   : Icons.share_outlined,
               size: 18,
             ),
-            label: Text(exportCsvLabel),
+            label: Text(exportExcelLabel),
           ),
           OutlinedButton.icon(
             onPressed: _refresh,

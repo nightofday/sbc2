@@ -13,12 +13,7 @@ Future<bool> exportBytesFile({
   try {
     final blob = web.Blob(
       [bytes.toJS].toJS,
-      // Text is UTF-8 with a byte-order mark; say so to the browser.
-      web.BlobPropertyBag(
-        type: mimeType.startsWith('text/')
-            ? '$mimeType;charset=utf-8'
-            : mimeType,
-      ),
+      web.BlobPropertyBag(type: mimeType),
     );
     final url = web.URL.createObjectURL(blob);
     final anchor = web.HTMLAnchorElement()

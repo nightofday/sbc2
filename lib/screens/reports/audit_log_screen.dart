@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/export/export_file.dart';
+import '../../core/export/xlsx.dart';
 import '../../core/error_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -10,6 +11,7 @@ import '../../domain/repositories/reporting_repository.dart';
 import '../../models/audit_entry.dart';
 import '../../models/reporting.dart';
 import '../../models/shift_report.dart';
+import '../../widgets/common/business_profile_scope.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/app_page.dart';
 
@@ -138,37 +140,44 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
       return;
     }
 
-    String two(int number) => number.toString().padLeft(2, '0');
-    String when(DateTime date) =>
-        '${date.year}-${two(date.month)}-${two(date.day)} '
-        '${two(date.hour)}:${two(date.minute)}';
-
-    final header = ['Date & Time', 'Who', 'What', 'Record', 'Details'];
-    final rows = [
-      for (final entry in entries)
-        [
-          when(entry.createdAt),
-          entry.actorName,
-          entry.title,
-          entry.label,
-          entry.changes
-              .map(
-                (change) => change.before.isEmpty
-                    ? '${change.field}: ${change.after}'
-                    : '${change.field}: ${change.before} -> ${change.after}',
-              )
-              .join('; '),
+    final search = _search.trim();
+    final workbook = XlsxWorkbook([
+      XlsxSheet(
+        name: 'Audit Log',
+        title: '${BusinessProfileScope.of(context).tradeName} — Audit Log',
+        subtitles: [
+          '$_rangeLabel · exported ${formatReportDateTime(DateTime.now())}',
+          if (search.isNotEmpty) 'Search: "$search"',
         ],
-    ];
-
-    final csv = [
-      header.map(csvField).join(','),
-      for (final row in rows)
-        row.map((cell) => csvField(safeCell(cell))).join(','),
-    ].join('\r\n');
-    final exported = await exportTextFile(
-      fileName: reportFileName('audit-log', _from, _to),
-      contents: csv,
+        columns: const [
+          XlsxColumn('Date & Time', XlsxKind.dateTime),
+          XlsxColumn('Who', XlsxKind.text),
+          XlsxColumn('What', XlsxKind.text),
+          XlsxColumn('Record', XlsxKind.text),
+          XlsxColumn('Details', XlsxKind.text),
+        ],
+        rows: [
+          for (final entry in entries)
+            [
+              entry.createdAt,
+              entry.actorName,
+              entry.title,
+              entry.label,
+              entry.changes
+                  .map(
+                    (change) => change.before.isEmpty
+                        ? '${change.field}: ${change.after}'
+                        : '${change.field}: ${change.before} → ${change.after}',
+                  )
+                  .join('\n'),
+            ],
+        ],
+      ),
+    ]);
+    final exported = await exportBytesFile(
+      fileName: reportFileName('audit-log', _from, _to, extension: 'xlsx'),
+      bytes: workbook.encode(),
+      mimeType: XlsxWorkbook.mimeType,
     );
     if (exported && !exportSavesToDownloads) return;
     _showMessage(
@@ -213,7 +222,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                   : Icons.share_outlined,
               size: 17,
             ),
-            label: Text(exportCsvLabel),
+            label: Text(exportExcelLabel),
           ),
           OutlinedButton.icon(
             onPressed: _refresh,

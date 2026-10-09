@@ -3,20 +3,7 @@ import 'package:sbc_management_system/core/export/export_file.dart';
 import 'package:sbc_management_system/models/reporting.dart';
 
 void main() {
-  test('a CSV cell is quoted only when it has to be', () {
-    expect(csvField('Hot Coffee'), 'Hot Coffee');
-    expect(csvField('Rice Bowls, Meals'), '"Rice Bowls, Meals"');
-    expect(csvField('Say "hi"'), '"Say ""hi"""');
-    expect(csvField('two\nlines'), '"two\nlines"');
-  });
-
-  test('text that looks like a formula is not run by the spreadsheet', () {
-    expect(safeCell('=SUM(A1:A9)'), "'=SUM(A1:A9)");
-    expect(safeCell('-5 damaged'), "'-5 damaged");
-    expect(safeCell('Table\tT1'), 'Table T1');
-  });
-
-  test('a section exports as rows of plain numbers under its headings', () {
+  test('copied for Sheets, a section is rows of plain numbers', () {
     final section = ReportSection(
       id: 'by_item',
       title: 'Items Sold',
@@ -31,14 +18,18 @@ void main() {
           'quantity_sold': 3,
           'net_sales': 1540.5,
         },
-        {'item_name': '=cmd', 'quantity_sold': 1.5, 'net_sales': 0},
+        // Text that starts like a formula is not run by the spreadsheet,
+        // and a tab stays inside its cell.
+        {'item_name': '=cmd\tx', 'quantity_sold': 1.5, 'net_sales': 0},
+        {'item_name': '-5 damaged', 'quantity_sold': 0, 'net_sales': 0},
       ],
     );
 
-    expect(section.toCsv().split('\r\n'), [
-      'Item,Sold,Net Sales',
-      '"Beef Bowl, Large",3,1540.50',
-      "'=cmd,1.5,0.00",
+    expect(section.toTsv().split('\n'), [
+      'Item\tSold\tNet Sales',
+      'Beef Bowl, Large\t3\t1540.50',
+      "'=cmd x\t1.5\t0.00",
+      "'-5 damaged\t0\t0.00",
     ]);
   });
 
@@ -49,12 +40,23 @@ void main() {
         DateTime(2026, 10, 1),
         DateTime(2026, 10, 7),
       ),
-      'sales-by-day_2026-10-01_2026-10-07.csv',
+      'sales-by-day_2026-10-01_2026-10-07.xlsx',
     );
   });
 
   test('outside the browser an export goes to the share sheet', () {
     expect(exportSavesToDownloads, isFalse);
-    expect(exportCsvLabel, 'Share CSV');
+    expect(exportExcelLabel, 'Share Excel');
+  });
+
+  test('a date and time reads as on screen', () {
+    expect(
+      formatReportDateTime(DateTime(2026, 10, 9, 21, 4)),
+      'Oct 9, 2026 9:04 PM',
+    );
+    expect(
+      formatReportDateTime(DateTime(2026, 10, 9, 0, 30)),
+      'Oct 9, 2026 12:30 AM',
+    );
   });
 }

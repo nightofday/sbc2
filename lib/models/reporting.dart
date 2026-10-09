@@ -45,10 +45,7 @@ class ReportSection {
       case ReportValueKind.dateTime:
         final date = DateTime.tryParse(value.toString())?.toLocal();
         if (date == null) return value.toString();
-        final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
-        final minute = date.minute.toString().padLeft(2, '0');
-        return '${formatReportDate(date)} $hour:$minute '
-            '${date.hour >= 12 ? 'PM' : 'AM'}';
+        return formatReportDateTime(date);
       case ReportValueKind.text:
         final text = value.toString();
         return text.isEmpty ? '—' : text;
@@ -91,17 +88,6 @@ class ReportSection {
     return lines.join('\n');
   }
 
-  /// Comma-separated values, for saving as a file that Excel and Google
-  /// Sheets open directly.
-  String toCsv() {
-    final lines = <String>[
-      columns.map((column) => csvField(_safeText(column.label))).join(','),
-      for (final row in rows)
-        columns.map((column) => csvField(exportValue(row, column))).join(','),
-    ];
-    return lines.join('\r\n');
-  }
-
   static double _number(Object value) {
     if (value is num) return value.toDouble();
     return double.tryParse(value.toString()) ?? 0;
@@ -116,22 +102,13 @@ class ReportSection {
   }
 }
 
-/// Keeps a value in one cell and stops text that starts like a formula from
-/// being run by the spreadsheet.
-String safeCell(String value) => ReportSection._safeText(value);
-
-/// One CSV cell: quoted when it holds a comma, quote or line break.
-String csvField(String value) {
-  if (!value.contains(RegExp(r'[",\r\n]'))) return value;
-  return '"${value.replaceAll('"', '""')}"';
-}
-
-/// A file name for an export, such as `sales-by-day_2026-10-01_2026-10-07.csv`.
+/// A file name for an export, such as
+/// `sales-by-day_2026-10-01_2026-10-07.xlsx`.
 String reportFileName(
   String title,
   DateTime from,
   DateTime to, {
-  String extension = 'csv',
+  String extension = 'xlsx',
 }) {
   String day(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-'
@@ -160,6 +137,14 @@ String formatReportQuantity(double value) {
       .toStringAsFixed(4)
       .replaceFirst(RegExp(r'0+$'), '')
       .replaceFirst(RegExp(r'\.$'), '');
+}
+
+/// A date and time such as `Oct 9, 2026 9:14 PM`.
+String formatReportDateTime(DateTime date) {
+  final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+  final minute = date.minute.toString().padLeft(2, '0');
+  return '${formatReportDate(date)} $hour:$minute '
+      '${date.hour >= 12 ? 'PM' : 'AM'}';
 }
 
 String formatReportDate(DateTime date) {
@@ -480,25 +465,6 @@ class BusinessReport {
   }
 
   /// Every table, one after another, for pasting into a spreadsheet.
-  /// The whole report as one CSV file: the summary, then each section under
-  /// its title, separated by a blank line.
-  String toCsv() {
-    return [
-      [
-        csvField('Street Bowl Café report'),
-        csvField('${formatReportDate(from)} to ${formatReportDate(to)}'),
-      ].join(','),
-      '',
-      'Summary',
-      summary.toSection().toCsv(),
-      for (final section in sections) ...[
-        '',
-        csvField(section.title),
-        section.toCsv(),
-      ],
-    ].join('\r\n');
-  }
-
   String toTsv() {
     return [
       'Street Bowl Café report\t${formatReportDate(from)} to '

@@ -125,12 +125,9 @@ Object? _value(Object? value, ReportColumn column) {
 }
 
 String _period(DateTime from, DateTime to, DateTime exportedAt) {
-  final hour = exportedAt.hour % 12 == 0 ? 12 : exportedAt.hour % 12;
-  final minute = exportedAt.minute.toString().padLeft(2, '0');
   final range = from == to
       ? formatReportDate(from)
       : '${formatReportDate(from)} to ${formatReportDate(to)}';
   return '$range · business days in Asia/Manila · exported '
-      '${formatReportDate(exportedAt)} $hour:$minute '
-      '${exportedAt.hour >= 12 ? 'PM' : 'AM'}';
+      '${formatReportDateTime(exportedAt)}';
 }
