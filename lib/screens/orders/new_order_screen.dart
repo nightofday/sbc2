@@ -1078,8 +1078,17 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
+  /// Taller, bordered buttons for the order panel, sized for a finger on
+  /// the tablet.
+  static final _panelButtonStyle = OutlinedButton.styleFrom(
+    minimumSize: const Size(0, 52),
+    foregroundColor: AppColors.black,
+    side: const BorderSide(color: AppColors.black, width: 1.5),
+  );
+
   Widget _buildCurrentOrderPanel() {
     final total = _cart.fold<double>(0, (sum, line) => sum + line.lineTotal);
+    final itemCount = _cart.fold<int>(0, (sum, line) => sum + line.quantity);
 
     return SectionCard(
       child: Column(
@@ -1121,48 +1130,78 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   ),
           ),
           const Divider(),
-          _summaryRow('Subtotal', _money(total)),
-          const SizedBox(height: 7),
-          _summaryRow('Total', _money(total), emphasized: true),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _cart.isEmpty || _openShiftId == null
-                  ? null
-                  : _showPaymentDialog,
-              icon: const Icon(Icons.payments_outlined, size: 18),
-              label: Text(
-                _openShiftId == null
-                    ? 'Start Shift to Continue'
-                    : 'Proceed to Payment',
+          _summaryRow('Items', '$itemCount'),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              const Text('Total', style: AppTextStyles.h3),
+              Flexible(
+                child: Text(
+                  _money(total),
+                  style: AppTextStyles.display,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
+            ],
+          ),
+          Text(
+            'Discounts are applied when taking payment.',
+            style: AppTextStyles.caption,
           ),
           if (_heldStore != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
+                    style: _panelButtonStyle,
                     onPressed: _cart.isEmpty ? null : _holdOrder,
-                    icon: const Icon(Icons.pause_circle_outline, size: 18),
+                    icon: const Icon(Icons.pause_circle_outline, size: 20),
                     label: const Text('Hold'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
+                    style: _panelButtonStyle,
                     onPressed: _heldStore!.heldOrders.isEmpty
                         ? null
                         : _showHeldOrders,
-                    icon: const Icon(Icons.playlist_play, size: 18),
+                    icon: const Icon(Icons.playlist_play, size: 20),
                     label: Text('Held (${_heldStore!.heldOrders.length})'),
                   ),
                 ),
               ],
             ),
           ],
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton.icon(
+              key: const ValueKey('pos-charge'),
+              style: ElevatedButton.styleFrom(
+                textStyle: AppTextStyles.h3.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              onPressed: _cart.isEmpty || _openShiftId == null
+                  ? null
+                  : _showPaymentDialog,
+              icon: const Icon(Icons.payments_outlined, size: 22),
+              label: Text(
+                _openShiftId == null
+                    ? 'Start Shift to Continue'
+                    : _cart.isEmpty
+                    ? 'Charge'
+                    : 'Charge ${_money(total)}',
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1433,67 +1472,73 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   }
 
   Widget _buildCartItem(_PosCartLine line, int index) {
+    final details = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(line.product.name, style: AppTextStyles.bodyMedium),
+        Text(
+          '${line.product.variantName} · '
+          '${_money(line.unitPriceWithModifiers)} each',
+          style: AppTextStyles.caption,
+        ),
+        if (line.modifiers.isNotEmpty)
+          Text(
+            line.modifiers.map((item) => item.name).join(', '),
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray700),
+          ),
+        if (line.specialInstructions.isNotEmpty)
+          Text(
+            'Note: ${line.specialInstructions}',
+            style: AppTextStyles.caption,
+          ),
+      ],
+    );
+    final lineTotal = Text(
+      _money(line.lineTotal),
+      textAlign: TextAlign.right,
+      style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+    );
+    final stepper = _QuantityStepper(
+      name: line.product.name,
+      quantity: line.quantity,
+      onDecrease: () => _decreaseLine(index),
+      onIncrease: () => _increaseLine(index),
+      onRemove: () => _removeLine(index),
+    );
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.gray100,
-        borderRadius: AppRadius.all,
-        border: Border.all(color: AppColors.gray200),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.gray200)),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // A narrow panel puts the buttons under the item's name.
+          if (constraints.maxWidth < 360) {
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(line.product.name, style: AppTextStyles.bodyMedium),
-                Text(
-                  '${line.product.variantName} • '
-                  '${_money(line.unitPriceWithModifiers)} each • '
-                  '${_money(line.lineTotal)}',
-                  style: AppTextStyles.caption,
+                details,
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    stepper,
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(child: lineTotal),
+                  ],
                 ),
-                if (line.modifiers.isNotEmpty)
-                  Text(
-                    line.modifiers.map((item) => item.name).join(', '),
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.gray700,
-                    ),
-                  ),
-                if (line.specialInstructions.isNotEmpty)
-                  Text(
-                    'Note: ${line.specialInstructions}',
-                    style: AppTextStyles.caption,
-                  ),
               ],
-            ),
-          ),
-          IconButton(
-            onPressed: () => _decreaseLine(index),
-            icon: const Icon(Icons.remove_circle_outline, size: 20),
-          ),
-          SizedBox(
-            width: 28,
-            child: Text(
-              '${line.quantity}',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMedium,
-            ),
-          ),
-          IconButton(
-            onPressed: () => _increaseLine(index),
-            icon: const Icon(Icons.add_circle_outline, size: 20),
-          ),
-          IconButton(
-            onPressed: () => _removeLine(index),
-            icon: const Icon(
-              Icons.delete_outline,
-              color: AppColors.primary,
-              size: 20,
-            ),
-          ),
-        ],
+            );
+          }
+          return Row(
+            children: [
+              Expanded(child: details),
+              const SizedBox(width: AppSpacing.sm),
+              stepper,
+              SizedBox(width: 92, child: lineTotal),
+            ],
+          );
+        },
       ),
     );
   }
@@ -2579,6 +2624,81 @@ class _CartQuantityBadge extends StatelessWidget {
           color: AppColors.white,
           fontWeight: FontWeight.w700,
         ),
+      ),
+    );
+  }
+}
+
+/// Remove and add buttons around a quantity, large enough to tap on the
+/// tablet. At one, the remove button takes the line off the order.
+class _QuantityStepper extends StatelessWidget {
+  final String name;
+  final int quantity;
+  final VoidCallback onDecrease;
+  final VoidCallback onIncrease;
+  final VoidCallback onRemove;
+
+  const _QuantityStepper({
+    required this.name,
+    required this.quantity,
+    required this.onDecrease,
+    required this.onIncrease,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final last = quantity <= 1;
+
+    Widget button({
+      required IconData icon,
+      required String tooltip,
+      required VoidCallback onPressed,
+      Color color = AppColors.black,
+    }) {
+      return IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+        style: IconButton.styleFrom(shape: const RoundedRectangleBorder()),
+        icon: Icon(icon, size: 22, color: color),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.all,
+        border: Border.all(color: AppColors.gray300, width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          last
+              ? button(
+                  icon: Icons.delete_outline,
+                  tooltip: 'Remove $name from the order',
+                  onPressed: onRemove,
+                  color: AppColors.primary,
+                )
+              : button(
+                  icon: Icons.remove,
+                  tooltip: 'One less $name',
+                  onPressed: onDecrease,
+                ),
+          SizedBox(
+            width: 32,
+            child: Text(
+              '$quantity',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+          button(
+            icon: Icons.add,
+            tooltip: 'One more $name',
+            onPressed: onIncrease,
+          ),
+        ],
       ),
     );
   }

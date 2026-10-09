@@ -151,7 +151,7 @@ void main() {
       find.widgetWithText(TextField, 'Table Number *'),
       'T1',
     );
-    await tester.tap(find.text('Proceed to Payment'));
+    await tester.tap(find.byKey(const ValueKey('pos-charge')));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Complete Payment'));

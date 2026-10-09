@@ -107,4 +107,47 @@ void main() {
     expect(badgeOn(cake, '1'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('the order panel has large quantity and charge buttons', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(home: NewOrderScreen(orderRepository: _MenuRepository())),
+    );
+    await tester.pumpAndSettle();
+
+    final latte = find.byKey(const ValueKey('pos-product-latte-large'));
+    await tester.tap(latte);
+    await tester.pumpAndSettle();
+
+    // The charge button names the amount.
+    expect(find.text('Charge ₱150.00'), findsOneWidget);
+    // Buttons are at least 48 px, so a finger can hit them.
+    final more = find.byTooltip('One more Latte');
+    expect(tester.getSize(more).height, greaterThanOrEqualTo(48));
+    expect(
+      tester.getSize(find.byKey(const ValueKey('pos-charge'))).height,
+      greaterThanOrEqualTo(56),
+    );
+
+    await tester.tap(more);
+    await tester.pumpAndSettle();
+    expect(find.text('Charge ₱300.00'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('One less Latte'));
+    await tester.pumpAndSettle();
+
+    // At one, the same button takes the line off the order.
+    expect(find.byTooltip('One less Latte'), findsNothing);
+    await tester.tap(find.byTooltip('Remove Latte from the order'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Charge'), findsOneWidget);
+    expect(find.text('No items added yet.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
