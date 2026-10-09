@@ -40,6 +40,10 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      // Desktop browsers would otherwise get a compact density that shrinks
+      // buttons and fields by 8 px. The app is built for a touch tablet, so
+      // every platform keeps the same 44 px controls.
+      visualDensity: VisualDensity.standard,
       fontFamily: AppTextStyles.fontFamily,
       scaffoldBackgroundColor: AppColors.gray100,
       colorScheme: const ColorScheme.light(
