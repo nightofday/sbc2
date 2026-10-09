@@ -98,7 +98,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Sales & Finance',
+      title: 'Sales and Finance',
       action: SizedBox(
         width: 180,
         child: DropdownButtonFormField<int>(

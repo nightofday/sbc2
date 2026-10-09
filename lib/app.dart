@@ -347,7 +347,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
           ),
           if (can('finance.view'))
             destination(
-              label: 'Finance Overview',
+              label: 'Sales and Finance',
               icon: Icons.account_balance_wallet_outlined,
               page: SalesFinanceScreen(
                 reportingRepository: _reportingRepository,
