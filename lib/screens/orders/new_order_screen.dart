@@ -110,7 +110,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
     final confirmed = await showPrototypeDialog<bool>(
       context: context,
-      title: 'Start Shift',
+      title: 'Start shift',
       width: 420,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -133,7 +133,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   decimal: true,
                 ),
                 decoration: InputDecoration(
-                  labelText: cashRequired ? 'Opening Cash *' : 'Opening Cash',
+                  labelText: cashRequired ? 'Opening cash *' : 'Opening cash',
                   prefixText: '₱',
                   helperText: cashRequired
                       ? null
@@ -171,7 +171,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             openingCash = amount;
             Navigator.pop(context, true);
           },
-          child: const Text('Start Shift'),
+          child: const Text('Start shift'),
         ),
       ],
     );
@@ -220,7 +220,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
       await showPrototypeDialog(
         context: context,
-        title: 'End Shift',
+        title: 'End shift',
         width: 560,
         content: StatefulBuilder(
           builder: (_, setDialogState) {
@@ -287,7 +287,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       setDialogState(() => errorMessage = null);
                     },
                     decoration: const InputDecoration(
-                      labelText: 'Counted Closing Cash',
+                      labelText: 'Counted closing cash',
                       prefixText: '₱',
                       helperText: 'Optional for now, but entering it records the cash variance.',
                     ),
@@ -315,7 +315,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     controller: notesController,
                     maxLines: 3,
                     decoration: const InputDecoration(
-                      labelText: 'Closing Notes',
+                      labelText: 'Closing notes',
                       hintText: 'Optional explanation for cash differences or handover notes...',
                     ),
                   ),
@@ -401,7 +401,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('End Shift'),
+                : const Text('End shift'),
           ),
         ],
       );
@@ -438,7 +438,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
       await showPrototypeDialog(
         context: context,
-        title: 'Cash Movement',
+        title: 'Cash movement',
         width: 560,
         content: StatefulBuilder(
           builder: (_, setDialogState) {
@@ -491,21 +491,24 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     isExpanded: true,
                     initialValue: movementType,
                     decoration: const InputDecoration(
-                      labelText: 'Movement Type',
+                      labelText: 'Movement type',
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'PAY_IN', child: Text('Pay In')),
+                      DropdownMenuItem(
+                        value: 'PAY_IN',
+                        child: Text('Add cash to drawer'),
+                      ),
                       DropdownMenuItem(
                         value: 'PAY_OUT',
-                        child: Text('Pay Out'),
+                        child: Text('Take cash from drawer'),
                       ),
                       DropdownMenuItem(
                         value: 'CASH_DROP',
-                        child: Text('Cash Drop'),
+                        child: Text('Cash drop'),
                       ),
                       DropdownMenuItem(
                         value: 'CORRECTION',
-                        child: Text('Positive Correction'),
+                        child: Text('Positive correction'),
                       ),
                     ],
                     onChanged: (value) {
@@ -587,7 +590,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 });
               }
             },
-            child: const Text('Record Movement'),
+            child: const Text('Record movement'),
           ),
         ],
       );
@@ -652,7 +655,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                                 icon: const Icon(Icons.arrow_back),
                               ),
                               const SizedBox(width: AppSpacing.sm),
-                              const Text('New Order', style: AppTextStyles.h1),
+                              const Text('New order', style: AppTextStyles.h1),
                             ],
                           );
 
@@ -727,7 +730,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               borderRadius: AppRadius.all,
             ),
             child: Text(
-              'Shift Active',
+              'Shift active',
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.success,
               ),
@@ -741,7 +744,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           OutlinedButton.icon(
             onPressed: _endingShift ? null : _showEndShiftDialog,
             icon: const Icon(Icons.stop_circle_outlined, size: 18),
-            label: const Text('End Shift'),
+            label: const Text('End shift'),
           ),
         ],
       );
@@ -750,7 +753,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     return ElevatedButton.icon(
       onPressed: _startingShift ? null : _startShift,
       icon: const Icon(Icons.play_arrow, size: 18),
-      label: Text(_startingShift ? 'Starting...' : 'Start Shift'),
+      label: Text(_startingShift ? 'Starting...' : 'Start shift'),
     );
   }
 
@@ -769,7 +772,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     // are shown here while products are being added.
                     Tab(
                       text: _cart.isEmpty
-                          ? 'Current Order'
+                          ? 'Current order'
                           : 'Order (${_cart.fold<int>(0, (sum, line) => sum + line.quantity)}) · '
                                 '${_money(_cart.fold<double>(0, (sum, line) => sum + line.lineTotal))}',
                     ),
@@ -823,7 +826,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 onPressed: () {
                   setState(_reloadPosData);
                 },
-                child: const Text('Retry'),
+                child: const Text('Try again'),
               ),
             ],
           ),
@@ -1103,15 +1106,15 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Current Order', style: AppTextStyles.h2),
+          const Text('Current order', style: AppTextStyles.h2),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
             isExpanded: true,
             initialValue: _orderType,
-            decoration: const InputDecoration(labelText: 'Order Type'),
+            decoration: const InputDecoration(labelText: 'Order type'),
             items: const [
-              DropdownMenuItem(value: 'Dine In', child: Text('Dine In')),
-              DropdownMenuItem(value: 'Take Out', child: Text('Take Out')),
+              DropdownMenuItem(value: 'Dine In', child: Text('Dine in')),
+              DropdownMenuItem(value: 'Take Out', child: Text('Take out')),
               DropdownMenuItem(value: 'Delivery', child: Text('Delivery')),
             ],
             onChanged: (value) {
@@ -1204,7 +1207,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               icon: const Icon(Icons.payments_outlined, size: 22),
               label: Text(
                 _openShiftId == null
-                    ? 'Start Shift to Continue'
+                    ? 'Start shift to continue'
                     : _cart.isEmpty
                     ? 'Charge'
                     : 'Charge ${_money(total)}',
@@ -1273,7 +1276,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
     final chosen = await showPrototypeDialog<HeldOrder>(
       context: context,
-      title: 'Held Orders',
+      title: 'Held orders',
       width: 480,
       content: StatefulBuilder(
         builder: (dialogContext, setDialogState) {
@@ -1440,13 +1443,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         children: [
           TextField(
             controller: _tableNumberController,
-            decoration: const InputDecoration(labelText: 'Table Number *'),
+            decoration: const InputDecoration(labelText: 'Table number *'),
           ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: _customerNameController,
             decoration: const InputDecoration(
-              labelText: 'Customer Name',
+              labelText: 'Customer name',
               hintText: 'Optional',
             ),
           ),
@@ -1460,14 +1463,14 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           TextField(
             controller: _customerNameController,
             decoration: const InputDecoration(
-              labelText: 'Customer / Recipient Name *',
+              labelText: 'Customer / recipient name *',
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: _deliveryReferenceController,
             decoration: const InputDecoration(
-              labelText: 'Delivery Reference / Platform',
+              labelText: 'Delivery reference / platform',
             ),
           ),
         ],
@@ -1476,7 +1479,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
     return TextField(
       controller: _customerNameController,
-      decoration: const InputDecoration(labelText: 'Customer Name *'),
+      decoration: const InputDecoration(labelText: 'Customer name *'),
     );
   }
 
@@ -1676,7 +1679,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       controller: instructionsController,
                       maxLines: 2,
                       decoration: const InputDecoration(
-                        labelText: 'Special Instructions',
+                        labelText: 'Special instructions',
                         hintText: 'Optional',
                       ),
                     ),
@@ -1905,13 +1908,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     isExpanded: true,
                     initialValue: selectedDiscount?.id ?? '',
                     decoration: const InputDecoration(
-                      labelText: 'Promotional Discount',
+                      labelText: 'Promotional discount',
                       helperText: 'Senior/PWD rules are not enabled until the café tax setup is confirmed.',
                     ),
                     items: [
                       const DropdownMenuItem(
                         value: '',
-                        child: Text('No Discount'),
+                        child: Text('No discount'),
                       ),
                       for (final discount in discounts)
                         DropdownMenuItem(
@@ -1954,8 +1957,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                             : 'Set by management for this promotion.',
                         labelText:
                             selectedDiscount!.calculationMethod == 'PERCENTAGE'
-                            ? 'Discount Percentage *'
-                            : 'Discount Amount *',
+                            ? 'Discount percentage *'
+                            : 'Discount amount *',
                         suffixText:
                             selectedDiscount!.calculationMethod == 'PERCENTAGE'
                             ? '%'
@@ -1982,7 +1985,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       controller: discountNotesController,
                       maxLines: 2,
                       decoration: const InputDecoration(
-                        labelText: 'Discount Notes',
+                        labelText: 'Discount notes',
                         hintText: 'Optional promo/reference notes',
                       ),
                     ),
@@ -1993,7 +1996,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   isExpanded: true,
                   initialValue: selectedMethod.id,
                   decoration: const InputDecoration(
-                    labelText: 'Payment Method',
+                    labelText: 'Payment method',
                   ),
                   items: methods
                       .map(
@@ -2024,7 +2027,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
-                    labelText: 'Amount Received',
+                    labelText: 'Amount received',
                     prefixText: '₱',
                   ),
                   onChanged: (_) {
@@ -2278,7 +2281,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Complete Payment'),
+              : const Text('Complete payment'),
         ),
       ],
     );

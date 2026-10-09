@@ -105,7 +105,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: existing == null ? 'Add Discount' : 'Edit Discount',
+      title: existing == null ? 'Add discount' : 'Edit discount',
       width: 520,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -118,7 +118,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Discount Name *'),
+                decoration: const InputDecoration(labelText: 'Discount name *'),
               ),
               const SizedBox(height: AppSpacing.md),
               if (existing == null)
@@ -153,7 +153,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                   decimal: true,
                 ),
                 decoration: InputDecoration(
-                  labelText: percentage ? 'Percent Off *' : 'Amount Off (₱) *',
+                  labelText: percentage ? 'Percent off *' : 'Amount Off (₱) *',
                   helperText: percentage
                       ? 'For example 10 for 10% off. 100 at most.'
                       : 'For example 20 for ₱20 off.',
@@ -178,7 +178,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                   ),
                   decoration: InputDecoration(
                     labelText: percentage
-                        ? 'Highest Percent Allowed'
+                        ? 'Highest percent allowed'
                         : 'Highest Amount Allowed (₱)',
                     helperText: 'Leave blank for no limit.',
                   ),
@@ -212,7 +212,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                         validFrom = null;
                         validUntil = null;
                       }),
-                      child: const Text('Clear Dates'),
+                      child: const Text('Clear dates'),
                     ),
                 ],
               ),
@@ -317,7 +317,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
               saving = false;
             }
           },
-          child: Text(existing == null ? 'Add Discount' : 'Save Changes'),
+          child: Text(existing == null ? 'Add discount' : 'Save changes'),
         ),
       ],
     );
@@ -350,7 +350,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
       action: ElevatedButton.icon(
         onPressed: _showEditor,
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('Add Discount'),
+        label: const Text('Add discount'),
       ),
       child: FutureBuilder<List<DiscountDefinition>>(
         future: _discountsFuture,
@@ -373,7 +373,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
                   const SizedBox(height: AppSpacing.md),
                   OutlinedButton(
                     onPressed: _refresh,
-                    child: const Text('Try Again'),
+                    child: const Text('Try again'),
                   ),
                 ],
               ),
@@ -411,7 +411,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
 
   Widget _discountCard(DiscountDefinition discount) {
     final status = discount.isStatutory
-        ? 'Not Available'
+        ? 'Not available'
         : discount.isActive
         ? 'Active'
         : 'Inactive';

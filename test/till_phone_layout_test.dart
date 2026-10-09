@@ -52,7 +52,7 @@ void main() {
     expect(find.text('Latte (Large)'), findsOneWidget);
     expect(find.text('Chocolate Cake'), findsOneWidget);
     expect(find.text('Out of stock'), findsOneWidget);
-    expect(find.text('Current Order'), findsOneWidget);
+    expect(find.text('Current order'), findsOneWidget);
 
     // Tapping the row adds the product.
     await tester.tap(find.text('Latte (Large)'));

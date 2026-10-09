@@ -90,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
         },
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('New Order'),
+        label: const Text('New order'),
       ),
       child: FutureBuilder<_DashboardData>(
         future: _dashboardFuture,
@@ -209,7 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       accentColor: AppColors.orange,
                     ),
                     SummaryCard(
-                      label: summary.businessScope ? 'Expenses' : 'Your Sales',
+                      label: summary.businessScope ? 'Expenses' : 'Your sales',
                       value: summary.businessScope
                           ? _money(summary.expenses ?? 0)
                           : _money(summary.netSales),
@@ -220,7 +220,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     if (summary.businessScope)
                       SummaryCard(
-                        label: 'Net After Expenses',
+                        label: 'Net after expenses',
                         value: _money(summary.netAfterExpenses ?? 0),
                         subtitle: 'Sales less refunds and expenses',
                         accentColor: AppColors.success,
@@ -228,7 +228,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                const Text('Recent Orders', style: AppTextStyles.h3),
+                const Text('Recent orders', style: AppTextStyles.h3),
                 const SizedBox(height: AppSpacing.md),
                 if (recentOrders.isEmpty)
                   Padding(

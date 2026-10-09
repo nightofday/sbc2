@@ -46,7 +46,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
     _Period.today: 'Today',
     _Period.last7: 'Last 7 Days',
     _Period.last30: 'Last 30 Days',
-    _Period.custom: 'Custom Dates',
+    _Period.custom: 'Custom dates',
   };
 
   @override
@@ -144,8 +144,8 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
     final search = _search.trim();
     final workbook = XlsxWorkbook([
       XlsxSheet(
-        name: 'Audit Log',
-        title: '${BusinessProfileScope.of(context).tradeName} — Audit Log',
+        name: 'Change history',
+        title: '${BusinessProfileScope.of(context).tradeName} — Change history',
         subtitles: [
           '$_rangeLabel · exported ${formatReportDateTime(DateTime.now())}',
           if (search.isNotEmpty) 'Search: "$search"',
@@ -176,7 +176,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
       ),
     ]);
     final exported = await exportBytesFile(
-      fileName: reportFileName('audit-log', _from, _to, extension: 'xlsx'),
+      fileName: reportFileName('change-history', _from, _to, extension: 'xlsx'),
       bytes: workbook.encode(),
       mimeType: XlsxWorkbook.mimeType,
     );
@@ -209,7 +209,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Audit Log',
+      title: 'Change history',
       subtitle: _rangeLabel,
       action: Wrap(
         spacing: AppSpacing.sm,
@@ -277,7 +277,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                         const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
-                          child: const Text('Try Again'),
+                          child: const Text('Try again'),
                         ),
                       ],
                     ),

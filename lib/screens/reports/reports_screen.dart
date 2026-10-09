@@ -44,8 +44,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
     _Period.yesterday: 'Yesterday',
     _Period.last7: 'Last 7 Days',
     _Period.last30: 'Last 30 Days',
-    _Period.thisMonth: 'This Month',
-    _Period.custom: 'Custom Dates',
+    _Period.thisMonth: 'This month',
+    _Period.custom: 'Custom dates',
   };
 
   @override
@@ -232,7 +232,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
-                          child: const Text('Try Again'),
+                          child: const Text('Try again'),
                         ),
                       ],
                     ),
@@ -258,7 +258,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           SummaryCardGrid(
             children: [
               SummaryCard(
-                label: 'Gross Sales',
+                label: 'Gross sales',
                 value: formatReportMoney(summary.grossSales),
                 subtitle: 'At menu prices, before discounts',
                 accentColor: AppColors.black,
@@ -279,7 +279,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 accentColor: AppColors.warning,
               ),
               SummaryCard(
-                label: 'Net Sales',
+                label: 'Net sales',
                 value: formatReportMoney(summary.netSales),
                 subtitle: 'Gross sales less discounts and refunds',
                 accentColor: AppColors.primary,

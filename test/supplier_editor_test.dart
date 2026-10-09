@@ -59,14 +59,14 @@ void main() {
     expect(find.text('12 Bajada Road'), findsOneWidget);
     expect(find.text('15 days'), findsOneWidget);
 
-    await tester.tap(find.text('Edit Supplier'));
+    await tester.tap(find.text('Edit supplier'));
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextField, 'Supplier Name *'),
+      find.widgetWithText(TextField, 'Supplier name *'),
       'Davao Packaging Supply',
     );
-    await tester.tap(find.text('Save Changes'));
+    await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
 
     final sent = repository.lastUpdate!;

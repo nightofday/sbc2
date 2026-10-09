@@ -124,13 +124,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Widget _buildOverviewPage() {
     return AppPage(
-      title: 'Stock Overview',
+      title: 'Stock on hand',
       subtitle: 'Monitor usable, expired, and total on-hand quantities.',
       action: widget.canManageInventory
           ? ElevatedButton.icon(
               onPressed: _showAddItemDialog,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add Item'),
+              label: const Text('Add item'),
             )
           : null,
       child: FutureBuilder<List<InventoryItem>>(
@@ -183,13 +183,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Widget _buildReleasePage() {
     return AppPage(
-      title: 'Release Supplies',
+      title: 'Take stock out for use',
       subtitle:
           'Post one traceable stock-out transaction for multiple supplies.',
       action: ElevatedButton.icon(
         onPressed: _showStockOutDialog,
         icon: const Icon(Icons.output_outlined, size: 18),
-        label: const Text('New Release'),
+        label: const Text('Take out stock'),
       ),
       child: FutureBuilder<List<StockOutSummary>>(
         future: _stockOutsFuture,
@@ -258,7 +258,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 widget.canManageInventory
                             ? OutlinedButton(
                                 onPressed: () => _voidStockOut(release),
-                                child: const Text('Void'),
+                                child: const Text('Void stock-out'),
                               )
                             : const Text('—', style: AppTextStyles.body),
                       ),
@@ -274,7 +274,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Widget _buildDisposalPage() {
     return AppPage(
-      title: 'Dispose Stock',
+      title: 'Throw away stock',
       subtitle:
           'Record expired, damaged, or spoiled stock against its exact lot.',
       child: FutureBuilder<List<InventoryItem>>(
@@ -345,7 +345,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             alignment: Alignment.centerLeft,
                             child: OutlinedButton(
                               onPressed: () => _showLots(item),
-                              child: const Text('Review Lots'),
+                              child: const Text('See batches'),
                             ),
                           ),
                         ],
@@ -362,7 +362,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Widget _buildAdjustmentPage() {
     return AppPage(
-      title: 'Stock Adjustment',
+      title: 'Correct stock',
       subtitle: 'Correct a verified physical-count difference with a required reason.',
       child: FutureBuilder<List<InventoryItem>>(
         future: _itemsFuture,
@@ -428,7 +428,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Widget _buildHistoryPage() {
     return AppPage(
-      title: 'Inventory History',
+      title: 'Inventory history',
       subtitle:
           'Trace stock movements by item, movement type, date, or reference.',
       child: FutureBuilder<List<InventoryItem>>(
@@ -535,7 +535,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                                           ?.name ??
                                                       'this item',
                                                 ),
-                                                child: const Text('Reverse'),
+                                                child: const Text(
+                                                  'Undo throw-away',
+                                                ),
                                               )
                                             : const SizedBox.shrink(),
                                       ),
@@ -581,7 +583,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       isExpanded: true,
       decoration: const InputDecoration(labelText: 'Item'),
       items: [
-        const DropdownMenuItem(value: '', child: Text('All Items')),
+        const DropdownMenuItem(value: '', child: Text('All items')),
         for (final item in items)
           DropdownMenuItem(
             value: item.id,
@@ -598,7 +600,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       isExpanded: true,
       decoration: const InputDecoration(labelText: 'Movement'),
       items: [
-        const DropdownMenuItem(value: '', child: Text('All Movements')),
+        const DropdownMenuItem(value: '', child: Text('All movements')),
         for (final type in movementTypes)
           DropdownMenuItem(value: type, child: Text(_movementLabel(type))),
       ],
@@ -731,7 +733,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       items: [
         const DropdownMenuItem(
           value: 'All Categories',
-          child: Text('All Categories'),
+          child: Text('All categories'),
         ),
         for (final category in categories)
           DropdownMenuItem(value: category, child: Text(category)),
@@ -745,11 +747,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
       initialValue: _stockFilter,
       isExpanded: true,
       items: const [
-        DropdownMenuItem(value: 'All Stock', child: Text('All Stock')),
-        DropdownMenuItem(value: 'Low Stock', child: Text('Low Stock')),
-        DropdownMenuItem(value: 'Expiring Soon', child: Text('Expiring Soon')),
+        DropdownMenuItem(value: 'All Stock', child: Text('All stock')),
+        DropdownMenuItem(value: 'Low Stock', child: Text('Low stock')),
+        DropdownMenuItem(value: 'Expiring Soon', child: Text('Expiring soon')),
         DropdownMenuItem(value: 'Expired', child: Text('Expired')),
-        DropdownMenuItem(value: 'In Stock', child: Text('In Stock')),
+        DropdownMenuItem(value: 'In Stock', child: Text('In stock')),
       ],
       onChanged: (value) {
         if (value == null) return;
@@ -876,7 +878,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Recent Activity', style: AppTextStyles.h3),
+              const Text('Recent activity', style: AppTextStyles.h3),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Latest inventory ledger entries',
@@ -1007,7 +1009,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               style: AppTextStyles.body.copyWith(color: AppColors.gray700),
             ),
             const SizedBox(height: AppSpacing.md),
-            OutlinedButton(onPressed: _refresh, child: const Text('Retry')),
+            OutlinedButton(onPressed: _refresh, child: const Text('Try again')),
           ],
         ),
       ),
@@ -1022,12 +1024,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     final reversed = await showReasonDialog(
       context: context,
-      title: 'Reverse Write-off',
+      title: 'Undo throw-away',
       message:
           'This returns the written-off quantity of $itemName to the stock '
           'it came from. The write-off stays in the history, marked as '
           'reversed.',
-      confirmLabel: 'Reverse Write-off',
+      confirmLabel: 'Undo throw-away',
       onConfirm: (reason) async {
         try {
           await widget.inventoryRepository.voidLotDisposal(
@@ -1054,11 +1056,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     final voided = await showReasonDialog(
       context: context,
-      title: 'Void Release SO-${release.number}',
+      title: 'Void stock-out SO-${release.number}',
       message:
           'This returns every quantity on this release to the stock it came '
           'from. The release stays on record as voided.',
-      confirmLabel: 'Void Release',
+      confirmLabel: 'Void stock-out',
       onConfirm: (reason) async {
         try {
           await widget.inventoryRepository.voidStockOut(
@@ -1125,7 +1127,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             ),
             _detailRow('Next Usable Expiration', latest.expiration),
             const Divider(height: 28),
-            const Text('Recent Stock Movements', style: AppTextStyles.h3),
+            const Text('Recent stock movements', style: AppTextStyles.h3),
             const SizedBox(height: AppSpacing.sm),
             if (movements.isEmpty)
               Text(
@@ -1193,7 +1195,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               Navigator.pop(context);
               _showLots(latest);
             },
-            child: const Text('Manage Lots'),
+            child: const Text('See batches'),
           ),
         if (widget.canManageInventory && latest.currentQuantity <= 0)
           OutlinedButton.icon(
@@ -1211,7 +1213,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Future<void> _confirmArchiveItem(InventoryItem item) async {
     await showPrototypeDialog(
       context: context,
-      title: 'Archive Inventory Item',
+      title: 'Archive inventory item',
       width: 460,
       content: Text(
         'Archive ${item.name}? It will be removed from active inventory, '
@@ -1239,7 +1241,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             }
           },
           icon: const Icon(Icons.archive_outlined, size: 17),
-          label: const Text('Archive Item'),
+          label: const Text('Archive item'),
         ),
       ],
     );
@@ -1262,7 +1264,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Inventory Lots — ${item.name}',
+      title: 'Batches — ${item.name}',
       width: 720,
       content: SizedBox(
         height: 390,
@@ -1287,7 +1289,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                           children: [
                             Text(
                               lot.lotCode.isEmpty
-                                  ? 'Unlabeled Lot'
+                                  ? 'Unlabeled batch'
                                   : lot.lotCode,
                               style: AppTextStyles.bodyMedium,
                             ),
@@ -1358,7 +1360,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Dispose Lot — ${item.name}',
+      title: 'Throw away stock — ${item.name}',
       width: 540,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -1368,7 +1370,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             children: [
               _detailRow(
                 'Lot',
-                lot.lotCode.isEmpty ? 'Unlabeled Lot' : lot.lotCode,
+                lot.lotCode.isEmpty ? 'Unlabeled batch' : lot.lotCode,
               ),
               _detailRow(
                 'Available',
@@ -1384,11 +1386,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: movementType,
-                decoration: const InputDecoration(labelText: 'Reason Type'),
+                decoration: const InputDecoration(labelText: 'Reason type'),
                 items: const [
                   DropdownMenuItem(
                     value: 'WASTE',
-                    child: Text('Waste / Spoilage'),
+                    child: Text('Waste / spoilage'),
                   ),
                   DropdownMenuItem(value: 'DAMAGED', child: Text('Damaged')),
                   DropdownMenuItem(value: 'EXPIRED', child: Text('Expired')),
@@ -1413,7 +1415,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 controller: reasonController,
                 maxLines: 2,
                 decoration: const InputDecoration(
-                  labelText: 'Reason / Notes *',
+                  labelText: 'Reason / notes *',
                   hintText: 'Explain why this exact lot is being disposed',
                 ),
               ),
@@ -1478,7 +1480,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               });
             }
           },
-          child: const Text('Record Disposal'),
+          child: const Text('Record thrown-away stock'),
         ),
       ],
     );
@@ -1521,16 +1523,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   isExpanded: true,
                   initialValue: movementType,
                   decoration: const InputDecoration(
-                    labelText: 'Adjustment Direction *',
+                    labelText: 'Adjustment direction *',
                   ),
                   items: const [
                     DropdownMenuItem(
                       value: 'STOCK_COUNT_ADJUSTMENT',
-                      child: Text('Decrease to match physical count'),
+                      child: Text('Remove stock'),
                     ),
                     DropdownMenuItem(
                       value: 'MANUAL_IN',
-                      child: Text('Increase to match physical count'),
+                      child: Text('Add stock'),
                     ),
                   ],
                   onChanged: (value) {
@@ -1562,7 +1564,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       decimal: true,
                     ),
                     decoration: const InputDecoration(
-                      labelText: 'Unit Cost',
+                      labelText: 'Cost per unit (₱)',
                       prefixText: '₱',
                     ),
                   ),
@@ -1586,7 +1588,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                         icon: const Icon(Icons.calendar_month_outlined),
                         label: Text(
                           expirationDate == null
-                              ? 'Select Expiration Date *'
+                              ? 'Select expiration date *'
                               : 'Expiration: ${_formatDate(expirationDate!)}',
                         ),
                       ),
@@ -1598,7 +1600,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   controller: reasonController,
                   maxLines: 2,
                   decoration: const InputDecoration(
-                    labelText: 'Adjustment Reason *',
+                    labelText: 'Adjustment reason *',
                     hintText: 'Example: Physical count variance on closing',
                   ),
                 ),
@@ -1697,7 +1699,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             }
           },
           icon: const Icon(Icons.check, size: 18),
-          label: const Text('Record Adjustment'),
+          label: const Text('Save correction'),
         ),
       ],
     );
@@ -1752,7 +1754,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Release Multiple Supplies',
+      title: 'Take stock out for use',
       width: 820,
       content: StatefulBuilder(
         builder: (dialogContext, setDialogState) {
@@ -1776,9 +1778,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: selectedPurpose,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Purpose / Destination *',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Used for *'),
                     items: purposeOptions
                         .map(
                           (purpose) => DropdownMenuItem(
@@ -1800,7 +1800,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     TextField(
                       controller: otherPurposeController,
                       decoration: const InputDecoration(
-                        labelText: 'Other Purpose / Destination *',
+                        labelText: 'Used for (other) *',
                         hintText:
                             'Describe where or why supplies were released',
                       ),
@@ -1813,7 +1813,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   TextField(
                     controller: referenceController,
                     decoration: const InputDecoration(
-                      labelText: 'Reference Number',
+                      labelText: 'Reference number',
                       hintText: 'Optional request, log, or handover reference',
                     ),
                   ),
@@ -1834,7 +1834,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                           });
                         },
                         icon: const Icon(Icons.add, size: 17),
-                        label: const Text('Add Supply'),
+                        label: const Text('Add supply'),
                       ),
                     ],
                   ),
@@ -1862,9 +1862,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   TextField(
                     controller: notesController,
                     maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Transaction Notes',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Notes'),
                   ),
                   if (errorMessage != null) ...[
                     const SizedBox(height: AppSpacing.sm),
@@ -1980,7 +1978,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             }
           },
           icon: const Icon(Icons.check, size: 18),
-          label: const Text('Post Stock Out'),
+          label: const Text('Take out stock'),
         ),
       ],
     );
@@ -2081,7 +2079,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 key: ValueKey('${line.itemId}-${line.unitId}'),
                 initialValue: line.unitId,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Release Unit *'),
+                decoration: const InputDecoration(labelText: 'Taken out in *'),
                 items: compatibleUnits
                     .map(
                       (unit) => DropdownMenuItem(
@@ -2190,7 +2188,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           TextField(
             controller: line.notesController,
             decoration: const InputDecoration(
-              labelText: 'Line Notes',
+              labelText: 'Notes',
               hintText: 'Optional condition or handover note',
             ),
           ),
@@ -2225,7 +2223,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Add Inventory Item',
+      title: 'Add inventory item',
       width: 620,
       content: StatefulBuilder(
         builder: (dialogContext, setDialogState) {
@@ -2238,7 +2236,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 TextField(
                   controller: nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Item Name *',
+                    labelText: 'Item name *',
                     hintText: 'e.g. Fresh Milk',
                   ),
                 ),
@@ -2246,7 +2244,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 TextField(
                   controller: skuController,
                   decoration: const InputDecoration(
-                    labelText: 'SKU',
+                    labelText: 'Item code (SKU)',
                     hintText: 'Optional internal code',
                   ),
                 ),
@@ -2272,7 +2270,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: unitId,
-                  decoration: const InputDecoration(labelText: 'Base Unit *'),
+                  decoration: const InputDecoration(labelText: 'Counted in *'),
                   items: units
                       .map(
                         (unit) => DropdownMenuItem(
@@ -2293,7 +2291,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
-                    labelText: 'Low Stock / Reorder Level',
+                    labelText: 'Reorder when usable stock falls to',
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -2302,7 +2300,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(labelText: 'Initial Stock'),
+                  decoration: const InputDecoration(labelText: 'Initial stock'),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextField(
@@ -2311,14 +2309,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
-                    labelText: 'Initial Unit Cost',
+                    labelText: 'Cost per unit (₱)',
                     prefixText: '₱',
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Track Expiration'),
+                  title: const Text('Track expiration'),
                   subtitle: const Text(
                     'Use this for perishable ingredients and products.',
                   ),
@@ -2352,7 +2350,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       icon: const Icon(Icons.calendar_month_outlined),
                       label: Text(
                         expirationDate == null
-                            ? 'Select Initial Expiration Date'
+                            ? 'Select initial expiration date'
                             : 'Expiration: ${_formatDate(expirationDate!)}',
                       ),
                     ),
@@ -2440,7 +2438,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               });
             }
           },
-          child: const Text('Save Item'),
+          child: const Text('Save item'),
         ),
       ],
     );

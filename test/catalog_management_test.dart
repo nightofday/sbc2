@@ -149,7 +149,7 @@ void main() {
     expect(find.text('Used by 3 products'), findsOneWidget);
     expect(find.text('Not in use'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Move Down').first);
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Move down').first);
     await tester.pumpAndSettle();
     expect(repository.calls.last, 'reorder snacks,coffee');
 
@@ -160,17 +160,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.calls.last, 'update coffee name=null active=false');
 
-    await tester.tap(find.text('Add Category').first);
+    await tester.tap(find.text('Add category').first);
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add Category').last);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add category').last);
     await tester.pumpAndSettle();
     expect(find.text('Category name is required.'), findsOneWidget);
 
     await tester.enterText(
-      find.widgetWithText(TextField, 'Category Name *'),
+      find.widgetWithText(TextField, 'Category name *'),
       '  Seasonal Drinks ',
     );
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add Category').last);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add category').last);
     await tester.pumpAndSettle();
 
     expect(repository.calls.last, 'create MENU Seasonal Drinks');
@@ -187,20 +187,20 @@ void main() {
     await _pump(tester, DiscountsScreen(catalogRepository: repository));
 
     expect(find.text('10% off • No end date'), findsOneWidget);
-    expect(find.text('Not Available'), findsOneWidget);
+    expect(find.text('Not available'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, 'Edit'), findsOneWidget);
 
-    await tester.tap(find.text('Add Discount').first);
+    await tester.tap(find.text('Add discount').first);
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.widgetWithText(TextField, 'Discount Name *'),
+      find.widgetWithText(TextField, 'Discount name *'),
       'Payday Promo',
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Percent Off *'),
+      find.widgetWithText(TextField, 'Percent off *'),
       '120',
     );
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add Discount').last);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add discount').last);
     await tester.pumpAndSettle();
     expect(
       find.text('A percentage discount cannot be more than 100.'),
@@ -209,10 +209,10 @@ void main() {
     expect(repository.createdDiscount, isNull);
 
     await tester.enterText(
-      find.widgetWithText(TextField, 'Percent Off *'),
+      find.widgetWithText(TextField, 'Percent off *'),
       '15',
     );
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add Discount').last);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add discount').last);
     await tester.pumpAndSettle();
 
     final created = repository.createdDiscount!;

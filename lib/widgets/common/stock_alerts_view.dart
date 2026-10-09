@@ -41,7 +41,7 @@ Future<void> showStockAlertsPanel({
               openOverview = true;
               Navigator.pop(dialogContext);
             },
-            child: const Text('Open stock overview'),
+            child: const Text('Open stock on hand'),
           ),
         ),
     ],

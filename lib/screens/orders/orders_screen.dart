@@ -101,7 +101,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           if (changed == true) _notifyDataChanged();
         },
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('New Order'),
+        label: const Text('New order'),
       ),
       child: Column(
         children: [
@@ -203,7 +203,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       initialValue: _dateFilter,
       isExpanded: true,
       items: const [
-        DropdownMenuItem(value: 'All Dates', child: Text('All Dates')),
+        DropdownMenuItem(value: 'All Dates', child: Text('All dates')),
         DropdownMenuItem(value: 'Today', child: Text('Today')),
         DropdownMenuItem(value: 'Yesterday', child: Text('Yesterday')),
         DropdownMenuItem(value: 'Last 7 Days', child: Text('Last 7 Days')),
@@ -217,9 +217,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
       initialValue: _typeFilter,
       isExpanded: true,
       items: const [
-        DropdownMenuItem(value: 'All Types', child: Text('All Types')),
-        DropdownMenuItem(value: 'Dine In', child: Text('Dine In')),
-        DropdownMenuItem(value: 'Take Out', child: Text('Take Out')),
+        DropdownMenuItem(value: 'All Types', child: Text('All types')),
+        DropdownMenuItem(value: 'Dine In', child: Text('Dine in')),
+        DropdownMenuItem(value: 'Take Out', child: Text('Take out')),
         DropdownMenuItem(value: 'Delivery', child: Text('Delivery')),
       ],
       onChanged: (value) {
@@ -231,7 +231,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       initialValue: _statusFilter,
       isExpanded: true,
       items: const [
-        DropdownMenuItem(value: 'All Status', child: Text('All Status')),
+        DropdownMenuItem(value: 'All Status', child: Text('All status')),
         DropdownMenuItem(value: 'Open', child: Text('Open')),
         DropdownMenuItem(value: 'Completed', child: Text('Completed')),
         DropdownMenuItem(value: 'Refunded', child: Text('Refunded')),
@@ -398,7 +398,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ),
         ElevatedButton(
           onPressed: () => _showReceipt(context, order),
-          child: const Text('View Receipt'),
+          child: const Text('View receipt'),
         ),
       ],
     );
@@ -409,14 +409,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Order Actions',
+      title: 'Order actions',
       width: 480,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
             leading: const Icon(Icons.receipt_long_outlined),
-            title: const Text('View Receipt'),
+            title: const Text('View receipt'),
             onTap: () {
               Navigator.pop(context);
               _showReceipt(context, order);
@@ -426,7 +426,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               order.status == 'Partially Refunded')
             ListTile(
               leading: const Icon(Icons.undo),
-              title: const Text('Refund Items'),
+              title: const Text('Refund items'),
               subtitle: const Text('Full or partial refund'),
               onTap: () {
                 Navigator.pop(context);
@@ -437,7 +437,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               order.status == 'Refunded')
             ListTile(
               leading: const Icon(Icons.inventory_2_outlined),
-              title: const Text('Review Returned Stock'),
+              title: const Text('Review returned stock'),
               subtitle: const Text('Restock eligible returned finished goods'),
               onTap: () {
                 Navigator.pop(context);
@@ -448,7 +448,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ListTile(
               leading: const Icon(Icons.block, color: AppColors.primary),
               title: const Text(
-                'Void Order',
+                'Void order',
                 style: TextStyle(color: AppColors.primary),
               ),
               subtitle: const Text('Requires manager authorization'),
@@ -540,7 +540,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Refund Order ${order.id}',
+      title: 'Refund order ${order.id}',
       width: 700,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -566,7 +566,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  const Text('Select Items', style: AppTextStyles.h3),
+                  const Text('Select items', style: AppTextStyles.h3),
                   const SizedBox(height: AppSpacing.sm),
                   for (final item in preview.items)
                     Container(
@@ -609,7 +609,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     decimal: true,
                                   ),
                               decoration: const InputDecoration(
-                                labelText: 'Qty',
+                                labelText: 'Quantity',
                               ),
                               onChanged: (_) {
                                 setDialogState(() {
@@ -632,7 +632,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     controller: reasonController,
                     maxLines: 2,
                     decoration: const InputDecoration(
-                      labelText: 'Refund Reason *',
+                      labelText: 'Refund reason *',
                     ),
                     onChanged: (_) {
                       dialogSetState?.call(() => errorMessage = null);
@@ -743,7 +743,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               });
             }
           },
-          child: const Text('Process Refund'),
+          child: const Text('Process refund'),
         ),
       ],
     );
@@ -796,7 +796,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Returned Stock • ${order.id}',
+      title: 'Returned stock • ${order.id}',
       width: 680,
       content: SizedBox(
         height: 430,
@@ -898,7 +898,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Approve Restock',
+      title: 'Approve restock',
       width: 520,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -918,7 +918,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 controller: notesController,
                 maxLines: 3,
                 decoration: const InputDecoration(
-                  labelText: 'Restock Notes',
+                  labelText: 'Notes',
                   hintText: 'Optional condition or return notes...',
                 ),
               ),
@@ -965,7 +965,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               });
             }
           },
-          child: const Text('Approve Restock'),
+          child: const Text('Approve restock'),
         ),
       ],
     );
@@ -990,7 +990,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: '$actionName Order ${order.id}',
+      title: '$actionName order ${order.id}',
       width: 540,
       content: StatefulBuilder(
         builder: (dialogContext, setDialogState) {

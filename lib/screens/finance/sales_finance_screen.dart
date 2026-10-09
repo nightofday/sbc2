@@ -98,13 +98,13 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Sales and Finance',
+      title: 'Sales and finance',
       action: SizedBox(
         width: 180,
         child: DropdownButtonFormField<int>(
           isExpanded: true,
           initialValue: _days,
-          decoration: const InputDecoration(labelText: 'Report Period'),
+          decoration: const InputDecoration(labelText: 'Report period'),
           items: const [
             DropdownMenuItem(value: 7, child: Text('Last 7 Days')),
             DropdownMenuItem(value: 30, child: Text('Last 30 Days')),
@@ -149,7 +149,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                 SummaryCardGrid(
                   children: [
                     SummaryCard(
-                      label: 'Net Sales',
+                      label: 'Net sales',
                       value: _money(finance.netSales),
                       subtitle: '${_money(finance.refunds)} refunded in period',
                       accentColor: AppColors.primary,
@@ -161,7 +161,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                       accentColor: AppColors.orange,
                     ),
                     SummaryCard(
-                      label: 'Net Sales Less Expenses',
+                      label: 'Net sales less expenses',
                       value: _money(finance.netSalesLessExpenses),
                       subtitle: 'Net sales less posted expenses. Not profit.',
                       accentColor: AppColors.black,
@@ -173,7 +173,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                   primary: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Sales Summary', style: AppTextStyles.h3),
+                      const Text('Sales summary', style: AppTextStyles.h3),
                       const SizedBox(height: AppSpacing.md),
                       if (dailyRows.isEmpty)
                         const SectionCard(
@@ -213,7 +213,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Financial Summary',
+                          'Financial summary',
                           style: AppTextStyles.h3,
                         ),
                         const SizedBox(height: AppSpacing.lg),
@@ -247,7 +247,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                 Row(
                   children: [
                     const Expanded(
-                      child: Text('Supplier Payables', style: AppTextStyles.h3),
+                      child: Text('Supplier payables', style: AppTextStyles.h3),
                     ),
                     OutlinedButton.icon(
                       onPressed: _refresh,
@@ -348,7 +348,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Recent Supplier Payments',
+                    'Recent supplier payments',
                     style: AppTextStyles.h3,
                   ),
                 ),
@@ -447,7 +447,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                                     ? TextButton(
                                         onPressed: () =>
                                             _reverseSupplierPayment(payment),
-                                        child: const Text('Reverse'),
+                                        child: const Text('Undo payment'),
                                       )
                                     : Text(
                                         payment.isReversal &&
@@ -476,12 +476,12 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
 
     final reversed = await showReasonDialog(
       context: context,
-      title: 'Reverse Supplier Payment',
+      title: 'Undo supplier payment',
       message:
           'This undoes the ${_money(payment.amount)} payment to '
           '${payment.supplierName}. The bill will show that amount as owed '
           'again. Both the payment and its reversal stay on record.',
-      confirmLabel: 'Reverse Payment',
+      confirmLabel: 'Undo payment',
       onConfirm: (reason) async {
         try {
           await widget.financeRepository.voidSupplierPayment(
@@ -525,7 +525,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Pay Supplier Bill',
+      title: 'Pay supplier bill',
       width: 560,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -541,7 +541,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
                 isExpanded: true,
                 initialValue: selectedMethod.id,
                 decoration: const InputDecoration(
-                  labelText: 'Payment Method *',
+                  labelText: 'Payment method *',
                 ),
                 items: methods
                     .map(
@@ -651,7 +651,7 @@ class _SalesFinanceScreenState extends State<SalesFinanceScreen> {
               });
             }
           },
-          child: const Text('Record Payment'),
+          child: const Text('Record payment'),
         ),
       ],
     );

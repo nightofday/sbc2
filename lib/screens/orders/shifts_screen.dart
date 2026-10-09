@@ -40,7 +40,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
     _Period.today: 'Today',
     _Period.last7: 'Last 7 Days',
     _Period.last30: 'Last 30 Days',
-    _Period.custom: 'Custom Dates',
+    _Period.custom: 'Custom dates',
   };
 
   @override
@@ -172,7 +172,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                         const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
-                          child: const Text('Try Again'),
+                          child: const Text('Try again'),
                         ),
                       ],
                     ),

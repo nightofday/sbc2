@@ -86,7 +86,7 @@ class _TransactionTraceabilityScreenState
         name: 'Transactions',
         title:
             '${BusinessProfileScope.of(context).tradeName} — '
-            'Transaction Traceability',
+            'Transactions',
         subtitles: [
           'Last $_days days, up to 500 recent records · exported '
               '${formatReportDateTime(today)}',
@@ -155,7 +155,7 @@ class _TransactionTraceabilityScreenState
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Transaction Traceability',
+      title: 'Find a transaction',
       subtitle: 'Follow each document back to its receipt/reference and employee (up to 500 recent records).',
       action: Wrap(
         spacing: AppSpacing.sm,
@@ -358,21 +358,21 @@ class _TransactionTraceabilityScreenState
     final type = DropdownButtonFormField<String>(
       initialValue: _eventType,
       isExpanded: true,
-      decoration: const InputDecoration(labelText: 'Transaction Type'),
+      decoration: const InputDecoration(labelText: 'Transaction type'),
       items: const [
-        DropdownMenuItem(value: 'ALL', child: Text('All Transactions')),
+        DropdownMenuItem(value: 'ALL', child: Text('All transactions')),
         DropdownMenuItem(value: 'SALE', child: Text('Sales')),
         DropdownMenuItem(value: 'REFUND', child: Text('Refunds')),
-        DropdownMenuItem(value: 'STOCK_IN', child: Text('Stock In')),
-        DropdownMenuItem(value: 'STOCK_OUT', child: Text('Stock Out')),
+        DropdownMenuItem(value: 'STOCK_IN', child: Text('Stock in')),
+        DropdownMenuItem(value: 'STOCK_OUT', child: Text('Stock out')),
         DropdownMenuItem(
           value: 'INVENTORY_COUNT',
-          child: Text('Inventory Counts'),
+          child: Text('Inventory counts'),
         ),
         DropdownMenuItem(value: 'EXPENSE', child: Text('Expenses')),
         DropdownMenuItem(
           value: 'SUPPLIER_PAYMENT',
-          child: Text('Supplier Payments'),
+          child: Text('Supplier payments'),
         ),
       ],
       onChanged: (value) {

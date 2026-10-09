@@ -145,7 +145,7 @@ void main() {
     expect(till.heldOrders, isEmpty);
 
     await tester.enterText(
-      find.widgetWithText(TextField, 'Table Number *'),
+      find.widgetWithText(TextField, 'Table number *'),
       'T7',
     );
     await tester.tap(find.text('Hold'));

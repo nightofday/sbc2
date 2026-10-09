@@ -49,12 +49,12 @@ class _UsersScreenState extends State<UsersScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Users',
+      title: 'Staff accounts',
       action: widget.canManageRoles
           ? ElevatedButton.icon(
               onPressed: _showAddUser,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add User'),
+              label: const Text('Add user'),
             )
           : null,
       child: FutureBuilder<List<UserRecord>>(
@@ -114,7 +114,7 @@ class _UsersScreenState extends State<UsersScreen> {
                     items: [
                       const DropdownMenuItem(
                         value: 'All Roles',
-                        child: Text('All Roles'),
+                        child: Text('All roles'),
                       ),
                       for (final role in roles)
                         DropdownMenuItem(value: role, child: Text(role)),
@@ -171,7 +171,7 @@ class _UsersScreenState extends State<UsersScreen> {
                                     child: StatusBadge(user.status),
                                   ),
                                   IconButton(
-                                    tooltip: 'Edit User',
+                                    tooltip: 'Edit user',
                                     onPressed: () => _showEditUser(user),
                                     icon: const Icon(
                                       Icons.edit_outlined,
@@ -223,7 +223,7 @@ class _UsersScreenState extends State<UsersScreen> {
             Navigator.pop(context);
             _showEditUser(latest);
           },
-          child: const Text('Edit User'),
+          child: const Text('Edit user'),
         ),
       ],
     );
@@ -244,7 +244,7 @@ class _UsersScreenState extends State<UsersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Add User',
+      title: 'Add user',
       width: 560,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -255,7 +255,7 @@ class _UsersScreenState extends State<UsersScreen> {
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Display Name *'),
+                decoration: const InputDecoration(labelText: 'Display name *'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
@@ -268,7 +268,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 controller: passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'Temporary Password *',
+                  labelText: 'Temporary password *',
                   helperText: 'Minimum 8 characters.',
                 ),
               ),
@@ -343,7 +343,7 @@ class _UsersScreenState extends State<UsersScreen> {
               });
             }
           },
-          child: const Text('Create User'),
+          child: const Text('Create user'),
         ),
       ],
     );
@@ -369,7 +369,7 @@ class _UsersScreenState extends State<UsersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Edit User',
+      title: 'Edit user',
       width: 540,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -380,7 +380,7 @@ class _UsersScreenState extends State<UsersScreen> {
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Display Name *'),
+                decoration: const InputDecoration(labelText: 'Display name *'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextFormField(
@@ -492,7 +492,7 @@ class _UsersScreenState extends State<UsersScreen> {
               });
             }
           },
-          child: const Text('Save Changes'),
+          child: const Text('Save changes'),
         ),
       ],
     );

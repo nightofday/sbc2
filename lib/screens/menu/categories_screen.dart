@@ -150,7 +150,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       context: context,
       title: existing == null
           ? 'Add ${_domain.label} Category'
-          : 'Edit Category',
+          : 'Edit category',
       width: 480,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -161,7 +161,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               TextField(
                 controller: nameController,
                 autofocus: true,
-                decoration: const InputDecoration(labelText: 'Category Name *'),
+                decoration: const InputDecoration(labelText: 'Category name *'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
@@ -227,7 +227,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               saving = false;
             }
           },
-          child: Text(existing == null ? 'Add Category' : 'Save Changes'),
+          child: Text(existing == null ? 'Add category' : 'Save changes'),
         ),
       ],
     );
@@ -251,7 +251,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       action: ElevatedButton.icon(
         onPressed: _showEditor,
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('Add Category'),
+        label: const Text('Add category'),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,7 +294,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         const SizedBox(height: AppSpacing.md),
                         OutlinedButton(
                           onPressed: _refresh,
-                          child: const Text('Try Again'),
+                          child: const Text('Try again'),
                         ),
                       ],
                     ),
@@ -382,13 +382,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 onPressed: _busy || index == 0
                     ? null
                     : () => _move(categories, index, -1),
-                child: const Text('Move Up'),
+                child: const Text('Move up'),
               ),
               OutlinedButton(
                 onPressed: _busy || index == categories.length - 1
                     ? null
                     : () => _move(categories, index, 1),
-                child: const Text('Move Down'),
+                child: const Text('Move down'),
               ),
               OutlinedButton(
                 onPressed: _busy ? null : () => _showEditor(existing: category),

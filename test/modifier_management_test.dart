@@ -153,11 +153,11 @@ void main() {
   ) async {
     final repository = await _open(tester, const Size(1200, 1000));
 
-    await tester.tap(find.widgetWithText(TextButton, 'Move Down').first);
+    await tester.tap(find.widgetWithText(TextButton, 'Move down').first);
     await tester.pumpAndSettle();
     expect(repository.calls.last, 'reorder group-size large,regular');
 
-    await tester.tap(find.text('Use Existing Group'));
+    await tester.tap(find.text('Use existing group'));
     await tester.pumpAndSettle();
     expect(find.text('Bowl Add-ons'), findsOneWidget);
     expect(find.textContaining('Used by Chicken Bowl'), findsOneWidget);

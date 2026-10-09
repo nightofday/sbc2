@@ -16,7 +16,7 @@ Future<void> showShiftReportDialog({
 }) {
   return showPrototypeDialog(
     context: context,
-    title: 'Shift Report',
+    title: 'Shift report',
     width: 520,
     content: FutureBuilder<ShiftReport>(
       future: report,
@@ -148,7 +148,7 @@ class ShiftReportView extends StatelessWidget {
             );
           },
           icon: const Icon(Icons.copy_outlined, size: 17),
-          label: const Text('Copy Report'),
+          label: const Text('Copy report'),
         ),
       ],
     );

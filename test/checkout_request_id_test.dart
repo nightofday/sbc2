@@ -148,19 +148,19 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('pos-product-variant-latte')));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.widgetWithText(TextField, 'Table Number *'),
+      find.widgetWithText(TextField, 'Table number *'),
       'T1',
     );
     await tester.tap(find.byKey(const ValueKey('pos-charge')));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Complete Payment'));
+    await tester.tap(find.text('Complete payment'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('may already be saved'), findsOneWidget);
     expect(find.text('Receipt'), findsNothing);
 
-    await tester.tap(find.text('Complete Payment'));
+    await tester.tap(find.text('Complete payment'));
     await tester.pumpAndSettle();
 
     expect(find.text('Receipt'), findsOneWidget);

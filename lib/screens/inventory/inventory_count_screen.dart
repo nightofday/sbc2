@@ -74,13 +74,13 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Inventory Count',
+      title: 'Count stock',
       subtitle:
           'Compare physical quantities with system stock and post variances.',
       action: ElevatedButton.icon(
         onPressed: _showCountDialog,
         icon: const Icon(Icons.playlist_add_check, size: 18),
-        label: const Text('New Count'),
+        label: const Text('Start a count'),
       ),
       child: FutureBuilder<List<StockCountSummary>>(
         future: _countsFuture,
@@ -157,7 +157,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                         child: count.status == 'POSTED'
                             ? OutlinedButton(
                                 onPressed: () => _voidCount(count),
-                                child: const Text('Void'),
+                                child: const Text('Void count'),
                               )
                             : const Text('—', style: AppTextStyles.body),
                       ),
@@ -176,12 +176,12 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
 
     final voided = await showReasonDialog(
       context: context,
-      title: 'Void Count IC-${count.number}',
+      title: 'Void count IC-${count.number}',
       message:
           'This reverses the stock differences this count posted. The count '
           'stays on record as cancelled. It is only possible while any stock '
           'the count added has not been used.',
-      confirmLabel: 'Void Count',
+      confirmLabel: 'Void count',
       onConfirm: (reason) async {
         try {
           await widget.inventoryRepository.voidStockCount(
@@ -233,7 +233,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'New Physical Inventory Count',
+      title: 'Start a count',
       width: 900,
       barrierDismissible: false,
       content: StatefulBuilder(
@@ -257,7 +257,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                     controller: notesController,
                     maxLines: 2,
                     decoration: const InputDecoration(
-                      labelText: 'Count Notes',
+                      labelText: 'Notes',
                       hintText: 'Example: End-of-month physical count',
                     ),
                   ),
@@ -289,7 +289,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                           });
                         },
                         icon: const Icon(Icons.add, size: 17),
-                        label: const Text('Add Item'),
+                        label: const Text('Add item'),
                       ),
                     ],
                   ),
@@ -410,7 +410,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
             }
           },
           icon: const Icon(Icons.check, size: 18),
-          label: const Text('Post Count'),
+          label: const Text('Save count'),
         ),
       ],
     );
@@ -554,7 +554,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
-                    labelText: 'Unit Cost for Added Stock',
+                    labelText: 'Cost per unit (₱)',
                     prefixText: '₱',
                   ),
                 );
@@ -573,7 +573,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
                   icon: const Icon(Icons.calendar_month_outlined),
                   label: Text(
                     line.expirationDate == null
-                        ? 'Expiration Date *'
+                        ? 'Expiration date *'
                         : _formatDate(line.expirationDate!),
                   ),
                 );
@@ -604,7 +604,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
           TextField(
             controller: line.notesController,
             decoration: const InputDecoration(
-              labelText: 'Line Notes',
+              labelText: 'Notes',
               hintText: 'Optional explanation for this item variance',
             ),
           ),

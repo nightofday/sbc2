@@ -106,8 +106,8 @@ void main() {
         find.widgetWithText(TextField, 'Business Name *'),
         '',
       );
-      await tester.ensureVisible(find.text('Save Changes'));
-      await tester.tap(find.text('Save Changes'));
+      await tester.ensureVisible(find.text('Save changes'));
+      await tester.tap(find.text('Save changes'));
       await tester.pumpAndSettle();
 
       expect(find.text('The business name is required.'), findsOneWidget);
@@ -120,8 +120,8 @@ void main() {
       await tester.enterText(find.widgetWithText(TextField, 'TIN'), '123-456');
       await tester.ensureVisible(find.text('Count the drawer to open'));
       await tester.tap(find.text('Count the drawer to open'));
-      await tester.ensureVisible(find.text('Save Changes'));
-      await tester.tap(find.text('Save Changes'));
+      await tester.ensureVisible(find.text('Save changes'));
+      await tester.tap(find.text('Save changes'));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -156,18 +156,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Start Shift').first);
+    await tester.tap(find.text('Start shift').first);
     await tester.pumpAndSettle();
-    expect(find.text('Opening Cash *'), findsOneWidget);
+    expect(find.text('Opening cash *'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Start Shift').last);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Start shift').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Enter the cash in the drawer.'), findsOneWidget);
     expect(repository.openingCash, isEmpty);
 
     await tester.enterText(find.byType(TextField).last, '500');
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Start Shift').last);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Start shift').last);
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);

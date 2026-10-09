@@ -149,7 +149,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Business Details',
+      title: 'Business details',
       subtitle: 'What receipts say about the business, and shift cash rules.',
       child: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -165,7 +165,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                   const SizedBox(height: AppSpacing.md),
                   OutlinedButton(
                     onPressed: _load,
-                    child: const Text('Try Again'),
+                    child: const Text('Try again'),
                   ),
                 ],
               ),
@@ -180,7 +180,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('On Receipts', style: AppTextStyles.h3),
+                          const Text('On receipts', style: AppTextStyles.h3),
                           const SizedBox(height: AppSpacing.xs),
                           Text(
                             'Shown at the top of every receipt. Leave a '
@@ -220,7 +220,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Shift Cash', style: AppTextStyles.h3),
+                          const Text('Shift cash', style: AppTextStyles.h3),
                           const SizedBox(height: AppSpacing.sm),
                           // The card paints its own background, so the
                           // switches need a surface of their own to draw
@@ -273,7 +273,7 @@ class _BusinessDetailsScreenState extends State<BusinessDetailsScreen> {
                     const SizedBox(height: AppSpacing.md),
                     ElevatedButton(
                       onPressed: _saving ? null : _save,
-                      child: Text(_saving ? 'Saving…' : 'Save Changes'),
+                      child: Text(_saving ? 'Saving…' : 'Save changes'),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                   ],

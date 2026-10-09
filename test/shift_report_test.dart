@@ -149,7 +149,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('Shift Report'), findsOneWidget);
+      expect(find.text('Shift report'), findsOneWidget);
       expect(find.text('Expected in drawer'), findsOneWidget);
       expect(find.text('Short'), findsOneWidget);
       expect(find.text('Cash out · Ice'), findsOneWidget);

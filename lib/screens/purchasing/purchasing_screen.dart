@@ -53,14 +53,14 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Purchasing',
+      title: 'Purchase orders',
       subtitle: 'Create purchase orders and receive several traceable stock items at once.',
       action: ElevatedButton.icon(
         onPressed: _tab == 0
             ? _showCreatePurchaseOrder
             : () => _showReceiveStock(),
         icon: const Icon(Icons.add, size: 18),
-        label: Text(_tab == 0 ? 'New Purchase Order' : 'Receive Stock'),
+        label: Text(_tab == 0 ? 'New purchase order' : 'Receive delivery'),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,12 +69,12 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
             spacing: AppSpacing.sm,
             children: [
               ChoiceChip(
-                label: const Text('Purchase Orders'),
+                label: const Text('Purchase orders'),
                 selected: _tab == 0,
                 onSelected: (_) => setState(() => _tab = 0),
               ),
               ChoiceChip(
-                label: const Text('Goods Receipts'),
+                label: const Text('Deliveries'),
                 selected: _tab == 1,
                 onSelected: (_) => setState(() => _tab = 1),
               ),
@@ -152,7 +152,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                             order.status == 'PARTIALLY_RECEIVED')
                           TextButton(
                             onPressed: () => _showReceiveStock(order: order),
-                            child: const Text('Receive'),
+                            child: const Text('Receive delivery'),
                           ),
                       ],
                     ),
@@ -261,7 +261,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'Goods Receipt GR-${receipt.number}',
+      title: 'Delivery GR-${receipt.number}',
       width: 820,
       content: SizedBox(
         height: 520,
@@ -287,7 +287,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                   _receiptDetail(
                     'Purchase Order',
                     receipt.purchaseOrderNumber == null
-                        ? 'Direct Receipt'
+                        ? 'Direct receipt'
                         : 'PO-${receipt.purchaseOrderNumber}',
                   ),
                   _receiptDetail('Posted', _formatDate(receipt.receivedAt)),
@@ -301,7 +301,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              const Text('Received Items', style: AppTextStyles.h3),
+              const Text('Received items', style: AppTextStyles.h3),
               const SizedBox(height: AppSpacing.sm),
               if (lines.isEmpty)
                 _emptyLines()
@@ -371,7 +371,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               Navigator.pop(context);
               _voidReceipt(receipt);
             },
-            child: const Text('Void Receipt'),
+            child: const Text('Void delivery'),
           ),
       ],
     );
@@ -382,13 +382,13 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
 
     final voided = await showReasonDialog(
       context: context,
-      title: 'Void Goods Receipt GR-${receipt.number}',
+      title: 'Void delivery GR-${receipt.number}',
       message:
           'This removes the stock this receipt added and voids its supplier '
           'bill. The receipt stays on record as cancelled. It is only '
           'possible while none of that stock has been used and the bill is '
           'unpaid.',
-      confirmLabel: 'Void Receipt',
+      confirmLabel: 'Void delivery',
       onConfirm: (reason) async {
         try {
           await widget.purchasingRepository.voidGoodsReceipt(
@@ -461,7 +461,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: 'New Purchase Order',
+      title: 'New purchase order',
       width: 760,
       barrierDismissible: false,
       content: StatefulBuilder(
@@ -510,7 +510,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     icon: const Icon(Icons.calendar_month_outlined),
                     label: Text(
                       expectedDate == null
-                          ? 'Set Expected Date'
+                          ? 'Set expected date'
                           : 'Expected: ${_formatDate(expectedDate!)}',
                     ),
                   ),
@@ -535,7 +535,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                         setDialogState(() => lines.add(line));
                       },
                       icon: const Icon(Icons.add, size: 17),
-                      label: const Text('Add Item'),
+                      label: const Text('Add item'),
                     ),
                   ],
                 ),
@@ -614,7 +614,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               });
             }
           },
-          child: const Text('Create Purchase Order'),
+          child: const Text('Create purchase order'),
         ),
       ],
     );
@@ -687,7 +687,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: order == null ? 'Receive Stock' : 'Receive PO-${order.number}',
+      title: order == null ? 'Receive delivery' : 'Receive PO-${order.number}',
       width: 780,
       barrierDismissible: false,
       content: StatefulBuilder(
@@ -721,7 +721,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                 TextField(
                   controller: invoiceController,
                   decoration: const InputDecoration(
-                    labelText: 'Supplier Invoice / Grocery Receipt Number *',
+                    labelText: 'Receipt or invoice number *',
                     hintText: 'Required external reference',
                   ),
                 ),
@@ -746,7 +746,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       icon: const Icon(Icons.calendar_month_outlined),
                       label: Text(
                         invoiceDate == null
-                            ? 'Invoice / Receipt Date *'
+                            ? 'Invoice / receipt date *'
                             : 'Reference: ${_formatDate(invoiceDate!)}',
                       ),
                     );
@@ -770,7 +770,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       icon: const Icon(Icons.event_outlined),
                       label: Text(
                         dueDate == null
-                            ? 'Bill Due Date'
+                            ? 'Bill due date'
                             : 'Due: ${_formatDate(dueDate!)}',
                       ),
                     );
@@ -799,7 +799,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                 Row(
                   children: [
                     const Expanded(
-                      child: Text('Received Items', style: AppTextStyles.h3),
+                      child: Text('Received items', style: AppTextStyles.h3),
                     ),
                     if (order == null)
                       OutlinedButton.icon(
@@ -815,7 +815,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           setDialogState(() => lines.add(line));
                         },
                         icon: const Icon(Icons.add, size: 17),
-                        label: const Text('Add Item'),
+                        label: const Text('Add item'),
                       ),
                   ],
                 ),
@@ -848,7 +848,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                 const SizedBox(height: AppSpacing.sm),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Create Supplier Bill'),
+                  title: const Text('Create supplier bill'),
                   subtitle: const Text(
                     'Records the amount as payable to the supplier.',
                   ),
@@ -864,7 +864,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                   controller: notesController,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    labelText: 'Receiving Notes',
+                    labelText: 'Receiving notes',
                   ),
                 ),
                 if (errorMessage != null) ...[
@@ -963,7 +963,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
               });
             }
           },
-          child: const Text('Post Receipt'),
+          child: const Text('Save delivery'),
         ),
       ],
     );
@@ -1048,7 +1048,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
 
           return AlertDialog(
             title: Text(
-              receiptMode ? 'Received Item' : 'Purchase Item',
+              receiptMode ? 'Received item' : 'Purchase item',
               style: AppTextStyles.h2,
             ),
             content: SizedBox(
@@ -1061,7 +1061,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       isExpanded: true,
                       initialValue: inventoryId,
                       decoration: const InputDecoration(
-                        labelText: 'Inventory Item *',
+                        labelText: 'Inventory item *',
                       ),
                       items: inventory
                           .map(
@@ -1091,7 +1091,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       isExpanded: true,
                       initialValue: purchaseUomId,
                       decoration: const InputDecoration(
-                        labelText: 'Purchase Unit *',
+                        labelText: 'Bought in *',
                       ),
                       items: compatible
                           .map(
@@ -1177,8 +1177,8 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       ),
                       decoration: InputDecoration(
                         labelText: receiptMode
-                            ? 'Quantity Received *'
-                            : 'Quantity Ordered *',
+                            ? 'Quantity received *'
+                            : 'Quantity ordered *',
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -1214,7 +1214,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                           icon: const Icon(Icons.calendar_month_outlined),
                           label: Text(
                             expirationDate == null
-                                ? 'Expiration Date *'
+                                ? 'Expiration date *'
                                 : 'Expires: ${_formatDate(expirationDate!)}',
                           ),
                         ),
@@ -1225,7 +1225,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                       TextField(
                         controller: lotController,
                         decoration: const InputDecoration(
-                          labelText: 'Lot / Batch Code',
+                          labelText: 'Batch code (optional)',
                         ),
                       ),
                     ],
@@ -1293,7 +1293,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     ),
                   );
                 },
-                child: const Text('Save Item'),
+                child: const Text('Save item'),
               ),
             ],
           );

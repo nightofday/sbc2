@@ -107,15 +107,17 @@ Future<String> _sharedWorkbook(
 }
 
 void main() {
-  testWidgets('the audit log is shared as an Excel workbook', (tester) async {
+  testWidgets('the change history is shared as an Excel workbook', (
+    tester,
+  ) async {
     final workbook = await _sharedWorkbook(
       tester,
       AuditLogScreen(reportingRepository: _Repository()),
       'Share Excel',
     );
 
-    expect(workbook, contains('<sheet name="Audit Log"'));
-    expect(workbook, contains('Street Bowl Café — Audit Log'));
+    expect(workbook, contains('<sheet name="Change history"'));
+    expect(workbook, contains('Street Bowl Café — Change history'));
     expect(workbook, contains('Product size changed'));
     expect(workbook, contains('Price: 100.0 → 120.0'));
   });

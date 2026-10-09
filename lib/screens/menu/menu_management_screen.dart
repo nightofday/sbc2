@@ -84,11 +84,11 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Menu Management',
+      title: 'Menu management',
       action: ElevatedButton.icon(
         onPressed: _showCreateProduct,
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('Add Product'),
+        label: const Text('Add product'),
       ),
       child: FutureBuilder<List<MenuVariantRecord>>(
         future: _variantsFuture,
@@ -146,7 +146,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     items: [
                       const DropdownMenuItem(
                         value: 'All Categories',
-                        child: Text('All Categories'),
+                        child: Text('All categories'),
                       ),
                       for (final category in categories)
                         DropdownMenuItem(
@@ -298,7 +298,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     if (!mounted || categories.isEmpty) return;
 
     await _showVariantEditor(
-      title: 'Add Product',
+      title: 'Add product',
       categories: categories,
       inventory: inventory,
       existing: null,
@@ -386,7 +386,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   controller: itemNameController,
                   enabled: !isAddingVariant,
                   decoration: const InputDecoration(
-                    labelText: 'Product Name *',
+                    labelText: 'Product name *',
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -416,7 +416,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                       child: TextField(
                         controller: variantNameController,
                         decoration: const InputDecoration(
-                          labelText: 'Variant Name *',
+                          labelText: 'Variant name *',
                           hintText: 'Regular, Small, Large, 330 ml Can...',
                         ),
                       ),
@@ -425,7 +425,9 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     Expanded(
                       child: TextField(
                         controller: skuController,
-                        decoration: const InputDecoration(labelText: 'SKU'),
+                        decoration: const InputDecoration(
+                          labelText: 'Item code (SKU)',
+                        ),
                       ),
                     ),
                   ],
@@ -437,7 +439,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
-                    labelText: 'Selling Price *',
+                    labelText: 'Selling price *',
                     prefixText: '₱',
                   ),
                 ),
@@ -446,7 +448,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   isExpanded: true,
                   initialValue: inventoryMode,
                   decoration: const InputDecoration(
-                    labelText: 'Inventory Tracking',
+                    labelText: 'Inventory tracking',
                   ),
                   items: const [
                     DropdownMenuItem(
@@ -455,7 +457,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     ),
                     DropdownMenuItem(
                       value: 'FINISHED_GOOD',
-                      child: Text('Countable Finished Product'),
+                      child: Text('Countable finished product'),
                     ),
                   ],
                   onChanged: (value) {
@@ -474,7 +476,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                         ? null
                         : finishedInventoryId,
                     decoration: const InputDecoration(
-                      labelText: 'Linked Inventory Item *',
+                      labelText: 'Stock item it uses *',
                     ),
                     items: inventory
                         .map(
@@ -508,7 +510,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   const SizedBox(height: AppSpacing.sm),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Variant Active'),
+                    title: const Text('Variant active'),
                     subtitle: const Text(
                       'Inactive variants are hidden from the POS.',
                     ),
@@ -730,7 +732,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                           OutlinedButton(
                             onPressed: () =>
                                 then(() => _showModifierEditor(variant, group)),
-                            child: const Text('Add Option'),
+                            child: const Text('Add option'),
                           ),
                           OutlinedButton(
                             onPressed: () => then(
@@ -739,7 +741,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                                 existing: group,
                               ),
                             ),
-                            child: const Text('Edit Group'),
+                            child: const Text('Edit group'),
                           ),
                           OutlinedButton(
                             onPressed: () => then(
@@ -762,12 +764,12 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
         OutlinedButton(
           onPressed: () =>
               then(() => _showExistingGroupPicker(variant, groups)),
-          child: const Text('Use Existing Group'),
+          child: const Text('Use existing group'),
         ),
         ElevatedButton.icon(
           onPressed: () => then(() => _showModifierGroupEditor(variant)),
           icon: const Icon(Icons.add, size: 18),
-          label: const Text('Add Modifier Group'),
+          label: const Text('Add modifier group'),
         ),
       ],
     );
@@ -828,13 +830,13 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
           ),
           TextButton(
             onPressed: position == 0 ? null : () => onAction(() => move(-1)),
-            child: const Text('Move Up'),
+            child: const Text('Move up'),
           ),
           TextButton(
             onPressed: position == group.modifiers.length - 1
                 ? null
                 : () => onAction(() => move(1)),
-            child: const Text('Move Down'),
+            child: const Text('Move down'),
           ),
         ],
       ),
@@ -1015,7 +1017,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: existing == null ? 'Add Modifier Group' : 'Edit Modifier Group',
+      title: existing == null ? 'Add modifier group' : 'Edit modifier group',
       width: 540,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -1026,7 +1028,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Group Name *',
+                  labelText: 'Group name *',
                   hintText: 'e.g. Milk Choice, Add-ons',
                 ),
               ),
@@ -1038,7 +1040,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                       controller: minController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Minimum Selections',
+                        labelText: 'Minimum selections',
                       ),
                     ),
                   ),
@@ -1147,7 +1149,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               });
             }
           },
-          child: Text(existing == null ? 'Create Group' : 'Save Changes'),
+          child: Text(existing == null ? 'Create group' : 'Save changes'),
         ),
       ],
     );
@@ -1190,7 +1192,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                 TextField(
                   controller: nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Modifier Name *',
+                    labelText: 'Modifier name *',
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -1200,7 +1202,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
-                    labelText: 'Additional Price',
+                    labelText: 'Additional price',
                     prefixText: '₱',
                   ),
                 ),
@@ -1283,7 +1285,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
               });
             }
           },
-          child: Text(existing == null ? 'Add Modifier' : 'Save Changes'),
+          child: Text(existing == null ? 'Add modifier' : 'Save changes'),
         ),
       ],
     );

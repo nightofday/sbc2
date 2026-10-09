@@ -153,7 +153,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             ? null
             : _showAddExpense,
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('Add Expense'),
+        label: const Text('Add expense'),
       ),
       child: _loadError != null
           ? Center(
@@ -197,7 +197,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       items: [
                         const DropdownMenuItem(
                           value: 'All Categories',
-                          child: Text('All Categories'),
+                          child: Text('All categories'),
                         ),
                         for (final category in _categories)
                           DropdownMenuItem(
@@ -325,7 +325,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
-                                    'Total Expenses',
+                                    'Total expenses',
                                     style: AppTextStyles.caption,
                                   ),
                                   Text(
@@ -388,7 +388,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: existing == null ? 'Add Expense' : 'Edit Expense',
+      title: existing == null ? 'Add expense' : 'Edit expense',
       width: 540,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -457,7 +457,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   initialValue: selectedSupplierId,
                   isExpanded: true,
                   decoration: const InputDecoration(
-                    labelText: 'Supplier / Grocery *',
+                    labelText: 'Supplier / grocery *',
                   ),
                   items: _suppliers
                       .map(
@@ -476,7 +476,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 TextField(
                   controller: referenceController,
                   decoration: const InputDecoration(
-                    labelText: 'Receipt / Reference Number *',
+                    labelText: 'Receipt / reference number *',
                     hintText: 'Official receipt, invoice, or grocery reference',
                   ),
                 ),
@@ -590,7 +590,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               });
             }
           },
-          child: Text(existing == null ? 'Save Expense' : 'Save Changes'),
+          child: Text(existing == null ? 'Save expense' : 'Save changes'),
         ),
       ],
     );
@@ -604,12 +604,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   Future<void> _confirmVoidExpense(ExpenseRecord expense) async {
     final voided = await showReasonDialog(
       context: context,
-      title: 'Void Expense',
+      title: 'Void expense',
       message:
           'This keeps the expense on record with your reason, but removes '
           '${expense.description} (${_money(expense.amount.toDouble())}) '
           'from expense totals.',
-      confirmLabel: 'Void Expense',
+      confirmLabel: 'Void expense',
       onConfirm: (reason) async {
         try {
           await widget.expenseRepository.deleteExpense(

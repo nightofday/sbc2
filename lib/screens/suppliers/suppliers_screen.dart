@@ -56,7 +56,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
       action: ElevatedButton.icon(
         onPressed: _showAddSupplier,
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('Add Supplier'),
+        label: const Text('Add supplier'),
       ),
       child: Column(
         children: [
@@ -186,7 +186,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
             Navigator.pop(context);
             _showEditSupplier(latest);
           },
-          child: const Text('Edit Supplier'),
+          child: const Text('Edit supplier'),
         ),
       ],
     );
@@ -222,7 +222,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
 
     await showPrototypeDialog(
       context: context,
-      title: existing == null ? 'Add Supplier' : 'Edit Supplier',
+      title: existing == null ? 'Add supplier' : 'Edit supplier',
       width: 520,
       content: StatefulBuilder(
         builder: (_, setDialogState) {
@@ -232,12 +232,12 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Supplier Name *'),
+                decoration: const InputDecoration(labelText: 'Supplier name *'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: contactPersonController,
-                decoration: const InputDecoration(labelText: 'Contact Person'),
+                decoration: const InputDecoration(labelText: 'Contact person'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
@@ -276,7 +276,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                 const SizedBox(height: AppSpacing.xs),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Active Supplier'),
+                  title: const Text('Active supplier'),
                   value: active,
                   onChanged: (value) => setDialogState(() => active = value),
                 ),
@@ -353,7 +353,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
               saving = false;
             }
           },
-          child: Text(existing == null ? 'Save Supplier' : 'Save Changes'),
+          child: Text(existing == null ? 'Save supplier' : 'Save changes'),
         ),
       ],
     );

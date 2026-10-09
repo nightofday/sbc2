@@ -72,6 +72,9 @@ class StreetBowlApp extends StatefulWidget {
 }
 
 class _StreetBowlAppState extends State<StreetBowlApp> {
+  /// The stock page's name, which the stock alerts use to find it.
+  static const _stockOnHandLabel = 'Stock on hand';
+
   late final BusinessRepository _businessRepository;
   final _businessProfile = ValueNotifier(BusinessProfile.fallback);
   String? _businessProfileLoadedFor;
@@ -277,7 +280,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
     final pages = <Widget>[];
     final showStockAlerts = can('inventory.view');
     if (showStockAlerts) _loadStockAlerts(profile.id);
-    // Set once the Stock Overview destination exists, below.
+    // Set once the stock-on-hand destination exists, below.
     int? stockOverviewIndex;
     void openStockOverview() {
       final index = stockOverviewIndex;
@@ -300,7 +303,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
 
     final groups = <AppNavigationGroup>[
       AppNavigationGroup(
-        label: 'MAIN',
+        label: 'Main',
         icon: Icons.home_outlined,
         collapsible: false,
         items: [
@@ -323,12 +326,12 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ],
       ),
       AppNavigationGroup(
-        label: 'SALES & FINANCE',
+        label: 'Sales & finance',
         icon: Icons.point_of_sale_outlined,
         initiallyExpanded: true,
         items: [
           destination(
-            label: 'Orders / POS',
+            label: 'Orders',
             icon: Icons.receipt_long_outlined,
             page: OrdersScreen(
               orderRepository: _orderRepository,
@@ -347,7 +350,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
           ),
           if (can('finance.view'))
             destination(
-              label: 'Sales and Finance',
+              label: 'Sales and finance',
               icon: Icons.account_balance_wallet_outlined,
               page: SalesFinanceScreen(
                 reportingRepository: _reportingRepository,
@@ -360,11 +363,11 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
       ),
       if (can('menu.manage'))
         AppNavigationGroup(
-          label: 'MENU & PRODUCTS',
+          label: 'Menu',
           icon: Icons.restaurant_menu_outlined,
           items: [
             destination(
-              label: 'Menu Management',
+              label: 'Menu management',
               icon: Icons.fastfood_outlined,
               page: MenuManagementScreen(
                 menuRepository: _menuRepository,
@@ -392,12 +395,12 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
           ],
         ),
       AppNavigationGroup(
-        label: 'INVENTORY',
+        label: 'Inventory',
         icon: Icons.inventory_2_outlined,
         initiallyExpanded: true,
         items: [
           destination(
-            label: 'Stock Overview',
+            label: _stockOnHandLabel,
             icon: Icons.view_list_outlined,
             page: InventoryScreen(
               inventoryRepository: _inventoryRepository,
@@ -408,7 +411,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
           ),
           if (can('inventory.adjust')) ...[
             destination(
-              label: 'Release Supplies',
+              label: 'Take stock out for use',
               icon: Icons.output_outlined,
               page: InventoryScreen(
                 inventoryRepository: _inventoryRepository,
@@ -418,7 +421,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               ),
             ),
             destination(
-              label: 'Dispose Stock',
+              label: 'Throw away stock',
               icon: Icons.delete_sweep_outlined,
               page: InventoryScreen(
                 inventoryRepository: _inventoryRepository,
@@ -428,7 +431,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               ),
             ),
             destination(
-              label: 'Inventory Count',
+              label: 'Count stock',
               icon: Icons.fact_check_outlined,
               page: InventoryCountScreen(
                 inventoryRepository: _inventoryRepository,
@@ -436,7 +439,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               ),
             ),
             destination(
-              label: 'Stock Adjustment',
+              label: 'Correct stock',
               icon: Icons.tune,
               page: InventoryScreen(
                 inventoryRepository: _inventoryRepository,
@@ -446,7 +449,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               ),
             ),
             destination(
-              label: 'Inventory History',
+              label: 'Inventory history',
               icon: Icons.history,
               page: InventoryScreen(
                 inventoryRepository: _inventoryRepository,
@@ -460,11 +463,11 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
       ),
       if (can('purchases.view'))
         AppNavigationGroup(
-          label: 'PURCHASING',
+          label: 'Purchasing',
           icon: Icons.shopping_cart_checkout_outlined,
           items: [
             destination(
-              label: 'Purchase Orders',
+              label: 'Purchase orders',
               icon: Icons.assignment_outlined,
               page: PurchasingScreen(
                 purchasingRepository: _purchasingRepository,
@@ -484,11 +487,11 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ),
       if (can('expenses.view'))
         AppNavigationGroup(
-          label: 'EXPENSES',
+          label: 'Expenses',
           icon: Icons.payments_outlined,
           items: [
             destination(
-              label: 'Expense Records',
+              label: 'Expenses',
               icon: Icons.receipt_outlined,
               page: ExpensesScreen(
                 expenseRepository: _expenseRepository,
@@ -500,11 +503,11 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ),
       if (can('reports.view'))
         AppNavigationGroup(
-          label: 'REPORTS',
+          label: 'Reports',
           icon: Icons.bar_chart_outlined,
           items: [
             destination(
-              label: 'Reports Overview',
+              label: 'Reports',
               icon: Icons.analytics_outlined,
               page: ReportsScreen(
                 reportingRepository: _reportingRepository,
@@ -512,7 +515,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               ),
             ),
             destination(
-              label: 'Transaction Traceability',
+              label: 'Find a transaction',
               icon: Icons.manage_search_outlined,
               page: TransactionTraceabilityScreen(
                 reportingRepository: _reportingRepository,
@@ -523,11 +526,11 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ),
       if (can('users.view'))
         AppNavigationGroup(
-          label: 'ADMINISTRATION',
+          label: 'Admin',
           icon: Icons.admin_panel_settings_outlined,
           items: [
             destination(
-              label: 'User Management',
+              label: 'Staff accounts',
               icon: Icons.people_outline,
               page: UsersScreen(
                 userRepository: _userRepository,
@@ -536,7 +539,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
             ),
             if (can('settings.manage'))
               destination(
-                label: 'Business Details',
+                label: 'Business details',
                 icon: Icons.storefront_outlined,
                 page: BusinessDetailsScreen(
                   businessRepository: _businessRepository,
@@ -545,7 +548,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
               ),
             if (can('audit.view'))
               destination(
-                label: 'Audit Log',
+                label: 'Change history',
                 icon: Icons.fact_check_outlined,
                 page: AuditLogScreen(
                   reportingRepository: _reportingRepository,
@@ -557,7 +560,7 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
     ];
 
     for (final item in groups.expand((group) => group.items)) {
-      if (item.label == 'Stock Overview') {
+      if (item.label == _stockOnHandLabel) {
         stockOverviewIndex = item.destinationIndex;
       }
     }

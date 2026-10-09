@@ -31,7 +31,7 @@ class CopyReceiptButton extends StatelessWidget {
         );
       },
       icon: const Icon(Icons.copy_outlined, size: 17),
-      label: const Text('Copy Receipt'),
+      label: const Text('Copy receipt'),
     );
   }
 }

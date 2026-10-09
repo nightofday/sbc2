@@ -268,7 +268,7 @@ class _AccountStateScreen extends StatelessWidget {
                       ),
                       FilledButton(
                         onPressed: onRetry,
-                        child: const Text('Retry'),
+                        child: const Text('Try again'),
                       ),
                     ],
                   ),

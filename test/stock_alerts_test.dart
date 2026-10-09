@@ -223,7 +223,7 @@ void main() {
       expect(find.text('In 3 days'), findsOneWidget);
       expect(find.text('18 pc usable · reorder at 50 pc'), findsOneWidget);
 
-      await tester.tap(find.text('Open stock overview'));
+      await tester.tap(find.text('Open stock on hand'));
       await tester.pumpAndSettle();
 
       expect(find.text('Fresh milk'), findsNothing);
