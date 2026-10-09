@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'section_card.dart';
+import '../../core/theme/app_radius.dart';
 
 class SummaryCard extends StatelessWidget {
   final String label;
@@ -31,7 +32,7 @@ class SummaryCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: accentColor,
                 borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(12),
+                  left: AppRadius.corner,
                 ),
               ),
             ),
@@ -51,7 +52,7 @@ class SummaryCard extends StatelessWidget {
                         child: Text(
                           value,
                           maxLines: 1,
-                          style: AppTextStyles.h2.copyWith(fontSize: 23),
+                          style: AppTextStyles.h1,
                         ),
                       ),
                     ),

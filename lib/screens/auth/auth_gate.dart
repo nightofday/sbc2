@@ -12,6 +12,7 @@ import '../../data/offline/offline_order_repository.dart'
     show isConnectionFailure;
 import '../../models/app_user_profile.dart';
 import 'login_screen.dart';
+import '../../core/theme/app_radius.dart';
 
 class AuthGate extends StatefulWidget {
   final Widget Function(AppUserProfile profile) authenticatedBuilder;
@@ -228,7 +229,7 @@ class _AccountStateScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.white,
                 border: Border.all(color: AppColors.gray200),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: AppRadius.all,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

@@ -13,6 +13,7 @@ import '../../widgets/common/status_badge.dart';
 import '../../widgets/common/summary_card.dart';
 import '../../widgets/layout/app_page.dart';
 import '../orders/new_order_screen.dart';
+import '../../core/theme/app_radius.dart';
 
 class DashboardScreen extends StatefulWidget {
   final OrderRepository orderRepository;
@@ -119,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: AppRadius.all,
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primary.withValues(alpha: .12),

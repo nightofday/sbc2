@@ -6,6 +6,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/app_navigation_item.dart';
 import '../../models/app_user_profile.dart';
+import '../../core/theme/app_radius.dart';
 
 class AppSidebar extends StatefulWidget {
   final AppUserProfile profile;
@@ -293,7 +294,7 @@ class _SidebarGroupHeader extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: AppRadius.all,
           child: SizedBox(
             height: 42,
             child: Row(
@@ -362,12 +363,12 @@ class _SidebarItem extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: AppRadius.all,
           child: Container(
             height: 40,
             decoration: BoxDecoration(
               color: selected ? AppColors.primarySoft : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: AppRadius.all,
             ),
             child: Row(
               children: [
@@ -377,7 +378,7 @@ class _SidebarItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: selected ? AppColors.primary : Colors.transparent,
                     borderRadius: const BorderRadius.horizontal(
-                      right: Radius.circular(3),
+                      right: AppRadius.corner,
                     ),
                   ),
                 ),

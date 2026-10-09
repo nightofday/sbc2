@@ -9,6 +9,7 @@ import '../../models/catalog_management.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_radius.dart';
 
 /// Lets management define the promotional discounts offered at the till.
 class DiscountsScreen extends StatefulWidget {
@@ -418,7 +419,7 @@ class _DiscountsScreenState extends State<DiscountsScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.all,
         border: Border.all(color: AppColors.gray200),
       ),
       child: Column(

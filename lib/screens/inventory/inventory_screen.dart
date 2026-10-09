@@ -16,6 +16,7 @@ import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_radius.dart';
 
 enum InventoryView { overview, release, disposal, adjustment, history }
 
@@ -917,7 +918,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           height: 34,
           decoration: BoxDecoration(
             color: positive ? AppColors.gray100 : AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: AppRadius.all,
           ),
           child: Icon(
             positive ? Icons.south_west : Icons.north_east,
@@ -2023,7 +2024,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.gray100,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.all,
         border: Border.all(color: AppColors.gray200),
       ),
       child: Column(

@@ -13,6 +13,7 @@ import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_radius.dart';
 
 class PurchasingScreen extends StatefulWidget {
   final PurchasingRepository purchasingRepository;
@@ -311,7 +312,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppColors.gray100,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: AppRadius.all,
                       border: Border.all(color: AppColors.gray200),
                     ),
                     child: Column(
@@ -1321,7 +1322,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: AppColors.gray100,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: AppRadius.all,
               border: Border.all(color: AppColors.gray200),
             ),
             child: LayoutBuilder(
@@ -1400,7 +1401,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.gray100,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadius.all,
         border: Border.all(color: AppColors.gray200),
       ),
       child: LayoutBuilder(
@@ -1467,7 +1468,7 @@ class _PurchasingScreenState extends State<PurchasingScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.gray100,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadius.all,
       ),
       child: Text(
         'No items added yet.',

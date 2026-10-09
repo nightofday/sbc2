@@ -11,6 +11,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_radius.dart';
 
 class TransactionTraceabilityScreen extends StatefulWidget {
   final ReportingRepository reportingRepository;
@@ -471,7 +472,7 @@ class _EventTypeBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: AppRadius.all,
       ),
       child: Text(
         label,

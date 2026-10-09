@@ -5,6 +5,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/repositories/offline_sales_queue.dart';
 import '../../models/offline_sale.dart';
 import 'app_dialog.dart';
+import '../../core/theme/app_radius.dart';
 
 /// A strip above the page that says when the till is working offline, how
 /// many sales are still on this device, and lets a refused sale be resolved.
@@ -156,7 +157,7 @@ class OfflineStatusBanner extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.gray200),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: AppRadius.all,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

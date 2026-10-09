@@ -12,6 +12,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_radius.dart';
 
 class MenuManagementScreen extends StatefulWidget {
   final MenuRepository menuRepository;
@@ -255,9 +256,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                                           vertical: 7,
                                         ),
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
+                                          borderRadius: AppRadius.all,
                                           border: Border.all(
                                             color: AppColors.gray300,
                                           ),

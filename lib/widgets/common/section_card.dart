@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_radius.dart';
 
 class SectionCard extends StatelessWidget {
   final Widget child;
@@ -18,7 +19,7 @@ class SectionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        borderRadius: AppRadius.all,
         border: Border.all(color: AppColors.gray200),
       ),
       padding: padding,

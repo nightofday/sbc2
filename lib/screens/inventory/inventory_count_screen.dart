@@ -13,6 +13,7 @@ import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_radius.dart';
 
 class InventoryCountScreen extends StatefulWidget {
   final InventoryRepository inventoryRepository;
@@ -471,7 +472,7 @@ class _InventoryCountScreenState extends State<InventoryCountScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.gray100,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.all,
         border: Border.all(color: AppColors.gray200),
       ),
       child: Column(

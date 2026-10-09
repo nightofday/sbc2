@@ -18,6 +18,7 @@ import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/status_badge.dart';
 import '../../widgets/layout/app_page.dart';
 import 'new_order_screen.dart';
+import '../../core/theme/app_radius.dart';
 
 class OrdersScreen extends StatefulWidget {
   final OrderRepository orderRepository;
@@ -550,7 +551,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.primarySoft,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: AppRadius.all,
                     ),
                     child: Text(
                       'Refunds return through ${preview.paymentMethodName}. '
@@ -567,7 +568,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: AppColors.gray100,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: AppRadius.all,
                         border: Border.all(color: AppColors.gray200),
                       ),
                       child: Row(
@@ -802,7 +803,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.gray100,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.all,
                   border: Border.all(color: AppColors.gray200),
                 ),
                 child: Text(
@@ -819,7 +820,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: AppColors.white,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: AppRadius.all,
                     border: Border.all(color: AppColors.gray200),
                   ),
                   child: Row(
@@ -998,7 +999,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.all,
                 ),
                 child: Text(
                   'Your signed-in Manager/Admin account will authorize this '

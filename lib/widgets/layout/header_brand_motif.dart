@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
 
 class HeaderBrandMotif extends StatelessWidget {
   const HeaderBrandMotif({super.key});
@@ -35,7 +36,7 @@ class HeaderBrandMotif extends StatelessWidget {
                   height: 135,
                   decoration: BoxDecoration(
                     color: AppColors.orange.withValues(alpha: .07),
-                    borderRadius: BorderRadius.circular(36),
+                    borderRadius: AppRadius.all,
                   ),
                 ),
               ),

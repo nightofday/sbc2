@@ -13,6 +13,7 @@ import '../../widgets/common/data_table_card.dart';
 import '../../widgets/common/responsive_filter_bar.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/app_page.dart';
+import '../../core/theme/app_radius.dart';
 
 class ExpensesScreen extends StatefulWidget {
   final ExpenseRepository expenseRepository;
@@ -168,7 +169,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppColors.orange.withValues(alpha: .10),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: AppRadius.all,
                     ),
                     child: const Text(
                       'Add the grocery store or supplier in Suppliers before '

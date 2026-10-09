@@ -27,6 +27,7 @@ import '../../widgets/common/shift_report_view.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/section_card.dart';
 import '../../widgets/layout/header_brand_motif.dart';
+import '../../core/theme/app_radius.dart';
 
 class NewOrderScreen extends StatefulWidget {
   final OrderRepository orderRepository;
@@ -242,7 +243,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.gray100,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: AppRadius.all,
                       border: Border.all(color: AppColors.gray200),
                     ),
                     child: Column(
@@ -300,7 +301,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         color: variance.abs() < 0.01
                             ? const Color(0xFFEAF7EE)
                             : AppColors.primarySoft,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: AppRadius.all,
                       ),
                       child: _paymentInfoRow(
                         'Cash Variance',
@@ -452,7 +453,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.gray100,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: AppRadius.all,
                     ),
                     child: Column(
                       children: [
@@ -718,7 +719,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: const Color(0xFFEAF7EE),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: AppRadius.all,
             ),
             child: Text(
               'Shift Active',
@@ -941,7 +942,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     return Material(
       color: AppColors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.all,
         side: const BorderSide(color: AppColors.gray200),
       ),
       clipBehavior: Clip.antiAlias,
@@ -1008,7 +1009,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             height: 42,
             decoration: BoxDecoration(
               color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: AppRadius.all,
             ),
             child: Icon(
               _iconForCategory(product.category),
@@ -1237,7 +1238,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.gray200),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: AppRadius.all,
                   ),
                   child: Row(
                     children: [
@@ -1421,7 +1422,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.gray100,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadius.all,
         border: Border.all(color: AppColors.gray200),
       ),
       child: Row(
@@ -2294,7 +2295,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.yellow.withValues(alpha: .18),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.all,
                 ),
                 child: const Text(
                   'Saved on this device while offline. It gets its order '

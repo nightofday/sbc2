@@ -11,5 +11,4 @@ class AppSpacing {
 
   static const double page = 28;
   static const double sidebarWidth = 220;
-  static const double cardRadius = 12;
 }
