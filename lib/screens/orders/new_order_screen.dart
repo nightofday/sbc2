@@ -890,9 +890,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   builder: (context, constraints) {
                     final columns = constraints.maxWidth < 420
                         ? 1
-                        : constraints.maxWidth < 720
+                        : constraints.maxWidth < 640
                         ? 2
-                        : 3;
+                        : constraints.maxWidth < 900
+                        ? 3
+                        : 4;
 
                     // On a phone a list of compact rows shows several
                     // products at once; cards would show two.
@@ -908,9 +910,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     return GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: columns,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
-                        mainAxisExtent: 200,
+                        crossAxisSpacing: AppSpacing.md,
+                        mainAxisSpacing: AppSpacing.md,
+                        mainAxisExtent: 156,
                       ),
                       itemCount: products.length,
                       itemBuilder: (_, index) =>
@@ -935,129 +937,143 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     return AppColors.success;
   }
 
+  /// How many of [product] are already in the order, across all lines.
+  int _quantityInCart(PosMenuItem product) => _cart
+      .where((line) => line.product.variantId == product.variantId)
+      .fold<int>(0, (sum, line) => sum + line.quantity);
+
   /// A product as one tappable line, for narrow screens.
   Widget _buildProductRow(PosMenuItem product) {
     final sizeLabel = orderLineName(product.name, product.variantName);
+    final inCart = _quantityInCart(product);
 
-    return Material(
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.all,
-        side: const BorderSide(color: AppColors.gray200),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: product.isOutOfStock ? null : () => _addProduct(product),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+    return _ProductTapTarget(
+      key: ValueKey('pos-product-${product.variantId}'),
+      product: product,
+      inCart: inCart,
+      onAdd: () => _addProduct(product),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    sizeLabel,
+                    style: AppTextStyles.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (product.tracksInventory)
                     Text(
-                      sizeLabel,
-                      style: AppTextStyles.bodyMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (product.tracksInventory)
-                      Text(
-                        _stockLabel(product),
-                        style: AppTextStyles.caption.copyWith(
-                          color: _stockColor(product),
-                          fontWeight: FontWeight.w600,
-                        ),
+                      _stockLabel(product),
+                      style: AppTextStyles.caption.copyWith(
+                        color: _stockColor(product),
+                        fontWeight: FontWeight.w600,
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Text(
-                _money(product.price),
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Icon(
-                Icons.add_circle,
-                size: 30,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              _money(product.price),
+              style: AppTextStyles.bodyMedium.copyWith(
                 color: product.isOutOfStock
-                    ? AppColors.gray300
+                    ? AppColors.gray700
                     : AppColors.primary,
               ),
+            ),
+            if (inCart > 0) ...[
+              const SizedBox(width: 10),
+              _CartQuantityBadge(inCart),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
 
+  /// A product as a card. The whole card adds the product, so the cashier
+  /// does not have to aim for a small button on the tablet.
   Widget _buildProductCard(PosMenuItem product) {
-    final variantLabel = product.variantName.trim().isEmpty
-        ? product.category
-        : '${product.category} • ${product.variantName}';
+    final inCart = _quantityInCart(product);
 
-    return SectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: AppRadius.all,
-            ),
-            child: Icon(
-              _iconForCategory(product.category),
-              color: AppColors.primary,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            product.name,
-            style: AppTextStyles.bodyMedium,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            variantLabel,
-            style: AppTextStyles.caption,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (product.tracksInventory) ...[
-            const SizedBox(height: 4),
-            Text(
-              _stockLabel(product),
-              style: AppTextStyles.caption.copyWith(
-                color: _stockColor(product),
-                fontWeight: FontWeight.w600,
+    return _ProductTapTarget(
+      key: ValueKey('pos-product-${product.variantId}'),
+      product: product,
+      inCart: inCart,
+      onAdd: () => _addProduct(product),
+      badge: inCart > 0
+          ? Positioned(top: 12, right: 12, child: _CartQuantityBadge(inCart))
+          : null,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              // Leaves room for the quantity badge in the corner.
+              padding: const EdgeInsets.only(right: 40),
+              child: Text(
+                product.category.toUpperCase(),
+                style: AppTextStyles.overline.copyWith(
+                  color: AppColors.gray700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(right: 40),
+              child: Text(
+                product.name,
+                style: AppTextStyles.h3,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (product.variantName.trim().isNotEmpty)
+              Text(
+                product.variantName,
+                style: AppTextStyles.caption,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            const Spacer(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _money(product.price),
+                  style: AppTextStyles.h3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: product.isOutOfStock
+                        ? AppColors.gray700
+                        : AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (product.tracksInventory)
+                  Expanded(
+                    child: Text(
+                      _stockLabel(product),
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: _stockColor(product),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
-          const Spacer(),
-          Row(
-            children: [
-              Text(
-                _money(product.price),
-                style: AppTextStyles.h3.copyWith(color: AppColors.primary),
-              ),
-              const Spacer(),
-              OutlinedButton.icon(
-                onPressed: product.isOutOfStock
-                    ? null
-                    : () => _addProduct(product),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add'),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -2420,18 +2436,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
-  IconData _iconForCategory(String category) {
-    final value = category.toLowerCase();
-    if (value.contains('coffee')) return Icons.coffee_outlined;
-    if (value.contains('baked')) return Icons.cake_outlined;
-    if (value.contains('rice') || value.contains('meal')) {
-      return Icons.rice_bowl_outlined;
-    }
-    if (value.contains('beverage')) return Icons.local_drink_outlined;
-    if (value.contains('snack')) return Icons.cookie_outlined;
-    return Icons.fastfood_outlined;
-  }
-
   String _signedMoney(double value) {
     final sign = value > 0 ? '+' : '';
     return '$sign${_money(value)}';
@@ -2484,6 +2488,98 @@ class _PosCartLine {
       quantity: quantity ?? this.quantity,
       modifiers: modifiers,
       specialInstructions: specialInstructions,
+    );
+  }
+}
+
+/// A menu product the cashier taps anywhere on to add one to the order.
+/// Products already in the order are outlined and show how many are in it.
+class _ProductTapTarget extends StatelessWidget {
+  final PosMenuItem product;
+  final int inCart;
+  final VoidCallback onAdd;
+  final Widget child;
+  final Widget? badge;
+
+  const _ProductTapTarget({
+    super.key,
+    required this.product,
+    required this.inCart,
+    required this.onAdd,
+    required this.child,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final out = product.isOutOfStock;
+    final selected = inCart > 0 && !out;
+    final price = formatReportMoney(product.price);
+    final name = orderLineName(product.name, product.variantName);
+
+    return Semantics(
+      button: true,
+      enabled: !out,
+      label: out
+          ? '$name, $price, out of stock'
+          : inCart > 0
+          ? 'Add another $name, $price. $inCart in the order'
+          : 'Add $name, $price',
+      excludeSemantics: true,
+      child: Material(
+        color: out
+            ? AppColors.gray100
+            : selected
+            ? AppColors.primarySoft
+            : AppColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.all,
+          side: BorderSide(
+            color: selected ? AppColors.primary : AppColors.gray200,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: out ? null : onAdd,
+          // Passthrough keeps the card's size: the grid cell fills it, a
+          // phone row sizes to its content.
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [
+              Opacity(opacity: out ? .55 : 1, child: child),
+              ?badge,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CartQuantityBadge extends StatelessWidget {
+  final int quantity;
+
+  const _CartQuantityBadge(this.quantity);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 30),
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: AppRadius.all,
+      ),
+      child: Text(
+        '$quantity',
+        style: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }

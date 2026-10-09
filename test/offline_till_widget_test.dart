@@ -129,7 +129,7 @@ void main() {
     // The connection drops after the till has loaded.
     server.reachable = false;
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byKey(const ValueKey('pos-product-variant-latte')));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextField, 'Table Number *'),

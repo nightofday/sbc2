@@ -135,7 +135,7 @@ void main() {
 
     expect(find.text('Held (0)'), findsOneWidget);
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byKey(const ValueKey('pos-product-latte')));
     await tester.pumpAndSettle();
 
     // Without a table or a name the order could not be found again.

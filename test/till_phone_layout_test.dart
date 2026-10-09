@@ -69,4 +69,42 @@ void main() {
     expect(find.text('Order (2) · ₱300.00'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('on a tablet tapping anywhere on a card adds the product', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(home: NewOrderScreen(orderRepository: _MenuRepository())),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    // There is no separate Add button to aim for.
+    expect(find.text('Add'), findsNothing);
+
+    final latte = find.byKey(const ValueKey('pos-product-latte-large'));
+    final cake = find.byKey(const ValueKey('pos-product-cake'));
+    Finder badgeOn(Finder card, String quantity) =>
+        find.descendant(of: card, matching: find.text(quantity));
+
+    // Tap the card's bottom-left corner, away from its text.
+    final corner = tester.getBottomLeft(latte) + const Offset(6, -6);
+    await tester.tapAt(corner);
+    await tester.pumpAndSettle();
+    await tester.tapAt(corner);
+    await tester.pumpAndSettle();
+
+    // The card shows how many are already in the order.
+    expect(badgeOn(latte, '2'), findsOneWidget);
+
+    // A sold-out card cannot be added.
+    await tester.tap(cake);
+    await tester.pumpAndSettle();
+    expect(badgeOn(cake, '1'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }
