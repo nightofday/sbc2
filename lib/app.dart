@@ -4,8 +4,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/state/app_navigation_controller.dart';
 import 'core/state/business_refresh_controller.dart';
 import 'core/state/inventory_refresh_controller.dart';
+import 'core/state/stock_alerts_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'data/offline/key_value_store.dart';
 import 'data/offline/offline_order_repository.dart';
@@ -56,6 +58,7 @@ import 'screens/suppliers/suppliers_screen.dart';
 import 'screens/users/users_screen.dart';
 import 'widgets/common/app_dialog.dart';
 import 'widgets/common/offline_status_banner.dart';
+import 'widgets/common/stock_alerts_view.dart';
 import 'widgets/layout/app_shell.dart';
 
 class StreetBowlApp extends StatefulWidget {
@@ -88,6 +91,9 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
   late final UserRepository _userRepository;
   late final BusinessRefreshController _businessRefreshController;
   late final InventoryRefreshController _inventoryRefreshController;
+  late final StockAlertsController _stockAlerts;
+  final _navigation = AppNavigationController();
+  String? _stockAlertsLoadedFor;
 
   @override
   void initState() {
@@ -115,7 +121,22 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
     _inventoryRefreshController = InventoryRefreshController(
       onRefresh: _businessRefreshController.refresh,
     );
+    _stockAlerts = StockAlertsController(
+      _inventoryRepository,
+      refreshListenable: _inventoryRefreshController,
+    );
     _orderRepository.addListener(_refreshAfterSync);
+  }
+
+  /// Checks stock once for each person who signs in; inventory changes in
+  /// this app reload it after that. Runs after the frame, because loading
+  /// notifies listeners that may be building.
+  void _loadStockAlerts(String userId) {
+    if (_stockAlertsLoadedFor == userId) return;
+    _stockAlertsLoadedFor = userId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_stockAlerts.load());
+    });
   }
 
   /// Sales that reach the server change stock, orders and the dashboard,
@@ -222,6 +243,8 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
   void dispose() {
     _businessProfile.dispose();
     _orderRepository.dispose();
+    _stockAlerts.dispose();
+    _navigation.dispose();
     _inventoryRefreshController.dispose();
     _businessRefreshController.dispose();
     super.dispose();
@@ -252,6 +275,14 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
     // what it was granted and a role added later sees nothing by default.
     final can = profile.can;
     final pages = <Widget>[];
+    final showStockAlerts = can('inventory.view');
+    if (showStockAlerts) _loadStockAlerts(profile.id);
+    // Set once the Stock Overview destination exists, below.
+    int? stockOverviewIndex;
+    void openStockOverview() {
+      final index = stockOverviewIndex;
+      if (index != null) _navigation.show(index);
+    }
 
     AppNavigationItem destination({
       required String label,
@@ -279,6 +310,12 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
             page: DashboardScreen(
               orderRepository: _orderRepository,
               dashboardRepository: _dashboardRepository,
+              notice: showStockAlerts
+                  ? StockAlertsBanner(
+                      controller: _stockAlerts,
+                      onOpenStockOverview: openStockOverview,
+                    )
+                  : null,
               refreshListenable: _businessRefreshController,
               onDataChanged: _inventoryRefreshController.refresh,
             ),
@@ -519,12 +556,26 @@ class _StreetBowlAppState extends State<StreetBowlApp> {
         ),
     ];
 
+    for (final item in groups.expand((group) => group.items)) {
+      if (item.label == 'Stock Overview') {
+        stockOverviewIndex = item.destinationIndex;
+      }
+    }
+
     return AppShell(
       profile: profile,
       groups: groups,
       pages: pages,
       onSignOut: _signOut,
       banner: OfflineStatusBanner(queue: _orderRepository),
+      navigationController: _navigation,
+      noticesBuilder: showStockAlerts
+          ? (compact) => StockAlertsButton(
+              controller: _stockAlerts,
+              compact: compact,
+              onOpenStockOverview: openStockOverview,
+            )
+          : null,
     );
   }
 }

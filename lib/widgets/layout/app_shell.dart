@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../common/business_profile_scope.dart';
+import '../../core/state/app_navigation_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/app_navigation_item.dart';
@@ -16,6 +17,13 @@ class AppShell extends StatefulWidget {
   /// Shown above every page, for app-wide notices.
   final Widget? banner;
 
+  /// Lets other widgets ask the shell to show a destination.
+  final AppNavigationController? navigationController;
+
+  /// App-wide notices with a button, such as stock alerts: shown in the
+  /// sidebar and, on a phone, in the top bar. Told whether space is tight.
+  final Widget Function(bool compact)? noticesBuilder;
+
   const AppShell({
     super.key,
     required this.profile,
@@ -23,6 +31,8 @@ class AppShell extends StatefulWidget {
     required this.pages,
     required this.onSignOut,
     this.banner,
+    this.navigationController,
+    this.noticesBuilder,
   });
 
   @override
@@ -36,8 +46,29 @@ class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    widget.navigationController?.addListener(_showRequestedDestination);
+  }
+
+  @override
+  void dispose() {
+    widget.navigationController?.removeListener(_showRequestedDestination);
+    super.dispose();
+  }
+
+  void _showRequestedDestination() {
+    final index = widget.navigationController?.requested;
+    if (index != null) _selectDestination(index);
+  }
+
+  @override
   void didUpdateWidget(covariant AppShell oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.navigationController != widget.navigationController) {
+      oldWidget.navigationController?.removeListener(_showRequestedDestination);
+      widget.navigationController?.addListener(_showRequestedDestination);
+    }
 
     if (_selectedIndex >= widget.pages.length) {
       _selectedIndex = 0;
@@ -66,6 +97,7 @@ class _AppShellState extends State<AppShell> {
                 compact: compactNavigation,
                 onItemSelected: _selectDestination,
                 onSignOut: widget.onSignOut,
+                footerBuilder: widget.noticesBuilder,
               ),
               Expanded(child: _buildPages()),
             ],
@@ -94,6 +126,13 @@ class _AppShellState extends State<AppShell> {
           overflow: TextOverflow.ellipsis,
           style: AppTextStyles.h3,
         ),
+        actions: [
+          if (widget.noticesBuilder case final notices?)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: notices(true),
+            ),
+        ],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
           child: Divider(height: 1),

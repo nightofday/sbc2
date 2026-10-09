@@ -21,12 +21,16 @@ class DashboardScreen extends StatefulWidget {
   final Listenable? refreshListenable;
   final VoidCallback? onDataChanged;
 
+  /// Shown above the sales summary, such as stock alerts.
+  final Widget? notice;
+
   const DashboardScreen({
     super.key,
     required this.orderRepository,
     required this.dashboardRepository,
     this.refreshListenable,
     this.onDataChanged,
+    this.notice,
   });
 
   @override
@@ -111,6 +115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                ?widget.notice,
                 Container(
                   width: double.infinity,
                   constraints: const BoxConstraints(minHeight: 116),
